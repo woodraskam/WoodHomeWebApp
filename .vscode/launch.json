@@ -1,0 +1,93 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch WoodHome WebApp",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/main.go",
+            "env": {
+                "WOODHOME_API_URL": "http://localhost:8080",
+                "PORT": "3000"
+            },
+            "args": [],
+            "showLog": true,
+            "console": "integratedTerminal",
+            "stopOnEntry": false,
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "kill-and-open-browser"
+        },
+        {
+            "name": "Launch WoodHome WebApp (Debug Mode)",
+            "type": "go",
+            "request": "launch",
+            "mode": "debug",
+            "program": "${workspaceFolder}/main.go",
+            "output": "${workspaceFolder}/bin/woodhome-webapp-debug.exe",
+            "env": {
+                "WOODHOME_API_URL": "http://localhost:8080",
+                "PORT": "3000"
+            },
+            "args": [],
+            "showLog": true,
+            "console": "integratedTerminal",
+            "stopOnEntry": false,
+            "cwd": "${workspaceFolder}",
+            "trace": "verbose",
+            "preLaunchTask": "kill-and-open-browser",
+            "postDebugTask": "kill-debug-processes"
+        },
+        {
+            "name": "Launch WoodHome WebApp (Fixed Name Debug)",
+            "type": "go",
+            "request": "launch",
+            "mode": "exec",
+            "program": "${workspaceFolder}/bin/woodhome-webapp-debug.exe",
+            "env": {
+                "WOODHOME_API_URL": "http://localhost:8080",
+                "PORT": "3000"
+            },
+            "args": [],
+            "showLog": true,
+            "console": "integratedTerminal",
+            "stopOnEntry": false,
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "build-debug-and-kill"
+        },
+        {
+            "name": "Launch WoodHome WebApp (Custom API URL)",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/main.go",
+            "env": {
+                "WOODHOME_API_URL": "http://localhost:8081",
+                "PORT": "3000"
+            },
+            "args": [],
+            "showLog": true,
+            "console": "integratedTerminal",
+            "stopOnEntry": false,
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "kill-and-open-browser"
+        },
+        {
+            "name": "Launch WoodHome WebApp (Cloudflare Tunnel)",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${workspaceFolder}/main.go",
+            "env": {
+                "WOODHOME_API_URL": "https://api.markwoodraska.com",
+                "PORT": "3000"
+            },
+            "args": [],
+            "showLog": true,
+            "console": "integratedTerminal",
+            "stopOnEntry": false,
+            "cwd": "${workspaceFolder}",
+            "preLaunchTask": "kill-and-open-browser-tunnel"
+        }
+    ]
+}

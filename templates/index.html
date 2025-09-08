@@ -1,0 +1,303 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{{.Title}}</title>
+
+        <!-- Material Design 3 CSS -->
+        <link rel="stylesheet" href="/static/css/material-design-3.css">
+
+        <!-- Google Fonts - Roboto -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+        <!-- Material Icons -->
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+        <!-- Weather Widget CSS -->
+        <link rel="stylesheet" href="/static/css/weather-new.css">
+
+        <!-- HTMX -->
+        <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+    </head>
+
+    <body>
+        <!-- App Bar -->
+        <header class="app-bar">
+            <div class="container">
+                <div class="app-bar-content">
+                    <h1 class="app-title title-large">🏠 WoodHome</h1>
+                    <div class="status-indicator" id="connection-status">
+                        <span class="material-icons">wifi_off</span>
+                        <span>Checking connection...</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="container">
+                <!-- Welcome Section -->
+                <div class="card card-elevated">
+                    <h2 class="headline-large" style="margin-bottom: 16px;">Welcome to WoodHome Dashboard</h2>
+                    <p class="body-large" style="margin-bottom: 24px; color: var(--md-sys-color-on-surface-variant);">
+                        Your modern home automation control center. Monitor and manage your smart home devices with
+                        ease.
+                    </p>
+                    <div class="grid grid-2">
+                        <div>
+                            <h3 class="title-large" style="margin-bottom: 8px;">API Status</h3>
+                            <p class="body-large" style="color: var(--md-sys-color-on-surface-variant);">
+                                Connected to: <code>{{.APIBaseURL}}</code>
+                            </p>
+                        </div>
+                        <div>
+                            <h3 class="title-large" style="margin-bottom: 8px;">Last Updated</h3>
+                            <p class="body-large" style="color: var(--md-sys-color-on-surface-variant);">
+                                {{.CurrentTime}}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Weather Widget -->
+                <div class="weather-widget-new">
+                    <!-- Weather content will be populated by JavaScript -->
+                </div>
+
+                <!-- API Connectivity Test -->
+                <div class="card">
+                    <h3 class="title-large" style="margin-bottom: 16px;">API Connectivity Test</h3>
+                    <p class="body-large" style="margin-bottom: 24px; color: var(--md-sys-color-on-surface-variant);">
+                        Test the connection to your WoodHome API and verify all endpoints are working correctly.
+                    </p>
+
+                    <div class="grid grid-2">
+                        <div>
+                            <button class="btn btn-primary" hx-get="/api/connectivity" hx-target="#connectivity-result"
+                                hx-indicator="#connectivity-loading">
+                                <span class="material-icons">wifi</span>
+                                Test API Connection
+                            </button>
+                            <div id="connectivity-loading" class="loading"></div>
+                        </div>
+                        <div>
+                            <button class="btn btn-secondary" hx-get="/api/health" hx-target="#health-result"
+                                hx-indicator="#health-loading">
+                                <span class="material-icons">health_and_safety</span>
+                                Check WebApp Health
+                            </button>
+                            <div id="health-loading" class="loading"></div>
+                        </div>
+                    </div>
+
+                    <div id="connectivity-result" style="margin-top: 16px;"></div>
+                    <div id="health-result" style="margin-top: 16px;"></div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card">
+                    <h3 class="title-large" style="margin-bottom: 16px;">Quick Actions</h3>
+                    <p class="body-large" style="margin-bottom: 24px; color: var(--md-sys-color-on-surface-variant);">
+                        Common operations to get you started with your WoodHome system.
+                    </p>
+
+                    <div class="grid grid-3">
+                        <button class="btn btn-outlined" onclick="showComingSoon('Device Management')">
+                            <span class="material-icons">devices</span>
+                            Device Management
+                        </button>
+                        <button class="btn btn-outlined" onclick="showComingSoon('Room Control')">
+                            <span class="material-icons">room</span>
+                            Room Control
+                        </button>
+                        <button class="btn btn-outlined" onclick="showComingSoon('Automation')">
+                            <span class="material-icons">auto_awesome</span>
+                            Automation
+                        </button>
+                        <button class="btn btn-outlined" onclick="showComingSoon('Energy Monitor')">
+                            <span class="material-icons">monitor</span>
+                            Energy Monitor
+                        </button>
+                        <button class="btn btn-outlined" onclick="showComingSoon('Security')">
+                            <span class="material-icons">security</span>
+                            Security
+                        </button>
+                        <button class="btn btn-outlined" onclick="showComingSoon('Settings')">
+                            <span class="material-icons">settings</span>
+                            Settings
+                        </button>
+                    </div>
+                </div>
+
+                <!-- API Endpoints -->
+                <div class="card">
+                    <h3 class="title-large" style="margin-bottom: 16px;">API Endpoints</h3>
+                    <p class="body-large" style="margin-bottom: 24px; color: var(--md-sys-color-on-surface-variant);">
+                        Available API endpoints for integration and testing.
+                    </p>
+
+                    <div class="grid grid-2">
+                        <div>
+                            <h4 class="label-large" style="margin-bottom: 8px;">WebApp Endpoints</h4>
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="margin-bottom: 8px;">
+                                    <code
+                                        style="background: var(--md-sys-color-surface-container-high); padding: 4px 8px; border-radius: 4px;">
+                                    GET /api/health
+                                </code>
+                                    <span
+                                        style="margin-left: 8px; color: var(--md-sys-color-on-surface-variant);">WebApp
+                                        health check</span>
+                                </li>
+                                <li style="margin-bottom: 8px;">
+                                    <code
+                                        style="background: var(--md-sys-color-surface-container-high); padding: 4px 8px; border-radius: 4px;">
+                                    GET /api/connectivity
+                                </code>
+                                    <span style="margin-left: 8px; color: var(--md-sys-color-on-surface-variant);">API
+                                        connectivity test</span>
+                                </li>
+                            </ul>
+                        </div>
+                        <div>
+                            <h4 class="label-large" style="margin-bottom: 8px;">WoodHome API Proxy</h4>
+                            <ul style="list-style: none; padding: 0;">
+                                <li style="margin-bottom: 8px;">
+                                    <code
+                                        style="background: var(--md-sys-color-surface-container-high); padding: 4px 8px; border-radius: 4px;">
+                                    /api/woodhome/*
+                                </code>
+                                    <span
+                                        style="margin-left: 8px; color: var(--md-sys-color-on-surface-variant);">Proxied
+                                        to {{.APIBaseURL}}</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Toast Notification -->
+        <div id="toast" style="
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        background: var(--md-sys-color-surface-container);
+        color: var(--md-sys-color-on-surface);
+        padding: 16px 24px;
+        border-radius: var(--md-sys-shape-corner-large);
+        box-shadow: var(--md-sys-elevation-level3);
+        transform: translateY(100px);
+        opacity: 0;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        max-width: 400px;
+    ">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="material-icons" id="toast-icon">info</span>
+                <span id="toast-message">Message</span>
+            </div>
+        </div>
+
+        <script>
+            // Auto-check connectivity on page load
+            document.addEventListener('DOMContentLoaded', function () {
+                setTimeout(() => {
+                    htmx.trigger('#connectivity-test', 'click');
+                }, 1000);
+            });
+
+            // Update connection status based on API response
+            htmx.on('htmx:afterRequest', function (event) {
+                if (event.detail.xhr.status === 200) {
+                    updateConnectionStatus('success', 'wifi', 'Connected');
+                } else {
+                    updateConnectionStatus('error', 'wifi_off', 'Disconnected');
+                }
+            });
+
+            function updateConnectionStatus(status, icon, text) {
+                const statusEl = document.getElementById('connection-status');
+                statusEl.className = `status-indicator status-${status}`;
+                statusEl.innerHTML = `<span class="material-icons">${icon}</span><span>${text}</span>`;
+            }
+
+            function showComingSoon(feature) {
+                showToast('info', `${feature} coming soon!`);
+            }
+
+            function showToast(type, message) {
+                const toast = document.getElementById('toast');
+                const icon = document.getElementById('toast-icon');
+                const messageEl = document.getElementById('toast-message');
+
+                // Set icon based on type
+                const icons = {
+                    'success': 'check_circle',
+                    'error': 'error',
+                    'warning': 'warning',
+                    'info': 'info'
+                };
+
+                icon.textContent = icons[type] || 'info';
+                messageEl.textContent = message;
+
+                // Show toast
+                toast.style.transform = 'translateY(0)';
+                toast.style.opacity = '1';
+
+                // Hide after 3 seconds
+                setTimeout(() => {
+                    toast.style.transform = 'translateY(100px)';
+                    toast.style.opacity = '0';
+                }, 3000);
+            }
+
+            // Handle HTMX response formatting
+            htmx.on('htmx:afterRequest', function (event) {
+                if (event.detail.xhr.getResponseHeader('content-type')?.includes('application/json')) {
+                    try {
+                        const response = JSON.parse(event.detail.xhr.responseText);
+                        const target = event.detail.target;
+
+                        if (response.status === 'success') {
+                            target.innerHTML = `
+                            <div class="status-indicator status-success">
+                                <span class="material-icons">check_circle</span>
+                                <span>${response.message}</span>
+                            </div>
+                        `;
+                        } else if (response.status === 'error') {
+                            target.innerHTML = `
+                            <div class="status-indicator status-error">
+                                <span class="material-icons">error</span>
+                                <span>${response.message}</span>
+                            </div>
+                        `;
+                        } else {
+                            target.innerHTML = `
+                            <div class="status-indicator status-warning">
+                                <span class="material-icons">warning</span>
+                                <span>${response.message}</span>
+                            </div>
+                        `;
+                        }
+                    } catch (e) {
+                        // Handle non-JSON responses
+                        event.detail.target.innerHTML = event.detail.xhr.responseText;
+                    }
+                }
+            });
+        </script>
+
+        <!-- Weather Widget JavaScript -->
+        <script src="/static/js/weather-new.js"></script>
+    </body>
+
+</html>
