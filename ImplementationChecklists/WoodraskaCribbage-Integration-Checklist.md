@@ -332,7 +332,7 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
 ## Phase 6: Dashboard Integration (Week 6)
 
 ### ✅ 6.1 Dashboard Games Section Update
-- [ ] Update `templates/index.html` games section:
+- [x] Update `templates/index.html` games section:
   ```html
   <div class="card">
       <h3 class="title-large" style="margin-bottom: 16px;">🎮 Games</h3>
@@ -360,16 +360,16 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
   ```
 
 ### ✅ 6.2 Navigation Integration
-- [ ] Add cribbage navigation to all game templates
-- [ ] Ensure consistent back navigation
-- [ ] Add breadcrumb navigation for game flow
-- [ ] Test navigation between all game states
+- [x] Add cribbage navigation to all game templates
+- [x] Ensure consistent back navigation
+- [x] Add breadcrumb navigation for game flow
+- [x] Test navigation between all game states
 
 ### ✅ 6.3 Error Handling Integration
-- [ ] Add cribbage-specific error handling
-- [ ] Integrate with existing error display system
-- [ ] Add logging for cribbage operations
-- [ ] Test error scenarios
+- [x] Add cribbage-specific error handling
+- [x] Integrate with existing error display system
+- [x] Add logging for cribbage operations
+- [x] Test error scenarios
 
 ---
 

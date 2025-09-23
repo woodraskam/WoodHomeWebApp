@@ -26,12 +26,12 @@ type APIResponse struct {
 }
 
 type WoodHomeConfig struct {
-	APIBaseURL    string
-	Port          string
-	SMTPHost      string
-	SMTPPort      int
-	FromEmail     string
-	FromPassword  string
+	APIBaseURL   string
+	Port         string
+	SMTPHost     string
+	SMTPPort     int
+	FromEmail    string
+	FromPassword string
 }
 
 // Database connection
@@ -390,7 +390,7 @@ func main() {
 
 	// Initialize cribbage game manager
 	cribbageManager = &CribbageGameManager{db: db}
-	
+
 	// Configuration
 	config.APIBaseURL = getEnv("WOODHOME_API_URL", "http://localhost:8080")
 	config.Port = getEnv("PORT", "3000")
@@ -398,7 +398,7 @@ func main() {
 	config.SMTPPort, _ = strconv.Atoi(getEnv("SMTP_PORT", "587"))
 	config.FromEmail = getEnv("FROM_EMAIL", "")
 	config.FromPassword = getEnv("FROM_PASSWORD", "")
-	
+
 	// Initialize email service
 	emailService = &EmailService{
 		smtpHost:     config.SMTPHost,
@@ -937,13 +937,13 @@ func createGameHandler(w http.ResponseWriter, r *http.Request) {
 
 	game, err := cribbageManager.CreateGame(request.PlayerEmail)
 	if err != nil {
-		http.Error(w, "Failed to create game", http.StatusInternalServerError)
+		handleCribbageError(w, "create game", err, "", request.PlayerEmail)
 		return
 	}
 
 	token, err := cribbageManager.CreateToken(game.ID, request.PlayerEmail)
 	if err != nil {
-		http.Error(w, "Failed to create token", http.StatusInternalServerError)
+		handleCribbageError(w, "create token", err, game.ID, request.PlayerEmail)
 		return
 	}
 
@@ -984,13 +984,13 @@ func joinGameHandler(w http.ResponseWriter, r *http.Request) {
 
 	err := cribbageManager.JoinGame(request.GameID, request.PlayerEmail)
 	if err != nil {
-		http.Error(w, "Failed to join game: "+err.Error(), http.StatusBadRequest)
+		handleCribbageError(w, "join game", err, request.GameID, request.PlayerEmail)
 		return
 	}
 
 	token, err := cribbageManager.CreateToken(request.GameID, request.PlayerEmail)
 	if err != nil {
-		http.Error(w, "Failed to create token", http.StatusInternalServerError)
+		handleCribbageError(w, "create token", err, request.GameID, request.PlayerEmail)
 		return
 	}
 
@@ -1000,11 +1000,11 @@ func joinGameHandler(w http.ResponseWriter, r *http.Request) {
 		// Send email notification to both players
 		go func() {
 			// Notify player 1 that player 2 joined
-			emailService.SendGameUpdate(request.GameID, game.Player1Email, "player_joined", 
+			emailService.SendGameUpdate(request.GameID, game.Player1Email, "player_joined",
 				fmt.Sprintf("Player %s has joined your cribbage game!", request.PlayerEmail))
-			
+
 			// Notify player 2 that they joined successfully
-			emailService.SendGameUpdate(request.GameID, request.PlayerEmail, "game_started", 
+			emailService.SendGameUpdate(request.GameID, request.PlayerEmail, "game_started",
 				fmt.Sprintf("You have successfully joined the cribbage game with %s!", game.Player1Email))
 		}()
 	}
@@ -1155,6 +1155,25 @@ func gameUpdatesHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
+}
+
+// Cribbage-specific error handling and logging
+func logCribbageError(operation string, err error, gameID string, playerEmail string) {
+	log.Printf("Cribbage Error - Operation: %s, GameID: %s, Player: %s, Error: %v", 
+		operation, gameID, playerEmail, err)
+}
+
+func handleCribbageError(w http.ResponseWriter, operation string, err error, gameID string, playerEmail string) {
+	logCribbageError(operation, err, gameID, playerEmail)
+	
+	response := APIResponse{
+		Status:  "error",
+		Message: fmt.Sprintf("Cribbage %s failed: %v", operation, err),
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusInternalServerError)
+	json.NewEncoder(w).Encode(response)
 }
 
 func getStatusMessage(game *Game, playerEmail string) string {
