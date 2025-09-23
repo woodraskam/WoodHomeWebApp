@@ -436,7 +436,12 @@ func (c *CribbageDB) UpdateGameState(gameID string, updates map[string]interface
 func cribbageHomeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	tmpl := template.Must(template.ParseFiles("templates/cribbage-home.html"))
+	// Create template with custom functions
+	tmpl := template.Must(template.New("cribbage-home.html").Funcs(template.FuncMap{
+		"lower": strings.ToLower,
+		"suitSymbol": getSuitSymbol,
+		"colorClass": getColorClass,
+	}).ParseFiles("templates/cribbage-home.html"))
 
 	data := map[string]interface{}{
 		"Title": "Woodraska Cribbage - WoodHome",
@@ -467,7 +472,41 @@ func cribbageBoardHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl := template.Must(template.ParseFiles("templates/cribbage-board.html"))
+	// Create template with custom functions
+	tmpl := template.Must(template.New("cribbage-board.html").Funcs(template.FuncMap{
+		"lower": strings.ToLower,
+		"suitSymbol": getSuitSymbol,
+		"colorClass": getColorClass,
+	}).ParseFiles("templates/cribbage-board.html"))
+
+	// Create sample card data for display
+	player1Hand := []map[string]interface{}{
+		{"ID": "card1", "Suit": "HEARTS", "Value": "A"},
+		{"ID": "card2", "Suit": "DIAMONDS", "Value": "K"},
+		{"ID": "card3", "Suit": "CLUBS", "Value": "Q"},
+		{"ID": "card4", "Suit": "SPADES", "Value": "J"},
+		{"ID": "card5", "Suit": "HEARTS", "Value": "10"},
+		{"ID": "card6", "Suit": "DIAMONDS", "Value": "9"},
+	}
+
+	player2Hand := []map[string]interface{}{
+		{"ID": "card7", "Suit": "CLUBS", "Value": "8"},
+		{"ID": "card8", "Suit": "SPADES", "Value": "7"},
+		{"ID": "card9", "Suit": "HEARTS", "Value": "6"},
+		{"ID": "card10", "Suit": "DIAMONDS", "Value": "5"},
+		{"ID": "card11", "Suit": "CLUBS", "Value": "4"},
+		{"ID": "card12", "Suit": "SPADES", "Value": "3"},
+	}
+
+	playedCards := []map[string]interface{}{
+		{"ID": "played1", "Suit": "HEARTS", "Value": "2"},
+		{"ID": "played2", "Suit": "DIAMONDS", "Value": "A"},
+	}
+
+	crib := []map[string]interface{}{
+		{"ID": "crib1", "Suit": "CLUBS", "Value": "K"},
+		{"ID": "crib2", "Suit": "SPADES", "Value": "Q"},
+	}
 
 	data := map[string]interface{}{
 		"Title":         "Woodraska Cribbage - Game Board",
@@ -480,6 +519,11 @@ func cribbageBoardHandler(w http.ResponseWriter, r *http.Request) {
 		"Player2Score":  game.Player2Score,
 		"GameStatus":    game.Status,
 		"CurrentPlayer": game.CurrentPlayer,
+		"Player1Hand":   player1Hand,
+		"Player2Hand":   player2Hand,
+		"PlayedCards":   playedCards,
+		"Crib":          crib,
+		"CurrentTotal":  15,
 	}
 
 	if err := tmpl.Execute(w, data); err != nil {
@@ -507,7 +551,12 @@ func cribbagePlayerHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	tmpl := template.Must(template.ParseFiles("templates/cribbage-controller.html"))
+	// Create template with custom functions
+	tmpl := template.Must(template.New("cribbage-controller.html").Funcs(template.FuncMap{
+		"lower": strings.ToLower,
+		"suitSymbol": getSuitSymbol,
+		"colorClass": getColorClass,
+	}).ParseFiles("templates/cribbage-controller.html"))
 
 	// Determine player score and opponent score
 	var playerScore, opponentScore int
@@ -523,6 +572,16 @@ func cribbagePlayerHandler(w http.ResponseWriter, r *http.Request) {
 		isCurrentPlayer = game.CurrentPlayer == game.Player2Email
 	}
 
+	// Create sample player hand data
+	playerHand := []map[string]interface{}{
+		{"ID": "card1", "Suit": "HEARTS", "Value": "A", "Playable": true},
+		{"ID": "card2", "Suit": "DIAMONDS", "Value": "K", "Playable": true},
+		{"ID": "card3", "Suit": "CLUBS", "Value": "Q", "Playable": true},
+		{"ID": "card4", "Suit": "SPADES", "Value": "J", "Playable": true},
+		{"ID": "card5", "Suit": "HEARTS", "Value": "10", "Playable": true},
+		{"ID": "card6", "Suit": "DIAMONDS", "Value": "9", "Playable": true},
+	}
+
 	data := map[string]interface{}{
 		"Title":           "Woodraska Cribbage - Player Controller",
 		"GameID":          game.ID,
@@ -536,6 +595,7 @@ func cribbagePlayerHandler(w http.ResponseWriter, r *http.Request) {
 		"GameStatus":      game.Status,
 		"IsCurrentPlayer": isCurrentPlayer,
 		"StatusMessage":   getStatusMessage(game, playerEmail),
+		"PlayerHand":     playerHand,
 	}
 
 	if err := tmpl.Execute(w, data); err != nil {
@@ -804,4 +864,22 @@ func getStatusMessage(game *Game, playerEmail string) string {
 	default:
 		return "Game in progress..."
 	}
+}
+
+// Template helper functions
+func getSuitSymbol(suit string) string {
+	symbols := map[string]string{
+		"HEARTS":   "♥",
+		"DIAMONDS": "♦",
+		"CLUBS":    "♣",
+		"SPADES":   "♠",
+	}
+	return symbols[suit]
+}
+
+func getColorClass(suit string) string {
+	if suit == "HEARTS" || suit == "DIAMONDS" {
+		return "red"
+	}
+	return "black"
 }
