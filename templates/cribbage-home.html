@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Woodraska Cribbage - WoodHome</title>
+    <link rel="stylesheet" href="/static/css/material-design-3.css">
+    <link rel="stylesheet" href="/static/games/WoodraskaCribbage/src/css/styles.css">
+    <link rel="stylesheet" href="/static/games/WoodraskaCribbage/src/css/responsive.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+    <div class="cribbage-container">
+        <!-- Header -->
+        <header class="card">
+            <div class="text-center">
+                <h1 class="cribbage-title">🃏 Woodraska Cribbage</h1>
+                <p class="cribbage-body">Classic two-player card game with split-screen play</p>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="card">
+            <div class="text-center">
+                <a href="/" class="btn btn-outlined">
+                    ← Back to Dashboard
+                </a>
+            </div>
+        </nav>
+
+        <!-- Game Options -->
+        <div class="grid grid-2">
+            <!-- Create Game -->
+            <div class="card">
+                <h2 class="cribbage-subtitle">Create New Game</h2>
+                <p class="cribbage-body mb-16">
+                    Start a new cribbage game and invite a friend to join.
+                </p>
+                
+                <form class="cribbage-form create-game-form" hx-post="/api/cribbage/create" hx-target="#game-result" hx-indicator="#create-loading">
+                    <div class="form-group">
+                        <label for="playerEmail" class="form-label">Your Email</label>
+                        <input type="email" id="playerEmail" name="playerEmail" class="form-input" required 
+                               placeholder="your-email@example.com">
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-primary">
+                            <span id="create-loading" class="loading hidden">
+                                <span class="loading-spinner"></span>
+                                Creating...
+                            </span>
+                            <span id="create-text">Create Game</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Join Game -->
+            <div class="card">
+                <h2 class="cribbage-subtitle">Join Existing Game</h2>
+                <p class="cribbage-body mb-16">
+                    Enter a game ID to join an existing cribbage game.
+                </p>
+                
+                <form class="cribbage-form join-game-form" hx-post="/api/cribbage/join" hx-target="#game-result" hx-indicator="#join-loading">
+                    <div class="form-group">
+                        <label for="gameId" class="form-label">Game ID</label>
+                        <input type="text" id="gameId" name="gameId" class="form-input" required 
+                               placeholder="Enter game ID">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="joinPlayerEmail" class="form-label">Your Email</label>
+                        <input type="email" id="joinPlayerEmail" name="playerEmail" class="form-input" required 
+                               placeholder="your-email@example.com">
+                    </div>
+                    
+                    <div class="text-center">
+                        <button type="submit" class="btn btn-secondary">
+                            <span id="join-loading" class="loading hidden">
+                                <span class="loading-spinner"></span>
+                                Joining...
+                            </span>
+                            <span id="join-text">Join Game</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Game Result -->
+        <div id="game-result" class="card hidden">
+            <!-- HTMX will populate this with game creation/join results -->
+        </div>
+
+        <!-- Game Rules -->
+        <div class="card">
+            <h2 class="cribbage-subtitle">How to Play</h2>
+            <div class="grid grid-2">
+                <div>
+                    <h3 class="cribbage-body" style="font-weight: 500; margin-bottom: 12px;">Objective</h3>
+                    <p class="cribbage-body">
+                        Be the first player to score 121 points by playing cards and counting hands.
+                    </p>
+                </div>
+                <div>
+                    <h3 class="cribbage-body" style="font-weight: 500; margin-bottom: 12px;">Scoring</h3>
+                    <p class="cribbage-body">
+                        Score points for 15s, pairs, runs, flushes, and having the Jack of the same suit as the cut card.
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Games (if any) -->
+        <div class="card">
+            <h2 class="cribbage-subtitle">Recent Games</h2>
+            <div id="recent-games">
+                <p class="cribbage-body text-center" style="color: var(--cribbage-on-surface); opacity: 0.7;">
+                    No recent games found.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/games/WoodraskaCribbage/src/js/main.js"></script>
+    <script src="/static/games/WoodraskaCribbage/src/js/gameState.js"></script>
+    <script src="/static/games/WoodraskaCribbage/src/js/cribbageLogic.js"></script>
+    <script src="/static/games/WoodraskaCribbage/src/js/signalr.js"></script>
+    <script src="/static/games/WoodraskaCribbage/src/js/cardAnimations.js"></script>
+
+    <script>
+        // Initialize animations
+        const animations = new CribbageCardAnimations();
+        animations.init();
+
+        // Handle form submissions
+        document.addEventListener('DOMContentLoaded', function() {
+            // HTMX event handlers
+            document.body.addEventListener('htmx:beforeRequest', function(event) {
+                const form = event.target.closest('form');
+                if (form) {
+                    const loadingElement = form.querySelector('.loading');
+                    const textElement = form.querySelector('.loading').nextElementSibling;
+                    if (loadingElement) loadingElement.classList.remove('hidden');
+                    if (textElement) textElement.classList.add('hidden');
+                }
+            });
+
+            document.body.addEventListener('htmx:afterRequest', function(event) {
+                const form = event.target.closest('form');
+                if (form) {
+                    const loadingElement = form.querySelector('.loading');
+                    const textElement = form.querySelector('.loading').nextElementSibling;
+                    if (loadingElement) loadingElement.classList.add('hidden');
+                    if (textElement) textElement.classList.remove('hidden');
+                }
+            });
+
+            document.body.addEventListener('htmx:responseError', function(event) {
+                console.error('HTMX error:', event.detail);
+                showError('An error occurred. Please try again.');
+            });
+        });
+
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error-card';
+            errorDiv.textContent = message;
+            document.getElementById('game-result').appendChild(errorDiv);
+            document.getElementById('game-result').classList.remove('hidden');
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success-card';
+            successDiv.textContent = message;
+            document.getElementById('game-result').appendChild(successDiv);
+            document.getElementById('game-result').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

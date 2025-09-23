@@ -1,0 +1,334 @@
+/* Woodraska Cribbage - Game Board Styles */
+
+/* Game board container */
+.cribbage-board {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    height: 100vh;
+    background: var(--board-background);
+    border: 2px solid var(--board-border);
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+/* Header section with game info */
+.board-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: var(--cribbage-surface);
+    border-bottom: 1px solid var(--board-border);
+}
+
+.game-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.game-title {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: var(--cribbage-on-surface);
+}
+
+.game-phase {
+    font-size: 0.875rem;
+    color: var(--cribbage-secondary);
+    font-weight: 500;
+}
+
+.player-info {
+    display: flex;
+    gap: 24px;
+}
+
+.player-score {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.player-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--cribbage-on-surface);
+}
+
+.score-display {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--cribbage-primary);
+    background: var(--cribbage-surface-variant);
+    padding: 8px 16px;
+    border-radius: 8px;
+    min-width: 60px;
+    text-align: center;
+}
+
+/* Main game area */
+.board-main {
+    display: grid;
+    grid-template-columns: 1fr 2fr 1fr;
+    gap: 16px;
+    padding: 16px;
+    background: var(--board-background);
+}
+
+/* Player areas */
+.player-area {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--cribbage-surface);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid var(--card-border);
+}
+
+.player-area.opponent {
+    background: var(--cribbage-surface-variant);
+}
+
+.player-hand {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    min-height: 120px;
+    align-items: center;
+}
+
+.player-hand.empty {
+    background: var(--cribbage-surface-variant);
+    border: 2px dashed var(--card-border);
+    border-radius: 8px;
+    color: var(--cribbage-on-surface);
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Center play area */
+.play-area {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    background: var(--cribbage-surface);
+    border-radius: 8px;
+    padding: 16px;
+    border: 1px solid var(--card-border);
+}
+
+.played-cards {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+    min-height: 120px;
+    align-items: center;
+    background: var(--cribbage-surface-variant);
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.played-cards.empty {
+    border: 2px dashed var(--card-border);
+    color: var(--cribbage-on-surface);
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.current-total {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--cribbage-primary);
+    background: var(--cribbage-surface);
+    padding: 12px;
+    border-radius: 8px;
+    border: 2px solid var(--cribbage-primary);
+}
+
+/* Crib area */
+.crib-area {
+    background: var(--crib-area);
+    border: 2px solid var(--card-border);
+    border-radius: 8px;
+    padding: 16px;
+    margin-top: 16px;
+}
+
+.crib-title {
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--cribbage-on-surface);
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.crib-cards {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    min-height: 80px;
+    align-items: center;
+}
+
+.crib-cards.empty {
+    border: 2px dashed var(--card-border);
+    border-radius: 8px;
+    color: var(--cribbage-on-surface);
+    font-style: italic;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Footer with controls */
+.board-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 24px;
+    background: var(--cribbage-surface);
+    border-top: 1px solid var(--board-border);
+}
+
+.game-controls {
+    display: flex;
+    gap: 12px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+/* Card positioning in play area */
+.card-in-play {
+    position: relative;
+    z-index: 1;
+}
+
+.card-in-play.played {
+    animation: cardPlay 0.5s ease-out;
+}
+
+@keyframes cardPlay {
+    0% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1) rotate(5deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+/* Score highlighting */
+.score-highlight {
+    animation: scoreFlash 0.6s ease-out;
+}
+
+@keyframes scoreFlash {
+    0% {
+        background: var(--cribbage-surface);
+    }
+    50% {
+        background: var(--cribbage-secondary);
+        color: var(--cribbage-on-secondary);
+    }
+    100% {
+        background: var(--cribbage-surface);
+    }
+}
+
+/* Game state indicators */
+.game-state {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    background: var(--cribbage-surface-variant);
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.game-state.waiting {
+    color: var(--cribbage-secondary);
+}
+
+.game-state.playing {
+    color: var(--cribbage-primary);
+}
+
+.game-state.finished {
+    color: var(--cribbage-error);
+}
+
+.state-indicator {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: currentColor;
+}
+
+/* Turn indicator */
+.turn-indicator {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    width: 24px;
+    height: 24px;
+    background: var(--cribbage-primary);
+    color: var(--cribbage-on-primary);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+    font-weight: 700;
+    z-index: 2;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .board-main {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto auto;
+    }
+    
+    .player-area {
+        order: 2;
+    }
+    
+    .play-area {
+        order: 1;
+    }
+    
+    .crib-area {
+        order: 3;
+    }
+    
+    .board-header {
+        flex-direction: column;
+        gap: 12px;
+        text-align: center;
+    }
+    
+    .player-info {
+        flex-direction: column;
+        gap: 12px;
+    }
+}

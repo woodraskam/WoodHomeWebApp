@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Woodraska Cribbage - Player Controller</title>
+    <link rel="stylesheet" href="/static/css/material-design-3.css">
+    <link rel="stylesheet" href="/static/games/WoodraskaCribbage/src/css/styles.css">
+    <link rel="stylesheet" href="/static/games/WoodraskaCribbage/src/css/controller.css">
+    <link rel="stylesheet" href="/static/games/WoodraskaCribbage/src/css/animations.css">
+    <link rel="stylesheet" href="/static/games/WoodraskaCribbage/src/css/responsive.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+    <div class="cribbage-controller">
+        <!-- Header -->
+        <header class="card">
+            <div class="text-center">
+                <h1 class="cribbage-title">🃏 Woodraska Cribbage</h1>
+                <p class="cribbage-body">Player Controller - {{.PlayerEmail}}</p>
+            </div>
+        </header>
+
+        <!-- Navigation -->
+        <nav class="card">
+            <div class="text-center">
+                <a href="/cribbage" class="btn btn-outlined">
+                    ← Back to Cribbage Home
+                </a>
+                <a href="/" class="btn btn-text">
+                    ← Dashboard
+                </a>
+            </div>
+        </nav>
+
+        <!-- Game Status -->
+        <div class="status-panel">
+            <div class="status-title">Game Status</div>
+            <div class="status-message {{.GameStatus}}" id="status-message">
+                {{.StatusMessage}}
+            </div>
+        </div>
+
+        <!-- Player Hand -->
+        <div class="player-hand-container">
+            <div class="hand-title">Your Hand</div>
+            <div class="hand-cards" id="player-hand">
+                {{range .PlayerHand}}
+                <div class="card {{.Suit | lower}} {{.Suit | colorClass}}" data-card-id="{{.ID}}" data-playable="{{.Playable}}">
+                    <div class="card-value">{{.Value}}</div>
+                    <div class="card-suit">{{.Suit | suitSymbol}}</div>
+                </div>
+                {{end}}
+            </div>
+        </div>
+
+        <!-- Discard Panel (if in discard phase) -->
+        {{if eq .CurrentPhase "discard"}}
+        <div class="discard-panel">
+            <div class="discard-title">Select 2 cards to discard to the crib</div>
+            <div class="discard-cards" id="discard-cards">
+                <!-- Selected cards will appear here -->
+            </div>
+        </div>
+        {{end}}
+
+        <!-- Action Panel -->
+        <div class="action-panel">
+            <div class="action-title">Actions</div>
+            <div class="action-buttons">
+                <button class="btn btn-primary action-btn" data-action="play-card" disabled>
+                    Play Card
+                </button>
+                <button class="btn btn-secondary action-btn" data-action="discard" disabled>
+                    Discard to Crib
+                </button>
+                <button class="btn btn-outlined action-btn" data-action="count-hand" disabled>
+                    Count Hand
+                </button>
+                <button class="btn btn-text action-btn" data-action="go" disabled>
+                    Go
+                </button>
+            </div>
+        </div>
+
+        <!-- Score Panel -->
+        <div class="score-panel">
+            <div class="score-title">Score</div>
+            <div class="score-grid">
+                <div class="score-item">
+                    <span class="score-label">Your Score</span>
+                    <span class="score-value" id="player-score">{{.PlayerScore}}</span>
+                </div>
+                <div class="score-item">
+                    <span class="score-label">Opponent Score</span>
+                    <span class="score-value" id="opponent-score">{{.OpponentScore}}</span>
+                </div>
+                <div class="score-item total-score">
+                    <span class="score-label">Total</span>
+                    <span class="score-value" id="total-score">{{.TotalScore}}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Info -->
+        <div class="card">
+            <h3 class="cribbage-subtitle">Game Information</h3>
+            <div class="grid grid-2">
+                <div>
+                    <strong>Game ID:</strong> {{.GameID}}
+                </div>
+                <div>
+                    <strong>Current Phase:</strong> {{.CurrentPhase}}
+                </div>
+                <div>
+                    <strong>Your Turn:</strong> {{.IsCurrentPlayer}}
+                </div>
+                <div>
+                    <strong>Game Status:</strong> {{.GameStatus}}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SSE Connection for Real-time Updates -->
+    <div id="hand" 
+         hx-sse="connect:/api/cribbage/updates?gameId={{.GameID}}&playerEmail={{.PlayerEmail}}"
+         hx-sse-swap="hand-update"
+         hx-target="#hand"
+         style="display: none;">
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/games/WoodraskaCribbage/src/js/main.js"></script>
+    <script src="/static/games/WoodraskaCribbage/src/js/gameState.js"></script>
+    <script src="/static/games/WoodraskaCribbage/src/js/cribbageLogic.js"></script>
+    <script src="/static/games/WoodraskaCribbage/src/js/signalr.js"></script>
+    <script src="/static/games/WoodraskaCribbage/src/js/cardAnimations.js"></script>
+
+    <script>
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', function() {
+            const gameState = new CribbageGameState();
+            const cribbageLogic = new CribbageLogic();
+            const animations = new CribbageCardAnimations();
+            const signalR = new CribbageSignalR();
+            
+            // Initialize animations
+            animations.init();
+            
+            // Setup game state
+            gameState.initialize({
+                gameId: '{{.GameID}}',
+                player1Email: '{{.Player1Email}}',
+                player2Email: '{{.Player2Email}}',
+                currentPlayer: '{{.CurrentPlayer}}',
+                currentPhase: '{{.CurrentPhase}}',
+                player1Score: {{.Player1Score}},
+                player2Score: {{.Player2Score}},
+                gameStatus: '{{.GameStatus}}'
+            });
+            
+            // Setup SignalR connection
+            signalR.connect('{{.GameID}}', '{{.PlayerEmail}}');
+            
+            // Setup event handlers
+            signalR.setOnGameUpdate(function(update) {
+                console.log('Game update received:', update);
+                updateGameDisplay(update);
+            });
+            
+            signalR.setOnConnectionLost(function() {
+                showNotification('Connection lost. Attempting to reconnect...', 'warning');
+            });
+            
+            signalR.setOnConnectionRestored(function() {
+                showNotification('Connection restored!', 'success');
+            });
+            
+            signalR.setOnError(function(error) {
+                showNotification('Error: ' + error, 'error');
+            });
+            
+            // Setup card click handlers
+            document.addEventListener('click', function(event) {
+                if (event.target.closest('.card')) {
+                    handleCardClick(event);
+                }
+            });
+            
+            // Setup action button handlers
+            document.addEventListener('click', function(event) {
+                if (event.target.closest('.action-btn')) {
+                    handleActionClick(event);
+                }
+            });
+            
+            // Initialize UI
+            updateActionButtons();
+            updateStatusMessage();
+        });
+        
+        function handleCardClick(event) {
+            const card = event.target.closest('.card');
+            if (!card || card.classList.contains('unplayable')) return;
+            
+            const isSelected = card.classList.contains('selected');
+            const currentPhase = '{{.CurrentPhase}}';
+            
+            if (isSelected) {
+                card.classList.remove('selected');
+                removeCardFromDiscard(card);
+            } else {
+                // Check if we can select this card
+                if (currentPhase === 'discard' && getSelectedCards().length >= 2) {
+                    showNotification('You can only select 2 cards for the crib', 'warning');
+                    return;
+                }
+                
+                card.classList.add('selected');
+                addCardToDiscard(card);
+            }
+            
+            updateActionButtons();
+            updateSelectionCount();
+        }
+        
+        function handleActionClick(event) {
+            const button = event.target.closest('.action-btn');
+            const action = button.dataset.action;
+            
+            switch (action) {
+                case 'play-card':
+                    playSelectedCard();
+                    break;
+                case 'discard':
+                    discardSelectedCards();
+                    break;
+                case 'count-hand':
+                    countHand();
+                    break;
+                case 'go':
+                    go();
+                    break;
+            }
+        }
+        
+        function playSelectedCard() {
+            const selectedCard = document.querySelector('.card.selected');
+            if (!selectedCard) {
+                showNotification('Please select a card to play', 'error');
+                return;
+            }
+            
+            const cardId = selectedCard.dataset.cardId;
+            
+            fetch('/api/cribbage/play', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    gameId: '{{.GameID}}',
+                    playerEmail: '{{.PlayerEmail}}',
+                    cardId: cardId,
+                    action: 'play'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateGameDisplay(data);
+                    selectedCard.remove();
+                } else {
+                    showNotification(data.error || 'Failed to play card', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Failed to play card', 'error');
+            });
+        }
+        
+        function discardSelectedCards() {
+            const selectedCards = document.querySelectorAll('.card.selected');
+            if (selectedCards.length !== 2) {
+                showNotification('Please select exactly 2 cards to discard', 'error');
+                return;
+            }
+            
+            const cardIds = Array.from(selectedCards).map(card => card.dataset.cardId);
+            
+            fetch('/api/cribbage/play', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    gameId: '{{.GameID}}',
+                    playerEmail: '{{.PlayerEmail}}',
+                    cardIds: cardIds,
+                    action: 'discard'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateGameDisplay(data);
+                    selectedCards.forEach(card => card.remove());
+                } else {
+                    showNotification(data.error || 'Failed to discard cards', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Failed to discard cards', 'error');
+            });
+        }
+        
+        function countHand() {
+            fetch('/api/cribbage/play', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    gameId: '{{.GameID}}',
+                    playerEmail: '{{.PlayerEmail}}',
+                    action: 'count'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateGameDisplay(data);
+                } else {
+                    showNotification(data.error || 'Failed to count hand', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Failed to count hand', 'error');
+            });
+        }
+        
+        function go() {
+            fetch('/api/cribbage/play', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    gameId: '{{.GameID}}',
+                    playerEmail: '{{.PlayerEmail}}',
+                    action: 'go'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateGameDisplay(data);
+                } else {
+                    showNotification(data.error || 'Failed to go', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Failed to go', 'error');
+            });
+        }
+        
+        function updateGameDisplay(data) {
+            if (data.playerScore !== undefined) {
+                document.getElementById('player-score').textContent = data.playerScore;
+            }
+            if (data.opponentScore !== undefined) {
+                document.getElementById('opponent-score').textContent = data.opponentScore;
+            }
+            if (data.totalScore !== undefined) {
+                document.getElementById('total-score').textContent = data.totalScore;
+            }
+            if (data.currentPhase) {
+                updateStatusMessage(data.currentPhase);
+            }
+            if (data.gameStatus) {
+                updateStatusMessage(null, data.gameStatus);
+            }
+        }
+        
+        function updateActionButtons() {
+            const selectedCards = document.querySelectorAll('.card.selected');
+            const currentPhase = '{{.CurrentPhase}}';
+            const isCurrentPlayer = '{{.IsCurrentPlayer}}' === 'true';
+            
+            const playButton = document.querySelector('[data-action="play-card"]');
+            const discardButton = document.querySelector('[data-action="discard"]');
+            const countButton = document.querySelector('[data-action="count-hand"]');
+            const goButton = document.querySelector('[data-action="go"]');
+            
+            // Reset all buttons
+            [playButton, discardButton, countButton, goButton].forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            if (!isCurrentPlayer) return;
+            
+            switch (currentPhase) {
+                case 'discard':
+                    discardButton.disabled = selectedCards.length !== 2;
+                    break;
+                case 'play':
+                    playButton.disabled = selectedCards.length !== 1;
+                    goButton.disabled = false;
+                    break;
+                case 'count':
+                    countButton.disabled = false;
+                    break;
+            }
+        }
+        
+        function updateStatusMessage(phase = null, status = null) {
+            const statusElement = document.getElementById('status-message');
+            const currentPhase = phase || '{{.CurrentPhase}}';
+            const currentStatus = status || '{{.GameStatus}}';
+            
+            let message = '';
+            
+            if (currentStatus === 'finished') {
+                message = 'Game Over!';
+            } else if (currentStatus === 'waiting') {
+                message = 'Waiting for another player to join...';
+            } else if (currentStatus === 'active') {
+                switch (currentPhase) {
+                    case 'discard':
+                        message = 'Select 2 cards to discard to the crib';
+                        break;
+                    case 'play':
+                        message = 'Play a card or pass';
+                        break;
+                    case 'count':
+                        message = 'Count your hand';
+                        break;
+                    default:
+                        message = 'Game in progress...';
+                }
+            }
+            
+            statusElement.textContent = message;
+            statusElement.className = `status-message ${currentStatus}`;
+        }
+        
+        function getSelectedCards() {
+            return document.querySelectorAll('.card.selected');
+        }
+        
+        function addCardToDiscard(card) {
+            const discardContainer = document.getElementById('discard-cards');
+            if (!discardContainer) return;
+            
+            const cardClone = card.cloneNode(true);
+            cardClone.classList.add('discard-card');
+            discardContainer.appendChild(cardClone);
+        }
+        
+        function removeCardFromDiscard(card) {
+            const discardContainer = document.getElementById('discard-cards');
+            if (!discardContainer) return;
+            
+            const discardCard = discardContainer.querySelector(`[data-card-id="${card.dataset.cardId}"]`);
+            if (discardCard) {
+                discardCard.remove();
+            }
+        }
+        
+        function updateSelectionCount() {
+            const selectedCount = getSelectedCards().length;
+            const currentPhase = '{{.CurrentPhase}}';
+            
+            if (currentPhase === 'discard' && selectedCount > 0) {
+                showSelectionCount(selectedCount);
+            } else {
+                hideSelectionCount();
+            }
+        }
+        
+        function showSelectionCount(count) {
+            let countElement = document.querySelector('.selection-count');
+            if (!countElement) {
+                countElement = document.createElement('div');
+                countElement.className = 'selection-count';
+                document.body.appendChild(countElement);
+            }
+            countElement.textContent = `${count} selected`;
+        }
+        
+        function hideSelectionCount() {
+            const countElement = document.querySelector('.selection-count');
+            if (countElement) {
+                countElement.remove();
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

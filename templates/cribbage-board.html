@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Woodraska Cribbage - Game Board</title>
+    <link rel="stylesheet" href="/static/css/material-design-3.css">
+    <link rel="stylesheet" href="/static/games/WoodraskaCribbage/src/css/styles.css">
+    <link rel="stylesheet" href="/static/games/WoodraskaCribbage/src/css/board.css">
+    <link rel="stylesheet" href="/static/games/WoodraskaCribbage/src/css/animations.css">
+    <link rel="stylesheet" href="/static/games/WoodraskaCribbage/src/css/responsive.css">
+    <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+</head>
+<body>
+    <div class="cribbage-board">
+        <!-- Header -->
+        <header class="board-header">
+            <div class="game-info">
+                <h1 class="game-title">🃏 Woodraska Cribbage</h1>
+                <div class="game-phase">{{.CurrentPhase}}</div>
+            </div>
+            
+            <div class="player-info">
+                <div class="player-score">
+                    <div class="player-name">Player 1</div>
+                    <div class="score-display player1-score">{{.Player1Score}}</div>
+                </div>
+                <div class="player-score">
+                    <div class="player-name">Player 2</div>
+                    <div class="score-display player2-score">{{.Player2Score}}</div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Game Area -->
+        <main class="board-main">
+            <!-- Player 1 Area -->
+            <div class="player-area">
+                <h3 class="cribbage-subtitle">Player 1</h3>
+                <div class="player-hand" id="player1-hand">
+                    {{range .Player1Hand}}
+                    <div class="card {{.Suit | lower}} back" data-card-id="{{.ID}}">
+                        <div class="card-value">🃏</div>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+
+            <!-- Center Play Area -->
+            <div class="play-area">
+                <h3 class="cribbage-subtitle">Play Area</h3>
+                <div class="played-cards" id="played-cards">
+                    {{range .PlayedCards}}
+                    <div class="card {{.Suit | lower}} card-in-play" data-card-id="{{.ID}}">
+                        <div class="card-value">{{.Value}}</div>
+                        <div class="card-suit">{{.Suit | suitSymbol}}</div>
+                    </div>
+                    {{end}}
+                </div>
+                
+                <div class="current-total" id="current-total">
+                    Total: {{.CurrentTotal}}
+                </div>
+                
+                <!-- Crib Area -->
+                <div class="crib-area">
+                    <div class="crib-title">Crib</div>
+                    <div class="crib-cards" id="crib-cards">
+                        {{range .Crib}}
+                        <div class="card {{.Suit | lower}}" data-card-id="{{.ID}}">
+                            <div class="card-value">{{.Value}}</div>
+                            <div class="card-suit">{{.Suit | suitSymbol}}</div>
+                        </div>
+                        {{end}}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Player 2 Area -->
+            <div class="player-area opponent">
+                <h3 class="cribbage-subtitle">Player 2</h3>
+                <div class="player-hand" id="player2-hand">
+                    {{range .Player2Hand}}
+                    <div class="card {{.Suit | lower}} back" data-card-id="{{.ID}}">
+                        <div class="card-value">🃏</div>
+                    </div>
+                    {{end}}
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="board-footer">
+            <div class="game-controls">
+                <div class="game-state">
+                    <div class="state-indicator"></div>
+                    <span id="game-status">{{.GameStatus}}</span>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary action-btn" data-action="play-card" disabled>
+                    Play Card
+                </button>
+                <button class="btn btn-secondary action-btn" data-action="discard" disabled>
+                    Discard
+                </button>
+                <button class="btn btn-outlined action-btn" data-action="count-hand" disabled>
+                    Count Hand
+                </button>
+                <button class="btn btn-text action-btn" data-action="go" disabled>
+                    Go
+                </button>
+            </div>
+        </footer>
+    </div>
+
+    <!-- SSE Connection for Real-time Updates -->
+    <div id="scoreboard" 
+         hx-sse="connect:/api/cribbage/updates?gameId={{.GameID}}&playerEmail={{.PlayerEmail}}"
+         hx-sse-swap="score-update"
+         hx-target="#scoreboard"
+         style="display: none;">
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/games/WoodraskaCribbage/src/js/main.js"></script>
+    <script src="/static/games/WoodraskaCribbage/src/js/gameState.js"></script>
+    <script src="/static/games/WoodraskaCribbage/src/js/cribbageLogic.js"></script>
+    <script src="/static/games/WoodraskaCribbage/src/js/signalr.js"></script>
+    <script src="/static/games/WoodraskaCribbage/src/js/cardAnimations.js"></script>
+
+    <script>
+        // Initialize the game
+        document.addEventListener('DOMContentLoaded', function() {
+            const gameState = new CribbageGameState();
+            const cribbageLogic = new CribbageLogic();
+            const animations = new CribbageCardAnimations();
+            const signalR = new CribbageSignalR();
+            
+            // Initialize animations
+            animations.init();
+            
+            // Setup game state
+            gameState.initialize({
+                gameId: '{{.GameID}}',
+                player1Email: '{{.Player1Email}}',
+                player2Email: '{{.Player2Email}}',
+                currentPlayer: '{{.CurrentPlayer}}',
+                currentPhase: '{{.CurrentPhase}}',
+                player1Score: {{.Player1Score}},
+                player2Score: {{.Player2Score}},
+                gameStatus: '{{.GameStatus}}'
+            });
+            
+            // Setup SignalR connection
+            signalR.connect('{{.GameID}}', '{{.PlayerEmail}}');
+            
+            // Setup event handlers
+            signalR.setOnGameUpdate(function(update) {
+                console.log('Game update received:', update);
+                updateGameDisplay(update);
+            });
+            
+            signalR.setOnConnectionLost(function() {
+                showNotification('Connection lost. Attempting to reconnect...', 'warning');
+            });
+            
+            signalR.setOnConnectionRestored(function() {
+                showNotification('Connection restored!', 'success');
+            });
+            
+            signalR.setOnError(function(error) {
+                showNotification('Error: ' + error, 'error');
+            });
+            
+            // Setup card click handlers
+            document.addEventListener('click', function(event) {
+                if (event.target.closest('.card')) {
+                    handleCardClick(event);
+                }
+            });
+            
+            // Setup action button handlers
+            document.addEventListener('click', function(event) {
+                if (event.target.closest('.action-btn')) {
+                    handleActionClick(event);
+                }
+            });
+        });
+        
+        function handleCardClick(event) {
+            const card = event.target.closest('.card');
+            if (!card || card.classList.contains('back')) return;
+            
+            const isSelected = card.classList.contains('selected');
+            
+            if (isSelected) {
+                card.classList.remove('selected');
+            } else {
+                // Remove other selections
+                document.querySelectorAll('.card.selected').forEach(c => c.classList.remove('selected'));
+                card.classList.add('selected');
+            }
+            
+            updateActionButtons();
+        }
+        
+        function handleActionClick(event) {
+            const button = event.target.closest('.action-btn');
+            const action = button.dataset.action;
+            
+            switch (action) {
+                case 'play-card':
+                    playSelectedCard();
+                    break;
+                case 'discard':
+                    discardSelectedCards();
+                    break;
+                case 'count-hand':
+                    countHand();
+                    break;
+                case 'go':
+                    go();
+                    break;
+            }
+        }
+        
+        function playSelectedCard() {
+            const selectedCard = document.querySelector('.card.selected');
+            if (!selectedCard) {
+                showNotification('Please select a card to play', 'error');
+                return;
+            }
+            
+            const cardId = selectedCard.dataset.cardId;
+            
+            fetch('/api/cribbage/play', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    gameId: '{{.GameID}}',
+                    playerEmail: '{{.PlayerEmail}}',
+                    cardId: cardId,
+                    action: 'play'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateGameDisplay(data);
+                } else {
+                    showNotification(data.error || 'Failed to play card', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Failed to play card', 'error');
+            });
+        }
+        
+        function discardSelectedCards() {
+            const selectedCards = document.querySelectorAll('.card.selected');
+            if (selectedCards.length !== 2) {
+                showNotification('Please select exactly 2 cards to discard', 'error');
+                return;
+            }
+            
+            const cardIds = Array.from(selectedCards).map(card => card.dataset.cardId);
+            
+            fetch('/api/cribbage/play', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    gameId: '{{.GameID}}',
+                    playerEmail: '{{.PlayerEmail}}',
+                    cardIds: cardIds,
+                    action: 'discard'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateGameDisplay(data);
+                } else {
+                    showNotification(data.error || 'Failed to discard cards', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Failed to discard cards', 'error');
+            });
+        }
+        
+        function countHand() {
+            fetch('/api/cribbage/play', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    gameId: '{{.GameID}}',
+                    playerEmail: '{{.PlayerEmail}}',
+                    action: 'count'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateGameDisplay(data);
+                } else {
+                    showNotification(data.error || 'Failed to count hand', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Failed to count hand', 'error');
+            });
+        }
+        
+        function go() {
+            fetch('/api/cribbage/play', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    gameId: '{{.GameID}}',
+                    playerEmail: '{{.PlayerEmail}}',
+                    action: 'go'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    updateGameDisplay(data);
+                } else {
+                    showNotification(data.error || 'Failed to go', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Failed to go', 'error');
+            });
+        }
+        
+        function updateGameDisplay(data) {
+            if (data.player1Score !== undefined) {
+                document.querySelector('.player1-score').textContent = data.player1Score;
+            }
+            if (data.player2Score !== undefined) {
+                document.querySelector('.player2-score').textContent = data.player2Score;
+            }
+            if (data.currentTotal !== undefined) {
+                document.getElementById('current-total').textContent = 'Total: ' + data.currentTotal;
+            }
+            if (data.currentPhase) {
+                document.querySelector('.game-phase').textContent = data.currentPhase;
+            }
+            if (data.gameStatus) {
+                document.getElementById('game-status').textContent = data.gameStatus;
+            }
+        }
+        
+        function updateActionButtons() {
+            const selectedCards = document.querySelectorAll('.card.selected');
+            const playButton = document.querySelector('[data-action="play-card"]');
+            const discardButton = document.querySelector('[data-action="discard"]');
+            
+            if (selectedCards.length === 1) {
+                playButton.disabled = false;
+                discardButton.disabled = true;
+            } else if (selectedCards.length === 2) {
+                playButton.disabled = true;
+                discardButton.disabled = false;
+            } else {
+                playButton.disabled = true;
+                discardButton.disabled = true;
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+    </script>
+</body>
+</html>

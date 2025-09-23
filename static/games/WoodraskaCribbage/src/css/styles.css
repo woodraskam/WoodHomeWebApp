@@ -1,0 +1,300 @@
+/* Woodraska Cribbage - Main Styles */
+/* Material Design 3 Integration with WoodHome Theme */
+
+:root {
+    /* Cribbage-specific color scheme */
+    --cribbage-primary: #1976d2;
+    --cribbage-primary-variant: #1565c0;
+    --cribbage-secondary: #f57c00;
+    --cribbage-surface: #ffffff;
+    --cribbage-surface-variant: #f5f5f5;
+    --cribbage-background: #fafafa;
+    --cribbage-error: #d32f2f;
+    --cribbage-on-primary: #ffffff;
+    --cribbage-on-secondary: #ffffff;
+    --cribbage-on-surface: #212121;
+    --cribbage-on-background: #212121;
+    --cribbage-on-error: #ffffff;
+    
+    /* Card-specific colors */
+    --card-red: #d32f2f;
+    --card-black: #212121;
+    --card-back: #1976d2;
+    --card-border: #e0e0e0;
+    
+    /* Game board colors */
+    --board-background: #f5f5f5;
+    --board-border: #e0e0e0;
+    --score-area: #ffffff;
+    --crib-area: #f0f0f0;
+}
+
+/* Base cribbage container */
+.cribbage-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 16px;
+    background: var(--cribbage-background);
+    min-height: 100vh;
+    font-family: 'Roboto', sans-serif;
+}
+
+/* Typography */
+.cribbage-title {
+    font-size: 2.5rem;
+    font-weight: 300;
+    color: var(--cribbage-on-surface);
+    margin-bottom: 24px;
+    text-align: center;
+}
+
+.cribbage-subtitle {
+    font-size: 1.5rem;
+    font-weight: 400;
+    color: var(--cribbage-on-surface);
+    margin-bottom: 16px;
+}
+
+.cribbage-body {
+    font-size: 1rem;
+    line-height: 1.5;
+    color: var(--cribbage-on-surface);
+}
+
+/* Card components */
+.card {
+    background: var(--cribbage-surface);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    padding: 16px;
+    margin-bottom: 16px;
+    border: 1px solid var(--card-border);
+    transition: box-shadow 0.2s ease;
+}
+
+.card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.card-elevated {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Buttons */
+.btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 48px;
+    gap: 8px;
+}
+
+.btn-primary {
+    background: var(--cribbage-primary);
+    color: var(--cribbage-on-primary);
+}
+
+.btn-primary:hover {
+    background: var(--cribbage-primary-variant);
+    box-shadow: 0 2px 8px rgba(25, 118, 210, 0.3);
+}
+
+.btn-secondary {
+    background: var(--cribbage-secondary);
+    color: var(--cribbage-on-secondary);
+}
+
+.btn-secondary:hover {
+    background: #e65100;
+    box-shadow: 0 2px 8px rgba(245, 124, 0, 0.3);
+}
+
+.btn-outlined {
+    background: transparent;
+    color: var(--cribbage-primary);
+    border: 2px solid var(--cribbage-primary);
+}
+
+.btn-outlined:hover {
+    background: var(--cribbage-primary);
+    color: var(--cribbage-on-primary);
+}
+
+.btn-text {
+    background: transparent;
+    color: var(--cribbage-primary);
+    padding: 8px 16px;
+}
+
+.btn-text:hover {
+    background: var(--cribbage-surface-variant);
+}
+
+/* Forms */
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-label {
+    display: block;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--cribbage-on-surface);
+    margin-bottom: 8px;
+}
+
+.form-input {
+    width: 100%;
+    padding: 12px 16px;
+    border: 2px solid var(--card-border);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: var(--cribbage-surface);
+    color: var(--cribbage-on-surface);
+    transition: border-color 0.2s ease;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--cribbage-primary);
+    box-shadow: 0 0 0 3px rgba(25, 118, 210, 0.1);
+}
+
+.form-input:invalid {
+    border-color: var(--cribbage-error);
+}
+
+/* Loading states */
+.loading {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--cribbage-primary);
+}
+
+.loading-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--cribbage-surface-variant);
+    border-top: 2px solid var(--cribbage-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Error states */
+.error {
+    color: var(--cribbage-error);
+    font-size: 0.875rem;
+    margin-top: 8px;
+}
+
+.error-card {
+    background: #ffebee;
+    border: 1px solid #ffcdd2;
+    color: var(--cribbage-error);
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+/* Success states */
+.success {
+    color: #2e7d32;
+    font-size: 0.875rem;
+    margin-top: 8px;
+}
+
+.success-card {
+    background: #e8f5e8;
+    border: 1px solid #c8e6c9;
+    color: #2e7d32;
+    padding: 16px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+}
+
+/* Grid layouts */
+.grid {
+    display: grid;
+    gap: 16px;
+}
+
+.grid-2 {
+    grid-template-columns: repeat(2, 1fr);
+}
+
+.grid-3 {
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.grid-4 {
+    grid-template-columns: repeat(4, 1fr);
+}
+
+/* Utility classes */
+.text-center {
+    text-align: center;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.mb-16 {
+    margin-bottom: 16px;
+}
+
+.mb-24 {
+    margin-bottom: 24px;
+}
+
+.mt-16 {
+    margin-top: 16px;
+}
+
+.mt-24 {
+    margin-top: 24px;
+}
+
+.hidden {
+    display: none;
+}
+
+.visible {
+    display: block;
+}
+
+/* Focus states for accessibility */
+.btn:focus,
+.form-input:focus {
+    outline: 2px solid var(--cribbage-primary);
+    outline-offset: 2px;
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+    .card {
+        border: 2px solid var(--cribbage-on-surface);
+    }
+    
+    .btn {
+        border: 2px solid currentColor;
+    }
+}
