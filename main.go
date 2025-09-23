@@ -10,11 +10,13 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 	"time"
 
 	"github.com/gorilla/mux"
 	_ "github.com/microsoft/go-mssqldb"
+	"gopkg.in/gomail.v2"
 )
 
 type APIResponse struct {
@@ -24,8 +26,12 @@ type APIResponse struct {
 }
 
 type WoodHomeConfig struct {
-	APIBaseURL string
-	Port       string
+	APIBaseURL    string
+	Port          string
+	SMTPHost      string
+	SMTPPort      int
+	FromEmail     string
+	FromPassword  string
 }
 
 // Database connection
@@ -34,6 +40,14 @@ var db *sql.DB
 // Cribbage game management
 type CribbageGameManager struct {
 	db *sql.DB
+}
+
+// Email service for cribbage notifications
+type EmailService struct {
+	smtpHost     string
+	smtpPort     int
+	fromEmail    string
+	fromPassword string
 }
 
 // Card structure for cribbage
@@ -112,6 +126,7 @@ type GameUpdate struct {
 
 var config WoodHomeConfig
 var cribbageManager *CribbageGameManager
+var emailService *EmailService
 
 // Initialize database
 func initDatabase() error {
@@ -284,6 +299,79 @@ func (c *CribbageGameManager) ValidateToken(token string) (*GameToken, error) {
 	return &gameToken, nil
 }
 
+// Email service methods
+func (e *EmailService) SendGameInvitation(gameID, player1Email, player2Email string) error {
+	subject := "Cribbage Game Invitation"
+	body := fmt.Sprintf(`
+		<html>
+		<body>
+			<h2>You've been invited to a Cribbage game!</h2>
+			<p>Hello,</p>
+			<p>%s has invited you to play a game of Cribbage.</p>
+			<p><strong>Game ID:</strong> %s</p>
+			<p>Click the link below to join the game:</p>
+			<p><a href="http://localhost:3000/play/cribbage?gameId=%s&playerEmail=%s">Join Game</a></p>
+			<p>Good luck and have fun!</p>
+		</body>
+		</html>
+	`, player1Email, gameID, gameID, player2Email)
+
+	return e.sendEmail(player2Email, subject, body)
+}
+
+func (e *EmailService) SendGameUpdate(gameID, playerEmail, updateType, message string) error {
+	subject := "Cribbage Game Update"
+	body := fmt.Sprintf(`
+		<html>
+		<body>
+			<h2>Cribbage Game Update</h2>
+			<p>Hello,</p>
+			<p>%s</p>
+			<p><strong>Game ID:</strong> %s</p>
+			<p>Click the link below to view the game:</p>
+			<p><a href="http://localhost:3000/play/WoodraskaCribbage/board/?gameId=%s&playerEmail=%s">View Game</a></p>
+		</body>
+		</html>
+	`, message, gameID, gameID, playerEmail)
+
+	return e.sendEmail(playerEmail, subject, body)
+}
+
+func (e *EmailService) SendGameEndNotification(gameID, playerEmail, winner string, finalScore string) error {
+	subject := "Cribbage Game Finished"
+	body := fmt.Sprintf(`
+		<html>
+		<body>
+			<h2>Cribbage Game Finished</h2>
+			<p>Hello,</p>
+			<p>The cribbage game has ended!</p>
+			<p><strong>Winner:</strong> %s</p>
+			<p><strong>Final Score:</strong> %s</p>
+			<p><strong>Game ID:</strong> %s</p>
+			<p>Thanks for playing!</p>
+		</body>
+		</html>
+	`, winner, finalScore, gameID)
+
+	return e.sendEmail(playerEmail, subject, body)
+}
+
+func (e *EmailService) sendEmail(to, subject, body string) error {
+	m := gomail.NewMessage()
+	m.SetHeader("From", e.fromEmail)
+	m.SetHeader("To", to)
+	m.SetHeader("Subject", subject)
+	m.SetBody("text/html", body)
+
+	d := gomail.NewDialer(e.smtpHost, e.smtpPort, e.fromEmail, e.fromPassword)
+
+	if err := d.DialAndSend(m); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Utility functions
 func generateGameID() string {
 	return fmt.Sprintf("game_%d", time.Now().UnixNano())
@@ -302,9 +390,22 @@ func main() {
 
 	// Initialize cribbage game manager
 	cribbageManager = &CribbageGameManager{db: db}
+	
 	// Configuration
 	config.APIBaseURL = getEnv("WOODHOME_API_URL", "http://localhost:8080")
 	config.Port = getEnv("PORT", "3000")
+	config.SMTPHost = getEnv("SMTP_HOST", "smtp.gmail.com")
+	config.SMTPPort, _ = strconv.Atoi(getEnv("SMTP_PORT", "587"))
+	config.FromEmail = getEnv("FROM_EMAIL", "")
+	config.FromPassword = getEnv("FROM_PASSWORD", "")
+	
+	// Initialize email service
+	emailService = &EmailService{
+		smtpHost:     config.SMTPHost,
+		smtpPort:     config.SMTPPort,
+		fromEmail:    config.FromEmail,
+		fromPassword: config.FromPassword,
+	}
 
 	// cribbageManager is already initialized in initDatabase()
 
@@ -891,6 +992,21 @@ func joinGameHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Failed to create token", http.StatusInternalServerError)
 		return
+	}
+
+	// Get game details for email notification
+	game, err := cribbageManager.GetGame(request.GameID)
+	if err == nil && game != nil {
+		// Send email notification to both players
+		go func() {
+			// Notify player 1 that player 2 joined
+			emailService.SendGameUpdate(request.GameID, game.Player1Email, "player_joined", 
+				fmt.Sprintf("Player %s has joined your cribbage game!", request.PlayerEmail))
+			
+			// Notify player 2 that they joined successfully
+			emailService.SendGameUpdate(request.GameID, request.PlayerEmail, "game_started", 
+				fmt.Sprintf("You have successfully joined the cribbage game with %s!", game.Player1Email))
+		}()
 	}
 
 	response := APIResponse{

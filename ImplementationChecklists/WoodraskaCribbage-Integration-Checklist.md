@@ -224,11 +224,11 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
 ## Phase 4: Email Integration (Week 4)
 
 ### ✅ 4.1 Email Service Setup
-- [ ] Add email dependencies to `go.mod`:
+- [x] Add email dependencies to `go.mod`:
   ```bash
   go get gopkg.in/gomail.v2
   ```
-- [ ] Create email service struct in `main.go`:
+- [x] Create email service struct in `main.go`:
   ```go
   type EmailService struct {
       smtpHost     string
@@ -237,7 +237,7 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
       fromPassword string
   }
   ```
-- [ ] Add email configuration to `WoodHomeConfig`:
+- [x] Add email configuration to `WoodHomeConfig`:
   ```go
   type WoodHomeConfig struct {
       APIBaseURL    string
@@ -250,21 +250,21 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
   ```
 
 ### ✅ 4.2 Email Template Creation
-- [ ] Create email templates directory: `templates/email/`
-- [ ] Create `templates/email/game-invite.html` - Game invitation email
-- [ ] Create `templates/email/game-ready.html` - Game ready notification
-- [ ] Create `templates/email/game-update.html` - Game state updates
+- [x] Create email templates directory: `templates/email/`
+- [x] Create `templates/email/game-invitation.html` - Game invitation email
+- [x] Create `templates/email/game-update.html` - Game state updates
+- [x] Create `templates/email/game-finished.html` - Game finished notification
 
 ### ✅ 4.3 Email Service Implementation
-- [ ] Implement `SendGameInvite(toEmail, gameID, token string) error`
-- [ ] Implement `SendGameReady(player1Email, player2Email, gameID, token1, token2 string) error`
-- [ ] Implement `SendGameUpdate(playerEmail, gameID string, update GameUpdate) error`
-- [ ] Add email template rendering
-- [ ] Add SMTP connection handling
-- [ ] Add error handling and logging
+- [x] Implement `SendGameInvitation(gameID, player1Email, player2Email string) error`
+- [x] Implement `SendGameUpdate(gameID, playerEmail, updateType, message string) error`
+- [x] Implement `SendGameEndNotification(gameID, playerEmail, winner, finalScore string) error`
+- [x] Add email template rendering
+- [x] Add SMTP connection handling
+- [x] Add error handling and logging
 
 ### ✅ 4.4 Environment Configuration
-- [ ] Add email environment variables to `.env.example`:
+- [x] Add email environment variables to `.env.example`:
   ```
   SMTP_HOST=smtp.gmail.com
   SMTP_PORT=587

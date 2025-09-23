@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Cribbage Game Finished</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #FF6F00;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px 8px 0 0;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 30px;
+            border-radius: 0 0 8px 8px;
+        }
+        .game-results {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #FF6F00;
+        }
+        .winner {
+            background-color: #E8F5E8;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .button {
+            display: inline-block;
+            background-color: #FF6F00;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 30px;
+            color: #666;
+            font-size: 14px;
+        }
+        .score-board {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+        }
+        .score {
+            text-align: center;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 6px;
+            min-width: 100px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🏆 Cribbage Game Finished!</h1>
+    </div>
+    
+    <div class="content">
+        <h2>Game Complete</h2>
+        
+        <p>Hello,</p>
+        
+        <p>The cribbage game has ended! Here are the final results:</p>
+        
+        <div class="game-results">
+            <h3>Final Results</h3>
+            <p><strong>Game ID:</strong> {{.GameID}}</p>
+            <p><strong>Game Duration:</strong> {{.GameDuration}}</p>
+        </div>
+        
+        <div class="winner">
+            <h2>🎉 Winner: {{.Winner}}</h2>
+        </div>
+        
+        <div class="score-board">
+            <div class="score">
+                <h4>{{.Player1Email}}</h4>
+                <p><strong>{{.Player1Score}}</strong> points</p>
+            </div>
+            <div class="score">
+                <h4>{{.Player2Email}}</h4>
+                <p><strong>{{.Player2Score}}</strong> points</p>
+            </div>
+        </div>
+        
+        <p>Thanks for playing Woodraska Cribbage!</p>
+        
+        <a href="{{.NewGameURL}}" class="button">Start New Game</a>
+        
+        <p>If you'd like to play again, click the button above to start a new game.</p>
+    </div>
+    
+    <div class="footer">
+        <p>This email was sent from WoodHome Cribbage Game System</p>
+        <p>Thanks for playing and come back soon!</p>
+    </div>
+</body>
+</html>
