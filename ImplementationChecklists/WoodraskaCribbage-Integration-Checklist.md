@@ -116,24 +116,24 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
 
 ## Phase 2.5: Main API Project Requirements (Week 2.5)
 
-### 🔄 2.5.1 Main API Project Setup
-- [ ] **CRITICAL**: Implement cribbage endpoints in main WoodHome API project
-- [ ] Add cribbage database schema to main API project
-- [ ] Create cribbage models in main API project
-- [ ] Implement cribbage business logic in main API project
+### ✅ 2.5.1 Main API Project Setup
+- [x] **CRITICAL**: Implement cribbage endpoints in main WoodHome API project
+- [x] Add cribbage database schema to main API project
+- [x] Create cribbage models in main API project
+- [x] Implement cribbage business logic in main API project
 
-### 🔄 2.5.2 Required API Endpoints in Main Project
-- [ ] `POST /api/cribbage/create` - Create new cribbage game
-- [ ] `POST /api/cribbage/join` - Join existing cribbage game  
-- [ ] `POST /api/cribbage/play` - Play card or make move
-- [ ] `GET /api/cribbage/state` - Get current game state
-- [ ] `GET /api/cribbage/updates` - Server-Sent Events for real-time updates
+### ✅ 2.5.2 Required API Endpoints in Main Project
+- [x] `POST /api/cribbage/create` - Create new cribbage game
+- [x] `POST /api/cribbage/join` - Join existing cribbage game  
+- [x] `POST /api/cribbage/play` - Play card or make move
+- [x] `GET /api/cribbage/state` - Get current game state
+- [x] `GET /api/cribbage/updates` - Server-Sent Events for real-time updates
 
-### 🔄 2.5.3 Database Integration in Main API
-- [ ] Add cribbage tables to main database (PostgreSQL/MySQL)
-- [ ] Implement cribbage data models in main API
-- [ ] Add cribbage business logic and game rules
-- [ ] Implement real-time updates via SSE/WebSocket
+### ✅ 2.5.3 Database Integration in Main API
+- [x] Add cribbage tables to main database (SQL Server)
+- [x] Implement cribbage data models in main API
+- [x] Add cribbage business logic and game rules
+- [x] Implement real-time updates via SSE/WebSocket
 
 ---
 

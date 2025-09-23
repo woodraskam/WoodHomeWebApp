@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"html/template"
@@ -13,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	_ "github.com/microsoft/go-mssqldb"
 )
 
 type APIResponse struct {
@@ -24,6 +26,42 @@ type APIResponse struct {
 type WoodHomeConfig struct {
 	APIBaseURL string
 	Port       string
+}
+
+// Database connection
+var db *sql.DB
+
+// Cribbage game management
+type CribbageGameManager struct {
+	db *sql.DB
+}
+
+// Card structure for cribbage
+type Card struct {
+	ID        string `json:"id"`
+	Suit      string `json:"suit"`
+	Value     string `json:"value"`
+	PlayValue int    `json:"playValue"`
+}
+
+// Game state for cribbage
+type CribbageGameState struct {
+	GameID        string    `json:"gameId"`
+	Player1Email  string    `json:"player1Email"`
+	Player2Email  string    `json:"player2Email"`
+	Status        string    `json:"status"`
+	Player1Score  int       `json:"player1Score"`
+	Player2Score  int       `json:"player2Score"`
+	CurrentPhase  string    `json:"currentPhase"`
+	CurrentPlayer string    `json:"currentPlayer"`
+	Player1Hand   []Card    `json:"player1Hand"`
+	Player2Hand   []Card    `json:"player2Hand"`
+	Crib          []Card    `json:"crib"`
+	PlayedCards   []Card    `json:"playedCards"`
+	CurrentTotal  int       `json:"currentTotal"`
+	CutCard       Card      `json:"cutCard"`
+	CreatedAt     time.Time `json:"createdAt"`
+	UpdatedAt     time.Time `json:"updatedAt"`
 }
 
 // Cribbage API client
@@ -73,18 +111,202 @@ type GameUpdate struct {
 }
 
 var config WoodHomeConfig
-var cribbageAPI *CribbageAPIClient
+var cribbageManager *CribbageGameManager
+
+// Initialize database
+func initDatabase() error {
+	var err error
+
+	// SQL Server connection string with trusted connection
+	// You can customize these values via environment variables
+	server := getEnv("DB_SERVER", "localhost")
+	port := getEnv("DB_PORT", "1433")
+	database := getEnv("DB_NAME", "WoodHome")
+	useTrustedConnection := getEnv("DB_TRUSTED_CONNECTION", "true")
+
+	connStr := fmt.Sprintf("server=%s;port=%s;database=%s;trusted_connection=%s;encrypt=disable;trustservercertificate=true",
+		server, port, database, useTrustedConnection)
+
+	db, err = sql.Open("sqlserver", connStr)
+	if err != nil {
+		return err
+	}
+
+	// Test connection
+	if err = db.Ping(); err != nil {
+		return err
+	}
+
+	// Create cribbage tables
+	_, err = db.Exec(`
+		IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='cribbage_games' AND xtype='U')
+		CREATE TABLE cribbage_games (
+			id NVARCHAR(255) PRIMARY KEY,
+			player1_email NVARCHAR(255) NOT NULL,
+			player2_email NVARCHAR(255),
+			status NVARCHAR(50) NOT NULL DEFAULT 'waiting',
+			player1_score INT DEFAULT 0,
+			player2_score INT DEFAULT 0,
+			current_phase NVARCHAR(50) DEFAULT 'waiting',
+			current_player NVARCHAR(255),
+			game_data NTEXT,
+			created_at DATETIME2 DEFAULT GETDATE(),
+			updated_at DATETIME2 DEFAULT GETDATE()
+		);
+
+		IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='cribbage_game_tokens' AND xtype='U')
+		CREATE TABLE cribbage_game_tokens (
+			token NVARCHAR(255) PRIMARY KEY,
+			game_id NVARCHAR(255) NOT NULL,
+			user_email NVARCHAR(255) NOT NULL,
+			expires_at DATETIME2 NOT NULL,
+			created_at DATETIME2 DEFAULT GETDATE(),
+			FOREIGN KEY (game_id) REFERENCES cribbage_games (id) ON DELETE CASCADE
+		);
+
+		IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='cribbage_game_moves' AND xtype='U')
+		CREATE TABLE cribbage_game_moves (
+			id INT IDENTITY(1,1) PRIMARY KEY,
+			game_id NVARCHAR(255) NOT NULL,
+			player_email NVARCHAR(255) NOT NULL,
+			move_type NVARCHAR(50) NOT NULL,
+			move_data NTEXT,
+			created_at DATETIME2 DEFAULT GETDATE(),
+			FOREIGN KEY (game_id) REFERENCES cribbage_games (id) ON DELETE CASCADE
+		);
+	`)
+
+	return err
+}
+
+// Cribbage game manager methods
+func (c *CribbageGameManager) CreateGame(player1Email string) (*Game, error) {
+	gameID := generateGameID()
+	now := time.Now()
+
+	_, err := c.db.Exec(`
+		INSERT INTO cribbage_games (id, player1_email, status, current_phase, created_at, updated_at)
+		VALUES (?, ?, 'waiting', 'waiting', ?, ?)
+	`, gameID, player1Email, now, now)
+
+	if err != nil {
+		return nil, err
+	}
+
+	game := &Game{
+		ID:           gameID,
+		Player1Email: player1Email,
+		Status:       "waiting",
+		CurrentPhase: "waiting",
+		CreatedAt:    now,
+		UpdatedAt:    now,
+	}
+
+	return game, nil
+}
+
+func (c *CribbageGameManager) JoinGame(gameID, player2Email string) error {
+	_, err := c.db.Exec(`
+		UPDATE cribbage_games 
+		SET player2_email = ?, status = 'active', current_phase = 'deal', updated_at = ?
+		WHERE id = ? AND player2_email IS NULL
+	`, player2Email, time.Now(), gameID)
+
+	return err
+}
+
+func (c *CribbageGameManager) GetGame(gameID string) (*Game, error) {
+	var game Game
+	err := c.db.QueryRow(`
+		SELECT id, player1_email, player2_email, status, player1_score, player2_score,
+		       current_phase, current_player, game_data, created_at, updated_at
+		FROM cribbage_games WHERE id = ?
+	`, gameID).Scan(
+		&game.ID, &game.Player1Email, &game.Player2Email, &game.Status,
+		&game.Player1Score, &game.Player2Score, &game.CurrentPhase,
+		&game.CurrentPlayer, &game.GameData, &game.CreatedAt, &game.UpdatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &game, nil
+}
+
+func (c *CribbageGameManager) UpdateGameState(gameID string, updates map[string]interface{}) error {
+	// Build dynamic update query
+	setParts := []string{}
+	args := []interface{}{}
+
+	for key, value := range updates {
+		setParts = append(setParts, fmt.Sprintf("%s = ?", key))
+		args = append(args, value)
+	}
+
+	args = append(args, time.Now(), gameID)
+	query := fmt.Sprintf("UPDATE cribbage_games SET %s, updated_at = ? WHERE id = ?", strings.Join(setParts, ", "))
+
+	_, err := c.db.Exec(query, args...)
+	return err
+}
+
+func (c *CribbageGameManager) CreateToken(gameID, userEmail string) (string, error) {
+	token := generateToken()
+	expiresAt := time.Now().Add(24 * time.Hour)
+
+	_, err := c.db.Exec(`
+		INSERT INTO cribbage_game_tokens (token, game_id, user_email, expires_at)
+		VALUES (?, ?, ?, ?)
+	`, token, gameID, userEmail, expiresAt)
+
+	if err != nil {
+		return "", err
+	}
+
+	return token, nil
+}
+
+func (c *CribbageGameManager) ValidateToken(token string) (*GameToken, error) {
+	var gameToken GameToken
+	err := c.db.QueryRow(`
+		SELECT token, game_id, user_email, expires_at, created_at
+		FROM cribbage_game_tokens WHERE token = ? AND expires_at > ?
+	`, token, time.Now()).Scan(
+		&gameToken.Token, &gameToken.GameID, &gameToken.UserEmail,
+		&gameToken.ExpiresAt, &gameToken.CreatedAt,
+	)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &gameToken, nil
+}
+
+// Utility functions
+func generateGameID() string {
+	return fmt.Sprintf("game_%d", time.Now().UnixNano())
+}
+
+func generateToken() string {
+	return fmt.Sprintf("token_%d", time.Now().UnixNano())
+}
 
 func main() {
+	// Initialize database
+	err := initDatabase()
+	if err != nil {
+		log.Fatal("Failed to initialize database:", err)
+	}
+
+	// Initialize cribbage game manager
+	cribbageManager = &CribbageGameManager{db: db}
 	// Configuration
 	config.APIBaseURL = getEnv("WOODHOME_API_URL", "http://localhost:8080")
 	config.Port = getEnv("PORT", "3000")
 
-	// Initialize API client
-	cribbageAPI = &CribbageAPIClient{
-		baseURL: config.APIBaseURL,
-		client:  &http.Client{Timeout: 30 * time.Second},
-	}
+	// cribbageManager is already initialized in initDatabase()
 
 	// Setup routes using standard http package for testing
 	// Register specific routes first (most specific to least specific)
@@ -453,7 +675,7 @@ func cribbageBoardHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get game data
-	game, err := cribbageAPI.GetGame(gameID)
+	game, err := cribbageManager.GetGame(gameID)
 	if err != nil {
 		http.Error(w, "Game not found", http.StatusNotFound)
 		return
@@ -532,7 +754,7 @@ func cribbagePlayerHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get game data
-	game, err := cribbageAPI.GetGame(gameID)
+	game, err := cribbageManager.GetGame(gameID)
 	if err != nil {
 		http.Error(w, "Game not found", http.StatusNotFound)
 		return
@@ -612,13 +834,13 @@ func createGameHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	game, err := cribbageAPI.CreateGame(request.PlayerEmail)
+	game, err := cribbageManager.CreateGame(request.PlayerEmail)
 	if err != nil {
 		http.Error(w, "Failed to create game", http.StatusInternalServerError)
 		return
 	}
 
-	token, err := cribbageAPI.CreateToken(game.ID, request.PlayerEmail)
+	token, err := cribbageManager.CreateToken(game.ID, request.PlayerEmail)
 	if err != nil {
 		http.Error(w, "Failed to create token", http.StatusInternalServerError)
 		return
@@ -659,13 +881,13 @@ func joinGameHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := cribbageAPI.JoinGame(request.GameID, request.PlayerEmail)
+	err := cribbageManager.JoinGame(request.GameID, request.PlayerEmail)
 	if err != nil {
 		http.Error(w, "Failed to join game: "+err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	token, err := cribbageAPI.CreateToken(request.GameID, request.PlayerEmail)
+	token, err := cribbageManager.CreateToken(request.GameID, request.PlayerEmail)
 	if err != nil {
 		http.Error(w, "Failed to create token", http.StatusInternalServerError)
 		return
@@ -711,7 +933,7 @@ func playCardHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Get game to validate
-	game, err := cribbageAPI.GetGame(request.GameID)
+	game, err := cribbageManager.GetGame(request.GameID)
 	if err != nil {
 		http.Error(w, "Game not found", http.StatusNotFound)
 		return
@@ -768,7 +990,7 @@ func gameStateHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	game, err := cribbageAPI.GetGame(gameID)
+	game, err := cribbageManager.GetGame(gameID)
 	if err != nil {
 		http.Error(w, "Game not found", http.StatusNotFound)
 		return
@@ -817,15 +1039,6 @@ func gameUpdatesHandler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-}
-
-// Utility functions
-func generateGameID() string {
-	return fmt.Sprintf("game_%d", time.Now().UnixNano())
-}
-
-func generateToken() string {
-	return fmt.Sprintf("token_%d", time.Now().UnixNano())
 }
 
 func getStatusMessage(game *Game, playerEmail string) string {
