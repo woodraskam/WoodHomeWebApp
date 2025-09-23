@@ -38,12 +38,12 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
 ## Phase 2: Backend Integration (Week 2)
 
 ### ✅ 2.1 Database Layer Setup
-- [ ] Add SQLite dependency to `go.mod`:
+- [x] Add SQLite dependency to `go.mod`:
   ```bash
   go get github.com/mattn/go-sqlite3
   ```
-- [ ] Create database schema file: `database/cribbage_schema.sql`
-- [ ] Create database models in `main.go`:
+- [x] Create database schema file: `database/cribbage_schema.sql`
+- [x] Create database models in `main.go`:
   ```go
   type CribbageDB struct {
       db *sql.DB
@@ -69,15 +69,15 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
   ```
 
 ### ✅ 2.2 Database Operations Implementation
-- [ ] Implement `CreateGame(player1Email string) (*Game, error)`
-- [ ] Implement `JoinGame(gameID, player2Email string) error`
-- [ ] Implement `GetGame(gameID string) (*Game, error)`
-- [ ] Implement `CreateToken(gameID, userEmail string) (string, error)`
-- [ ] Implement `ValidateToken(token string) (*GameToken, error)`
-- [ ] Implement `UpdateGameState(gameID string, updates map[string]interface{}) error`
+- [x] Implement `CreateGame(player1Email string) (*Game, error)`
+- [x] Implement `JoinGame(gameID, player2Email string) error`
+- [x] Implement `GetGame(gameID string) (*Game, error)`
+- [x] Implement `CreateToken(gameID, userEmail string) (string, error)`
+- [x] Implement `ValidateToken(token string) (*GameToken, error)`
+- [x] Implement `UpdateGameState(gameID string, updates map[string]interface{}) error`
 
 ### ✅ 2.3 Route Registration in main.go
-- [ ] Add cribbage routes to `main.go` (most specific first):
+- [x] Add cribbage routes to `main.go` (most specific first):
   ```go
   // Cribbage routes
   http.HandleFunc("/play/WoodraskaCribbage/board/", cribbageBoardHandler)
@@ -87,15 +87,15 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
   ```
 
 ### ✅ 2.4 Handler Implementation
-- [ ] Implement `cribbageHomeHandler(w http.ResponseWriter, r *http.Request)`
-- [ ] Implement `cribbageBoardHandler(w http.ResponseWriter, r *http.Request)`
-- [ ] Implement `cribbagePlayerHandler(w http.ResponseWriter, r *http.Request)`
-- [ ] Add error handling and logging to all handlers
-- [ ] Add template parsing with error handling
-- [ ] Add data preparation for templates
+- [x] Implement `cribbageHomeHandler(w http.ResponseWriter, r *http.Request)`
+- [x] Implement `cribbageBoardHandler(w http.ResponseWriter, r *http.Request)`
+- [x] Implement `cribbagePlayerHandler(w http.ResponseWriter, r *http.Request)`
+- [x] Add error handling and logging to all handlers
+- [x] Add template parsing with error handling
+- [x] Add data preparation for templates
 
 ### ✅ 2.5 API Endpoints
-- [ ] Add API routes to `main.go`:
+- [x] Add API routes to `main.go`:
   ```go
   http.HandleFunc("/api/cribbage/create", createGameHandler)
   http.HandleFunc("/api/cribbage/join", joinGameHandler)
@@ -103,11 +103,11 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
   http.HandleFunc("/api/cribbage/state", gameStateHandler)
   http.HandleFunc("/api/cribbage/updates", gameUpdatesHandler)
   ```
-- [ ] Implement `createGameHandler(w http.ResponseWriter, r *http.Request)`
-- [ ] Implement `joinGameHandler(w http.ResponseWriter, r *http.Request)`
-- [ ] Implement `playCardHandler(w http.ResponseWriter, r *http.Request)`
-- [ ] Implement `gameStateHandler(w http.ResponseWriter, r *http.Request)`
-- [ ] Implement `gameUpdatesHandler(w http.ResponseWriter, r *http.Request)`
+- [x] Implement `createGameHandler(w http.ResponseWriter, r *http.Request)`
+- [x] Implement `joinGameHandler(w http.ResponseWriter, r *http.Request)`
+- [x] Implement `playCardHandler(w http.ResponseWriter, r *http.Request)`
+- [x] Implement `gameStateHandler(w http.ResponseWriter, r *http.Request)`
+- [x] Implement `gameUpdatesHandler(w http.ResponseWriter, r *http.Request)`
 
 ---
 
