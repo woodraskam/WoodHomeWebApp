@@ -35,20 +35,19 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
 
 ---
 
-## Phase 2: Backend Integration (Week 2)
+## Phase 2: API Integration (Week 2)
 
-### ✅ 2.1 Database Layer Setup
-- [x] Add SQLite dependency to `go.mod`:
-  ```bash
-  go get github.com/mattn/go-sqlite3
-  ```
-- [x] Create database schema file: `database/cribbage_schema.sql`
-- [x] Create database models in `main.go`:
+### ✅ 2.1 API Client Setup
+- [x] Remove SQLite dependency from `go.mod`
+- [x] Create API client struct in `main.go`:
   ```go
-  type CribbageDB struct {
-      db *sql.DB
+  type CribbageAPIClient struct {
+      baseURL string
+      client  *http.Client
   }
-  
+  ```
+- [x] Create data models for API communication:
+  ```go
   type Game struct {
       ID            string    `json:"id"`
       Player1Email  string    `json:"player1_email"`
@@ -57,7 +56,10 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
       Player1Score  int       `json:"player1_score"`
       Player2Score  int       `json:"player2_score"`
       CurrentPhase  string    `json:"current_phase"`
+      CurrentPlayer string    `json:"current_player"`
+      GameData      string    `json:"game_data"`
       CreatedAt     time.Time `json:"created_at"`
+      UpdatedAt     time.Time `json:"updated_at"`
   }
   
   type GameToken struct {
@@ -65,16 +67,17 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
       GameID    string    `json:"game_id"`
       UserEmail string    `json:"user_email"`
       ExpiresAt time.Time `json:"expires_at"`
+      CreatedAt time.Time `json:"created_at"`
   }
   ```
 
-### ✅ 2.2 Database Operations Implementation
-- [x] Implement `CreateGame(player1Email string) (*Game, error)`
-- [x] Implement `JoinGame(gameID, player2Email string) error`
-- [x] Implement `GetGame(gameID string) (*Game, error)`
-- [x] Implement `CreateToken(gameID, userEmail string) (string, error)`
-- [x] Implement `ValidateToken(token string) (*GameToken, error)`
-- [x] Implement `UpdateGameState(gameID string, updates map[string]interface{}) error`
+### ✅ 2.2 API Client Operations Implementation
+- [x] Implement `CreateGame(player1Email string) (*Game, error)` - HTTP POST to `/api/cribbage/create`
+- [x] Implement `JoinGame(gameID, player2Email string) error` - HTTP POST to `/api/cribbage/join`
+- [x] Implement `GetGame(gameID string) (*Game, error)` - HTTP GET to `/api/cribbage/state`
+- [x] Implement `CreateToken(gameID, userEmail string) (string, error)` - Token generation
+- [x] Implement `ValidateToken(token string) (*GameToken, error)` - Token validation
+- [x] Implement `UpdateGameState(gameID string, updates map[string]interface{}) error` - Game state updates
 
 ### ✅ 2.3 Route Registration in main.go
 - [x] Add cribbage routes to `main.go` (most specific first):
@@ -94,8 +97,8 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
 - [x] Add template parsing with error handling
 - [x] Add data preparation for templates
 
-### ✅ 2.5 API Endpoints
-- [x] Add API routes to `main.go`:
+### ✅ 2.5 API Proxy Endpoints
+- [x] Add API proxy routes to `main.go`:
   ```go
   http.HandleFunc("/api/cribbage/create", createGameHandler)
   http.HandleFunc("/api/cribbage/join", joinGameHandler)
@@ -103,11 +106,34 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
   http.HandleFunc("/api/cribbage/state", gameStateHandler)
   http.HandleFunc("/api/cribbage/updates", gameUpdatesHandler)
   ```
-- [x] Implement `createGameHandler(w http.ResponseWriter, r *http.Request)`
-- [x] Implement `joinGameHandler(w http.ResponseWriter, r *http.Request)`
-- [x] Implement `playCardHandler(w http.ResponseWriter, r *http.Request)`
-- [x] Implement `gameStateHandler(w http.ResponseWriter, r *http.Request)`
-- [x] Implement `gameUpdatesHandler(w http.ResponseWriter, r *http.Request)`
+- [x] Implement `createGameHandler(w http.ResponseWriter, r *http.Request)` - Proxies to main API
+- [x] Implement `joinGameHandler(w http.ResponseWriter, r *http.Request)` - Proxies to main API
+- [x] Implement `playCardHandler(w http.ResponseWriter, r *http.Request)` - Proxies to main API
+- [x] Implement `gameStateHandler(w http.ResponseWriter, r *http.Request)` - Proxies to main API
+- [x] Implement `gameUpdatesHandler(w http.ResponseWriter, r *http.Request)` - Proxies to main API
+
+---
+
+## Phase 2.5: Main API Project Requirements (Week 2.5)
+
+### 🔄 2.5.1 Main API Project Setup
+- [ ] **CRITICAL**: Implement cribbage endpoints in main WoodHome API project
+- [ ] Add cribbage database schema to main API project
+- [ ] Create cribbage models in main API project
+- [ ] Implement cribbage business logic in main API project
+
+### 🔄 2.5.2 Required API Endpoints in Main Project
+- [ ] `POST /api/cribbage/create` - Create new cribbage game
+- [ ] `POST /api/cribbage/join` - Join existing cribbage game  
+- [ ] `POST /api/cribbage/play` - Play card or make move
+- [ ] `GET /api/cribbage/state` - Get current game state
+- [ ] `GET /api/cribbage/updates` - Server-Sent Events for real-time updates
+
+### 🔄 2.5.3 Database Integration in Main API
+- [ ] Add cribbage tables to main database (PostgreSQL/MySQL)
+- [ ] Implement cribbage data models in main API
+- [ ] Add cribbage business logic and game rules
+- [ ] Implement real-time updates via SSE/WebSocket
 
 ---
 
@@ -403,32 +429,35 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
 ## Implementation Notes
 
 ### Key Integration Points
-1. **Route Registration**: Add cribbage routes following existing pattern
-2. **Template System**: Use existing Go template system
-3. **Static Assets**: Follow existing static file organization
-4. **Material Design**: Integrate with existing Material Design 3 theme
-5. **HTMX Integration**: Use existing HTMX patterns for dynamic updates
-6. **Error Handling**: Follow existing error handling patterns
+1. **API Architecture**: WebApp calls main API project for all cribbage operations
+2. **Route Registration**: Add cribbage routes following existing pattern
+3. **Template System**: Use existing Go template system
+4. **Static Assets**: Follow existing static file organization
+5. **Material Design**: Integrate with existing Material Design 3 theme
+6. **HTMX Integration**: Use existing HTMX patterns for dynamic updates
+7. **Error Handling**: Follow existing error handling patterns
 
-### Database Considerations
-- SQLite for local development and testing
-- Consider PostgreSQL for production
-- Implement proper connection pooling
-- Add database migration scripts
+### API Architecture Considerations
+- **WebApp Role**: Pure frontend client calling main API
+- **Main API Role**: Handles all cribbage business logic and data persistence
+- **Separation of Concerns**: Clean separation between frontend and backend
+- **Scalability**: Multiple WebApp instances can share same API backend
+- **Consistency**: Follows existing WoodHome architecture patterns
 
 ### Security Considerations
-- Validate all user inputs
-- Sanitize email addresses
-- Implement rate limiting for API endpoints
-- Secure token generation and validation
+- Validate all user inputs in main API
+- Sanitize email addresses in main API
+- Implement rate limiting for API endpoints in main API
+- Secure token generation and validation in main API
 - Add CSRF protection for forms
+- Use existing authentication/authorization from main API
 
 ### Performance Considerations
-- Implement connection pooling for database
-- Add caching for frequently accessed data
-- Optimize SSE connections
-- Implement proper cleanup for disconnected clients
-- Add database indexing for performance
+- **API Client**: Efficient HTTP client with connection pooling
+- **Caching**: Implement caching in main API for frequently accessed data
+- **SSE Connections**: Optimize Server-Sent Events in main API
+- **Database**: Use main API's existing database infrastructure
+- **Load Balancing**: Multiple WebApp instances can share API load
 
 ### Mobile Optimization
 - Touch-friendly card interfaces
@@ -436,6 +465,159 @@ This checklist provides step-by-step instructions for integrating the Woodraska 
 - Optimize for mobile data usage
 - Implement offline capabilities where possible
 - Test on various mobile devices
+
+---
+
+## API Requirements Documentation
+
+### Required Endpoints in Main WoodHome API Project
+
+#### 1. Create Game
+```
+POST /api/cribbage/create
+Content-Type: application/json
+
+Request:
+{
+  "playerEmail": "player1@example.com"
+}
+
+Response:
+{
+  "status": "success",
+  "message": "Game created successfully",
+  "data": {
+    "gameId": "game_1234567890",
+    "playerEmail": "player1@example.com",
+    "token": "token_1234567890"
+  }
+}
+```
+
+#### 2. Join Game
+```
+POST /api/cribbage/join
+Content-Type: application/json
+
+Request:
+{
+  "gameId": "game_1234567890",
+  "playerEmail": "player2@example.com"
+}
+
+Response:
+{
+  "status": "success",
+  "message": "Joined game successfully",
+  "data": {
+    "gameId": "game_1234567890",
+    "playerEmail": "player2@example.com",
+    "token": "token_1234567890"
+  }
+}
+```
+
+#### 3. Play Card/Make Move
+```
+POST /api/cribbage/play
+Content-Type: application/json
+
+Request:
+{
+  "gameId": "game_1234567890",
+  "playerEmail": "player1@example.com",
+  "cardId": "card_123", // for play action
+  "cardIds": ["card_123", "card_456"], // for discard action
+  "action": "play|discard|count|go"
+}
+
+Response:
+{
+  "status": "success",
+  "message": "Move processed successfully",
+  "data": {
+    "gameId": "game_1234567890",
+    "action": "play",
+    "gameState": { ... }
+  }
+}
+```
+
+#### 4. Get Game State
+```
+GET /api/cribbage/state?gameId=game_1234567890&playerEmail=player1@example.com
+
+Response:
+{
+  "status": "success",
+  "message": "Game state retrieved",
+  "data": {
+    "id": "game_1234567890",
+    "player1_email": "player1@example.com",
+    "player2_email": "player2@example.com",
+    "status": "active",
+    "player1_score": 15,
+    "player2_score": 12,
+    "current_phase": "play",
+    "current_player": "player1@example.com",
+    "game_data": "{ ... }",
+    "created_at": "2024-01-01T00:00:00Z",
+    "updated_at": "2024-01-01T00:05:00Z"
+  }
+}
+```
+
+#### 5. Real-time Updates (SSE)
+```
+GET /api/cribbage/updates?gameId=game_1234567890&playerEmail=player1@example.com
+
+Response: Server-Sent Events stream
+data: {"type":"connected","message":"Connected to game updates"}
+
+data: {"type":"heartbeat","timestamp":1704067200}
+
+data: {"type":"game_update","payload":{"gameId":"game_1234567890","updateType":"card_played","data":{...}}}
+```
+
+### Database Schema Requirements for Main API
+
+```sql
+-- Games table
+CREATE TABLE cribbage_games (
+    id VARCHAR(255) PRIMARY KEY,
+    player1_email VARCHAR(255) NOT NULL,
+    player2_email VARCHAR(255),
+    status VARCHAR(50) NOT NULL DEFAULT 'waiting',
+    player1_score INT DEFAULT 0,
+    player2_score INT DEFAULT 0,
+    current_phase VARCHAR(50) DEFAULT 'waiting',
+    current_player VARCHAR(255),
+    game_data TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Game tokens table
+CREATE TABLE cribbage_game_tokens (
+    token VARCHAR(255) PRIMARY KEY,
+    game_id VARCHAR(255) NOT NULL,
+    user_email VARCHAR(255) NOT NULL,
+    expires_at TIMESTAMP NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (game_id) REFERENCES cribbage_games(id) ON DELETE CASCADE
+);
+
+-- Game moves table
+CREATE TABLE cribbage_game_moves (
+    id SERIAL PRIMARY KEY,
+    game_id VARCHAR(255) NOT NULL,
+    player_email VARCHAR(255) NOT NULL,
+    move_type VARCHAR(50) NOT NULL,
+    move_data TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (game_id) REFERENCES cribbage_games(id) ON DELETE CASCADE
+);
+```
 
 ---
 
