@@ -1,0 +1,654 @@
+/* Candyland Adventure - Responsive Design */
+
+/* Mobile-friendly touch events and responsive breakpoints */
+
+/* Large screens (desktops) */
+@media (min-width: 1200px) {
+    .game-title {
+        font-size: 6rem;
+    }
+    
+    .board-path {
+        max-width: 1400px;
+    }
+    
+    .square {
+        width: 50px;
+        height: 50px;
+        font-size: 2rem;
+    }
+    
+    .game-piece {
+        width: 70px;
+        height: 70px;
+        font-size: 2.5rem;
+    }
+}
+
+/* Medium screens (tablets) */
+@media (max-width: 1024px) {
+    .game-title {
+        font-size: 4rem;
+    }
+    
+    .start-screen {
+        padding: 30px;
+    }
+    
+    .player-buttons {
+        gap: 15px;
+    }
+    
+    .player-btn {
+        padding: 15px 25px;
+        font-size: 1.3rem;
+    }
+    
+    .game-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .control-buttons {
+        justify-content: center;
+    }
+    
+    .board-path {
+        padding: 15px;
+    }
+    
+    .square {
+        width: 42px;
+        height: 42px;
+        font-size: 1.6rem;
+    }
+    
+    .game-piece {
+        width: 55px;
+        height: 55px;
+        font-size: 1.8rem;
+    }
+}
+
+/* Small screens (mobile phones) */
+@media (max-width: 768px) {
+    #game-container {
+        padding: 10px;
+    }
+    
+    .game-title {
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+    }
+    
+    .start-screen {
+        padding: 20px;
+        margin-bottom: 20px;
+    }
+    
+    .welcome-title {
+        font-size: 1.8rem;
+    }
+    
+    .player-count {
+        font-size: 1.5rem;
+    }
+    
+    .player-buttons {
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+    }
+    
+    .player-btn {
+        padding: 12px 20px;
+        font-size: 1.1rem;
+    }
+    
+    .start-btn {
+        font-size: 1.8rem;
+        padding: 20px 30px;
+    }
+    
+    .game-board {
+        padding: 15px;
+    }
+    
+    /* Master scorecard responsive */
+    .master-scorecard {
+        padding: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .scorecard-title {
+        font-size: 1.2rem;
+        margin-bottom: 10px;
+    }
+    
+    .progress-timeline {
+        height: 140px; /* Height for 3 rows on mobile */
+        padding: 10px;
+        grid-template-columns: repeat(45, 1fr);
+        grid-template-rows: repeat(3, 1fr);
+        row-gap: 8px; /* Gap between rows on mobile */
+    }
+    
+    /* Adjust connectors for mobile */
+    .progress-timeline::before {
+        right: 8px;
+        top: 30px; /* Adjusted for mobile height */
+        width: 15px;
+        height: 12px;
+    }
+    
+    .progress-timeline::after {
+        left: 8px;
+        top: 70px; /* Adjusted for mobile height */
+        width: 15px;
+        height: 12px;
+    }
+    
+    .timeline-segment {
+        height: 30px;
+        font-size: 0.5rem;
+    }
+    
+    .player-marker {
+        width: 16px;
+        height: 16px;
+        font-size: 0.7rem;
+    }
+    
+    /* Swim lanes responsive */
+    .swim-lanes-container {
+        gap: 10px;
+        margin: 15px 0;
+    }
+    
+    .swim-lane {
+        padding: 10px;
+        flex: 1; /* Fill remaining space on mobile too */
+        min-height: 80px;
+        display: none; /* Maintain single lane behavior on mobile */
+        opacity: 0;
+    }
+    
+    .swim-lane.active {
+        display: block;
+        opacity: 1;
+    }
+    
+    .lane-header {
+        margin-bottom: 6px;
+    }
+    
+    .lane-player-name-bubble {
+        padding: 6px 12px;
+        font-size: 1rem;
+    }
+    
+    .lane-player-piece {
+        width: 25px;
+        height: 25px;
+        font-size: 1rem;
+    }
+    
+    .lane-player-name {
+        font-size: 1rem;
+    }
+    
+    .lane-progress {
+        font-size: 0.8rem;
+        padding: 3px 6px;
+    }
+    
+    .lane-game-piece {
+        width: 40px;
+        height: 40px;
+        font-size: 1.5rem;
+        left: 30px;
+    }
+    
+    /* Walking character responsive */
+    .walking-character {
+        width: 90px; /* Bigger on mobile */
+        height: calc(100% - 8px); /* Fill almost entire height on mobile */
+        font-size: 5rem; /* Bigger font on mobile */
+        left: 10px;
+        top: 4px;
+    }
+    
+    .walking-character .character-asset {
+        width: 100%;
+        height: 100%;
+    }
+    
+    /* Forest tiles responsive */
+    .path-tiles {
+        left: 110px; /* Space for bigger mobile character */
+        width: calc(100% - 120px);
+        padding: 0 3px;
+        bottom: 20px; /* Position for bigger tiles on mobile */
+    }
+    
+    .forest-tile {
+        width: calc((100% - 10px) / 11); /* Bigger tiles with minimal gaps on mobile - now 11 tiles */
+        min-width: 35px; /* Bigger minimum on mobile */
+        max-width: 50px; /* Bigger maximum on mobile */
+        height: 45px; /* Taller tiles on mobile */
+        font-size: 1rem;
+        transform: perspective(250px) rotateX(50deg); /* Flat sidewalk tiles on mobile */
+        margin: 0 0.5px; /* Minimal spacing on mobile */
+    }
+    
+    .forest-tile.current {
+        transform: perspective(200px) rotateX(50deg) scale(1.1); /* Mobile flat tiles with scale */
+    }
+    
+    /* Character assets responsive - removed max constraints for full sizing */
+    .character-asset {
+        /* No max-width or max-height constraints - let assets fill available space */
+    }
+    
+    .timeline-segment.character-square {
+        min-width: 12px;
+    }
+    
+    .timeline-segment.character-square .character-asset {
+        min-width: 12px;
+        min-height: 12px;
+    }
+    
+    .forest-tile .character-asset {
+        max-width: 20px;
+        max-height: 20px;
+    }
+    
+    /* Drawn card assets responsive */
+    .drawn-card .card-asset {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .current-player {
+        font-size: 1.3rem;
+    }
+    
+    .card-display {
+        padding: 15px;
+        min-width: 130px;
+    }
+    
+    .drawn-card {
+        font-size: 2.5rem;
+    }
+    
+    .card-text {
+        font-size: 1rem;
+    }
+    
+    .btn {
+        padding: 12px 16px;
+        font-size: 1rem;
+        min-width: 100px;
+    }
+    
+    .victory-content {
+        padding: 20px;
+        margin: 15px;
+    }
+    
+    .victory-title {
+        font-size: 2rem;
+    }
+    
+    .victory-message {
+        font-size: 1.2rem;
+    }
+    
+    /* Player Score Row Responsive */
+    .player-score-row {
+        padding: 8px 15px;
+        gap: 6px;
+    }
+    
+    .player-score-card {
+        padding: 6px 8px;
+        gap: 8px;
+    }
+    
+    .player-score-avatar {
+        width: 35px;
+        height: 35px;
+        font-size: 1.2rem;
+    }
+    
+    .player-score-name {
+        font-size: 0.8rem;
+        margin-bottom: 1px;
+    }
+    
+    .player-score-progress {
+        font-size: 0.6rem;
+        margin-bottom: 1px;
+    }
+    
+    .player-score-percentage {
+        font-size: 0.9rem;
+    }
+
+    .victory-player-avatar .victory-avatar {
+        width: 120px;
+        height: 120px;
+        font-size: 4rem;
+    }
+    
+    .victory-player-avatar .victory-avatar-image {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .floating-candy {
+        font-size: 2rem;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+    .game-title {
+        font-size: 2rem;
+    }
+    
+    .welcome-title {
+        font-size: 1.5rem;
+    }
+    
+    .player-buttons {
+        grid-template-columns: 1fr;
+    }
+    
+    .start-btn {
+        font-size: 1.5rem;
+        padding: 15px 25px;
+    }
+    
+    /* Single swim lane behavior on extra small screens */
+    .swim-lane {
+        display: none;
+        opacity: 0;
+        flex: 1; /* Fill space on extra small screens */
+        min-height: 70px;
+    }
+    
+    .swim-lane.active {
+        display: block;
+        opacity: 1;
+    }
+    
+    .lane-player-name-bubble {
+        padding: 4px 10px;
+        font-size: 0.9rem;
+    }
+    
+    /* Walking character extra small */
+    .walking-character {
+        width: 70px; /* Bigger on extra small */
+        height: calc(100% - 6px); /* Fill almost entire height */
+        font-size: 4rem; /* Bigger font */
+        left: 8px;
+        top: 3px;
+    }
+    
+    .walking-character .character-asset {
+        width: 100%;
+        height: 100%;
+    }
+    
+    /* Path tiles extra small */
+    .path-tiles {
+        left: 85px; /* Space for bigger character */
+        width: calc(100% - 95px);
+        bottom: 15px; /* Ground position for bigger tiles */
+    }
+    
+    .forest-tile {
+        transform: perspective(150px) rotateX(45deg); /* Flat sidewalk on extra small */
+    }
+    
+    .forest-tile.current {
+        transform: perspective(150px) rotateX(45deg) scale(1.1);
+    }
+    
+    .square {
+        width: 25px;
+        height: 25px;
+        font-size: 1rem;
+        min-width: 25px;
+        min-height: 25px;
+        border-radius: 6px;
+    }
+    
+    .game-piece {
+        width: 35px;
+        height: 35px;
+        font-size: 1.2rem;
+        border-width: 2px;
+    }
+    
+    .drawn-card {
+        font-size: 2.5rem;
+    }
+    
+    .victory-title {
+        font-size: 2rem;
+    }
+    
+    .victory-message {
+        font-size: 1.2rem;
+    }
+    
+    /* Player Score Row Responsive - Extra Small */
+    .player-score-row {
+        padding: 6px 10px;
+        gap: 4px;
+    }
+    
+    .player-score-card {
+        padding: 4px 6px;
+        gap: 6px;
+    }
+    
+    .player-score-avatar {
+        width: 30px;
+        height: 30px;
+        font-size: 1rem;
+    }
+    
+    .player-score-name {
+        font-size: 0.7rem;
+        margin-bottom: 1px;
+    }
+    
+    .player-score-progress {
+        font-size: 0.5rem;
+        margin-bottom: 1px;
+    }
+    
+    .player-score-percentage {
+        font-size: 0.8rem;
+    }
+
+    .victory-player-avatar .victory-avatar {
+        width: 100px;
+        height: 100px;
+        font-size: 3rem;
+    }
+    
+    .victory-player-avatar .victory-avatar-image {
+        width: 100px;
+        height: 100px;
+    }
+    
+    /* Forest tiles for extra small screens */
+    .path-tiles {
+        left: 60px; /* Even less space on very small screens */
+        width: calc(100% - 80px);
+        padding: 0 2px;
+    }
+    
+    .forest-tile {
+        width: calc((100% - 18px) / 11); /* Minimal gaps - now 11 tiles */
+        min-width: 20px;
+        max-width: 28px;
+        height: 25px;
+        font-size: 0.7rem;
+        border-width: 1px;
+    }
+    
+    /* Character assets for extra small screens - removed max constraints */
+    .character-asset {
+        /* No max-width or max-height constraints - let assets fill available space */
+    }
+    
+    .timeline-segment.character-square {
+        min-width: 10px;
+    }
+    
+    .timeline-segment.character-square .character-asset {
+        min-width: 10px;
+        min-height: 10px;
+    }
+    
+    /* Extra small connector adjustments */
+    .progress-timeline::before {
+        right: 6px;
+        top: 25px;
+        width: 12px;
+        height: 10px;
+        border-width: 2px;
+    }
+    
+    .progress-timeline::after {
+        left: 6px;
+        top: 55px;
+        width: 12px;
+        height: 10px;
+        border-width: 2px;
+    }
+    
+    .forest-tile .character-asset {
+        max-width: 15px;
+        max-height: 15px;
+    }
+    
+    /* Drawn card assets for extra small screens */
+    .drawn-card .card-asset {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* Touch-friendly interactions */
+@media (hover: none) and (pointer: coarse) {
+    .square:hover {
+        transform: none;
+        box-shadow: none;
+        filter: none;
+    }
+    
+    .player-btn:hover {
+        transform: none;
+        box-shadow: none;
+        filter: none;
+    }
+    
+    .btn:hover {
+        transform: none;
+        box-shadow: none;
+        filter: none;
+    }
+    
+    .start-btn:hover {
+        transform: none;
+        box-shadow: none;
+        filter: none;
+    }
+    
+    /* Add active states for touch */
+    .square:active {
+        transform: scale(1.1);
+        box-shadow: 0 0 15px rgba(255, 255, 255, 0.7);
+    }
+    
+    .player-btn:active {
+        transform: scale(1.05);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .btn:active {
+        transform: scale(1.05);
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    }
+    
+    .start-btn:active {
+        transform: scale(1.05);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .game-piece {
+        border-width: 3px;
+    }
+    
+    .square {
+        border-width: 2px;
+    }
+}
+
+/* Landscape orientation on mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .game-title {
+        font-size: 2rem;
+        margin-bottom: 10px;
+    }
+    
+    .start-screen {
+        padding: 15px;
+        margin-bottom: 15px;
+    }
+    
+    .game-board {
+        padding: 15px;
+    }
+    
+    .board-path {
+        margin: 15px auto;
+    }
+    
+    .game-controls {
+        margin: 15px 0;
+    }
+    
+    .player-info {
+        margin: 15px 0;
+    }
+}
+
+/* Accessibility - Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    .floating-candy {
+        animation: none;
+    }
+    
+    body {
+        animation: none;
+        background: var(--hot-pink);
+    }
+}

@@ -1,0 +1,6 @@
+tunnel: b13c235e-e013-447f-be6b-24da41bc0115
+credentials-file: C:\Users\markw\.cloudflared\b13c235e-e013-447f-be6b-24da41bc0115.json
+
+ingress:
+  # Route all traffic to your local web server
+  - service: http://localhost:3000

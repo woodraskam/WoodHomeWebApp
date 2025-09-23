@@ -1,0 +1,1259 @@
+/* Candyland Adventure - Main Styles */
+
+:root {
+    --hot-pink: #FF1493;
+    --electric-blue: #00BFFF;
+    --sunshine-yellow: #FFD700;
+    --lime-green: #32CD32;
+    --orange: #FF6347;
+    --purple: #9370DB;
+    --candy-red: #FF6B6B;
+    --candy-purple: #A8E6CF;
+    --candy-blue: #88D8C0;
+    --candy-yellow: #FFD93D;
+    --candy-orange: #FF8C42;
+    --candy-pink: #FFB6C1;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    background: linear-gradient(45deg, var(--hot-pink), var(--electric-blue), var(--sunshine-yellow), var(--lime-green));
+    background-size: 400% 400%;
+    animation: gradientShift 8s ease infinite;
+    min-height: 100vh;
+    overflow-x: auto;
+}
+
+#game-container {
+    position: relative;
+    z-index: 10;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+}
+
+.game-title {
+    font-size: 5rem;
+    color: white;
+    text-shadow:
+        4px 4px 0px var(--purple),
+        8px 8px 0px var(--hot-pink),
+        12px 12px 0px var(--electric-blue);
+    margin-bottom: 30px;
+    animation: bounce 2s ease-in-out infinite;
+    will-change: transform;
+}
+
+/* Start Screen */
+.start-screen {
+    text-align: center;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 50px;
+    border-radius: 30px;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+    margin-bottom: 30px;
+    border: 5px solid var(--sunshine-yellow);
+}
+
+.welcome-title {
+    font-size: 2.5rem;
+    color: var(--purple);
+    margin-bottom: 30px;
+    text-shadow: 2px 2px 0px white;
+}
+
+.player-selector {
+    margin: 30px 0;
+}
+
+.player-count {
+    font-size: 2rem;
+    margin: 20px;
+    color: var(--purple);
+    text-shadow: 2px 2px 0px white;
+}
+
+.player-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.player-btn {
+    padding: 20px 30px;
+    font-size: 1.5rem;
+    border: none;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    font-weight: bold;
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+    will-change: transform;
+}
+
+.player-btn:nth-child(1) {
+    background: var(--candy-red);
+    color: white;
+}
+
+.player-btn:nth-child(2) {
+    background: var(--electric-blue);
+    color: white;
+}
+
+.player-btn:nth-child(3) {
+    background: var(--lime-green);
+    color: white;
+}
+
+.player-btn:nth-child(4) {
+    background: var(--candy-yellow);
+    color: white;
+}
+
+.player-btn:hover {
+    transform: scale(1.15);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    filter: brightness(1.1);
+}
+
+.start-btn {
+    background: linear-gradient(45deg, var(--hot-pink), var(--electric-blue));
+    color: white;
+    font-size: 2.5rem;
+    padding: 25px 50px;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    font-weight: bold;
+    text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.4);
+    will-change: transform;
+}
+
+.start-btn:hover:not(:disabled) {
+    transform: scale(1.1);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+    filter: brightness(1.2);
+}
+
+.start-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Game Board */
+.game-board {
+    display: none;
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: 25px;
+    padding: 15px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+    width: 100vw;
+    height: 100vh;
+    max-width: 100vw;
+    max-height: 100vh;
+    border: 5px solid var(--sunshine-yellow);
+    overflow: hidden;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    flex-direction: column;
+}
+
+.game-board.show {
+    display: flex;
+}
+
+/* Game Content Layout (below timeline) */
+.game-content {
+    display: flex;
+    width: 100%;
+    flex: 1;
+    gap: 15px;
+    margin-top: 10px;
+    min-height: 0;
+    /* Allow flex children to shrink */
+}
+
+/* Left Control Panel */
+.left-control-panel {
+    width: 250px;
+    background: linear-gradient(135deg, var(--candy-purple), var(--candy-blue));
+    border-radius: 15px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    flex-shrink: 0;
+    min-height: 0;
+    overflow-y: auto;
+    height: fit-content;
+}
+
+.panel-title {
+    color: white;
+    font-size: 1.3rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+}
+
+/* Right Game Area */
+.right-game-area {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    min-height: 0;
+    /* Allow flex children to shrink */
+}
+
+/* Master Progress Tracker - Full Width Top */
+.master-scorecard {
+    background: linear-gradient(45deg, var(--purple), var(--hot-pink));
+    border-radius: 15px;
+    padding: 15px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    flex-shrink: 0;
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.scorecard-title {
+    color: white;
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+}
+
+.progress-timeline {
+    display: grid;
+    grid-template-columns: repeat(45, 1fr);
+    /* Wider rows for 3-row layout */
+    grid-template-rows: repeat(3, 1fr);
+    /* 3 rows: right, left, right */
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 10px;
+    padding: 15px;
+    position: relative;
+    height: 160px;
+    /* Less height for 3 rows */
+    width: 100%;
+    gap: 3px;
+    row-gap: 10px;
+    /* More space between rows */
+}
+
+/* Path connectors between rows */
+.progress-timeline::before,
+.progress-timeline::after {
+    content: '';
+    position: absolute;
+    width: 20px;
+    height: 15px;
+    border: 3px solid rgba(255, 0, 0, 0.8);
+    border-top: none;
+    border-radius: 0 0 15px 15px;
+    z-index: 5;
+}
+
+/* Right connector: Row 1 to Row 2 */
+.progress-timeline::before {
+    right: -20px;
+    top: 46px;
+    transform: rotate(270deg);
+    width: 50px;
+}
+
+/* Left connector: Row 2 to Row 3 */
+.progress-timeline::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 44px;
+    border: 3px solid rgb(255 72 68);
+    border-left: none;
+    border-radius: 0 15px 15px 0;
+    transform: rotate(180deg);
+    left: 1px;
+}
+
+.timeline-segment {
+    width: 100%;
+    height: 100%;
+    border-radius: 6px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.6rem;
+    transition: all 0.3s ease;
+}
+
+/* First row (left to right) - positions 0-66 */
+.timeline-segment.row-1 {
+    grid-row: 1;
+}
+
+/* Second row (right to left) - positions 67-133 */
+.timeline-segment.row-2 {
+    grid-row: 2;
+}
+
+/* Curve connectors at the ends */
+.progress-timeline::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 12px;
+    height: 44px;
+    border: 3px solid rgb(255 72 68);
+    border-left: none;
+    border-radius: 0 15px 15px 0;
+    transform: rotate(180deg);
+    left: 1px;
+}
+
+/* Path direction indicators */
+.timeline-segment.row-1:first-child::before {
+    content: '→';
+    position: absolute;
+    right: -15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.timeline-segment.row-2:last-child::before {
+    content: '←';
+    position: absolute;
+    left: -15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.timeline-segment.milestone {
+    border: 2px solid white;
+    box-shadow: 0 0 5px rgba(255, 255, 255, 0.8);
+}
+
+.player-marker {
+    position: absolute;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    border: 2px solid white;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+/* Row-specific marker positioning */
+.player-marker.top-row {
+    /* Markers on top row */
+}
+
+.player-marker.bottom-row {
+    /* Markers on bottom row */
+}
+
+/* Timeline segments with player markers */
+.timeline-segment[class*="-marker"] {
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    transform: scale(1.1);
+    z-index: 5;
+}
+
+/* PNG Asset Images */
+.card-asset {
+    width: 80px;
+    height: 80px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+/* Larger card assets for drawn cards */
+.drawn-card .card-asset {
+    width: 100px;
+    height: 100px;
+    object-fit: contain;
+}
+
+.player-asset {
+    width: 30px;
+    height: 30px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.character-asset {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 50%;
+    /* Removed border and box-shadow for clean character appearance */
+}
+
+.lane-player-asset {
+    width: 25px;
+    height: 25px;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Remove background styling when PNG assets are present */
+.player-marker:has(.player-asset) {
+    background: transparent !important;
+    border: none;
+}
+
+.walking-character:has(.character-asset) {
+    background: transparent !important;
+    border: none;
+}
+
+.lane-player-piece:has(.lane-player-asset) {
+    background: transparent !important;
+    border: none;
+}
+
+/* Character assets on timeline and tiles */
+.character-asset {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 4px;
+}
+
+.timeline-segment.character-square {
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 14px;
+    border: none;
+    background: transparent !important;
+}
+
+.timeline-segment.character-square .character-asset {
+    width: 100%;
+    height: 100%;
+    min-width: 14px;
+    min-height: 14px;
+    object-fit: contain;
+    border-radius: 0;
+}
+
+.forest-tile.character-tile {
+    padding: 1px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid rgba(255, 255, 255, 0.9);
+    background: white !important;
+}
+
+.forest-tile .character-asset {
+    max-width: 25px;
+    max-height: 25px;
+}
+
+/* Swimming Lanes Layout */
+.swim-lanes-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    overflow-y: auto;
+    padding: 5px;
+}
+
+/* Forest Walking Lane */
+.swim-lane {
+    background: url('/static/games/CandyLand/assets/images/forest-bg.jpg') center/cover;
+    border-radius: 12px;
+    padding: 12px;
+    position: relative;
+    overflow: hidden;
+    flex: 1;
+    /* Fill remaining space */
+    min-height: 120px;
+    /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); */
+    border: 2px solid transparent;
+    transition: all 0.3s ease, opacity 0.4s ease-in-out;
+    display: none;
+    /* Hide all swim lanes by default */
+    opacity: 0;
+}
+
+.swim-lane.active {
+    display: block;
+    /* Show only the active swim lane */
+    opacity: 1;
+    /* Fade in the active swim lane */
+    border-color: var(--sunshine-yellow);
+    position: relative;
+}
+
+/* Forest Background - Removed overlay to show clean forest image */
+/* .swim-lane::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: 
+        radial-gradient(circle at 20% 20%, rgba(34, 139, 34, 0.3) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(46, 125, 50, 0.2) 0%, transparent 50%),
+        radial-gradient(circle at 40% 60%, rgba(27, 94, 32, 0.4) 0%, transparent 40%);
+    background-size: 100px 100px, 150px 150px, 80px 80px;
+    opacity: 0.6;
+    pointer-events: none;
+} */
+
+.lane-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 8px;
+    position: relative;
+    z-index: 5;
+}
+
+.lane-player-name-bubble {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 8px 16px;
+    border-radius: 20px;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: var(--text-primary);
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+/* Removed unused lane header styles - now using simplified name bubble only */
+
+/* Forest Path with Next 10 Tiles */
+.forest-path {
+    position: relative;
+    flex: 1;
+    /* Fill remaining space after header */
+    display: flex;
+    align-items: center;
+    z-index: 3;
+    height: calc(100% - 60px);
+}
+
+.path-tiles {
+    display: flex;
+    justify-content: space-between;
+    /* Pack tiles closer together */
+    align-items: center;
+    position: absolute;
+    left: 40px;
+    /* Space for much larger character */
+    right: 10px;
+    /* Smaller right margin */
+    bottom: 0;
+    /* Position for bigger tiles */
+    width: calc(100% - 40px);
+    /* Space adjusted for bigger character */
+    padding: 0 5px;
+    /* Less padding for more tile space */
+    /* Bigger tiles laid flat like a sidewalk surface */
+}
+
+.forest-tile {
+    width: calc((100% - 20px) / 11);
+    /* Much bigger tiles with minimal gaps - now 11 tiles */
+    min-width: 50px;
+    /* Bigger minimum tile size */
+    max-width: 80px;
+    /* Much bigger maximum tile size */
+    height: 60px;
+    /* Much taller tiles */
+    border-radius: 8px;
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    /* box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4); */
+    transition: all 0.3s ease;
+    flex-shrink: 0;
+    /* Prevent tiles from shrinking */
+    transform: perspective(400px) rotateX(60deg);
+    /* Lay tiles flat like sidewalk surface */
+    margin: 0 1px;
+    /* Minimal spacing between tiles */
+    /* Much bigger tiles laid flat on the ground for walking on */
+}
+
+.forest-tile.current {
+    border-color: white;
+    /* box-shadow: 0 0 15px rgba(255, 255, 255, 0.8); */
+    transform: perspective(300px) rotateX(60deg) scale(1.1);
+    /* Maintain flat sidewalk perspective with scale */
+}
+
+/* Walking Character */
+.walking-character {
+    position: absolute;
+    width: 130px;
+    /* Much wider character */
+    font-size: 8rem;
+    /* Much bigger font for emoji fallback */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    bottom: 0px;
+    /* Minimal margin from top */
+    left: 0px;
+    /* Closer to edge */
+    transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    will-change: transform;
+    /* Removed all background styling - just the massive sprite */
+}
+
+.walking-character.walking {
+    animation: forest-walk 1.8s ease-in-out infinite;
+}
+
+/* Character asset styling for maximum size sprite */
+.walking-character .character-asset {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 0;
+    /* No background, border, or shadow - just the sprite filling available space */
+}
+
+@keyframes forest-walk {
+
+    0%,
+    100% {
+        transform: scale(1) translateY(0px);
+    }
+
+    50% {
+        transform: scale(1.03) translateY(-6px);
+    }
+}
+
+/* Scrolling Background Path */
+.lane-path {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 2000px;
+    /* Much wider than container for scrolling effect */
+    height: 100%;
+    display: flex;
+    align-items: center;
+    background: repeating-linear-gradient(90deg,
+            var(--hot-pink) 0px,
+            var(--hot-pink) 20px,
+            var(--electric-blue) 20px,
+            var(--electric-blue) 40px,
+            var(--sunshine-yellow) 40px,
+            var(--sunshine-yellow) 60px,
+            var(--lime-green) 60px,
+            var(--lime-green) 80px,
+            var(--orange) 80px,
+            var(--orange) 100px,
+            var(--purple) 100px,
+            var(--purple) 120px);
+    opacity: 0.3;
+    transition: transform 0.5s ease;
+}
+
+.lane-path::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: repeating-linear-gradient(90deg,
+            white 0px,
+            white 10px,
+            transparent 10px,
+            transparent 20px);
+    transform: translateY(-50%);
+}
+
+/* Game Piece in Lane */
+.lane-game-piece {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    z-index: 10;
+    top: 50%;
+    left: 50px;
+    /* Starting position */
+    transform: translateY(-50%);
+    transition: all 0.5s ease;
+    will-change: transform;
+}
+
+.lane-game-piece.moving {
+    animation: lane-bounce 0.3s ease-in-out;
+}
+
+@keyframes lane-bounce {
+
+    0%,
+    100% {
+        transform: translateY(-50%) scale(1);
+    }
+
+    50% {
+        transform: translateY(-60%) scale(1.1);
+    }
+}
+
+.square {
+    width: 45px;
+    height: 45px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    position: relative;
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    will-change: transform;
+}
+
+.square:hover {
+    transform: scale(1.2) rotate(5deg);
+    box-shadow: 0 0 25px rgba(255, 255, 255, 0.9);
+    filter: brightness(1.2);
+}
+
+/* Square Colors */
+.square.red {
+    background: var(--hot-pink);
+    box-shadow: 0 0 15px rgba(255, 20, 147, 0.5);
+}
+
+.square.blue {
+    background: var(--electric-blue);
+    box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+}
+
+.square.yellow {
+    background: var(--sunshine-yellow);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+}
+
+.square.green {
+    background: var(--lime-green);
+    box-shadow: 0 0 15px rgba(50, 205, 50, 0.5);
+}
+
+.square.orange {
+    background: var(--orange);
+    box-shadow: 0 0 15px rgba(255, 99, 71, 0.5);
+}
+
+.square.purple {
+    background: var(--purple);
+    box-shadow: 0 0 15px rgba(147, 112, 219, 0.5);
+}
+
+.square.start {
+    background: linear-gradient(45deg, var(--sunshine-yellow), var(--candy-orange));
+    font-size: 2.5rem;
+    animation: pulse 2s ease-in-out infinite;
+    will-change: transform;
+}
+
+.square.finish {
+    background: linear-gradient(45deg, var(--hot-pink), var(--purple));
+    font-size: 2.5rem;
+    animation: sparkle 1.5s ease-in-out infinite;
+    will-change: filter, transform;
+}
+
+.square.special {
+    background: linear-gradient(45deg, var(--candy-purple), var(--candy-blue));
+    animation: glow 2s ease-in-out infinite;
+    /* will-change: box-shadow; */
+}
+
+.square.sticky {
+    background: linear-gradient(45deg, #8B4513, #A0522D);
+    animation: sticky 1s ease-in-out infinite;
+    will-change: transform;
+}
+
+/* Game Pieces */
+.game-piece {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    position: absolute;
+    font-size: 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.5s ease-in-out;
+    z-index: 20;
+    border: 4px solid white;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+    will-change: transform;
+    transform: translate3d(0, 0, 0);
+}
+
+.game-piece.moving {
+    animation: bounce-move 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+/* Game Controls */
+.game-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 30px 0;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.current-player {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--purple);
+    text-shadow: 2px 2px 0px white;
+}
+
+.card-display {
+    background: linear-gradient(45deg, var(--sunshine-yellow), var(--candy-orange));
+    padding: 20px;
+    border-radius: 15px;
+    text-align: center;
+    min-width: 180px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border: 4px solid white;
+    flex: 0.65;
+    /* Take 65% of available vertical space */
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.drawn-card {
+    font-size: 4rem;
+    margin-bottom: 15px;
+    animation: card-flip 0.5s ease-in-out;
+    will-change: transform;
+}
+
+/* Wheel Overlay Styles */
+.card-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.card-overlay.show {
+    display: flex;
+}
+
+.card-overlay-content {
+    width: 80%;
+    height: 80%;
+    max-width: 600px;
+    max-height: 600px;
+    background: linear-gradient(45deg, var(--sunshine-yellow), var(--candy-orange));
+    border-radius: 20px;
+    border: 6px solid white;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 30px;
+    position: relative;
+}
+
+.spinning-card {
+    width: 300px;
+    height: 400px;
+    background: white;
+    border-radius: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.3);
+    border: 4px solid #333;
+    position: relative;
+    overflow: hidden;
+}
+
+.card-icon {
+    font-size: 8rem;
+    margin-bottom: 1rem;
+    transition: all 0.1s ease;
+}
+
+.card-text {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    transition: all 0.1s ease;
+}
+
+.spinning-card.spinning {
+    animation: card-spin 0.1s linear infinite;
+}
+
+@keyframes card-spin {
+    0% {
+        transform: rotateY(0deg);
+    }
+
+    100% {
+        transform: rotateY(360deg);
+    }
+}
+
+.card-instructions {
+    font-size: 2rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.5);
+    text-align: center;
+}
+
+.card-text {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4);
+}
+
+.control-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    flex: 0.35;
+    /* Take 35% of available vertical space */
+    align-items: center;
+}
+
+.btn {
+    padding: 15px 20px;
+    font-size: 1.2rem;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    font-family: inherit;
+    font-weight: bold;
+    width: 100%;
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+    will-change: transform;
+}
+
+.btn:hover:not(:disabled) {
+    transform: scale(1.1) rotate(2deg);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    filter: brightness(1.1);
+}
+
+.btn-primary {
+    background: linear-gradient(45deg, var(--hot-pink), var(--electric-blue));
+    color: white;
+}
+
+.btn-secondary {
+    background: linear-gradient(45deg, var(--lime-green), var(--candy-yellow));
+    color: white;
+}
+
+.btn-danger {
+    background: linear-gradient(45deg, var(--candy-red), var(--candy-orange));
+    color: white;
+}
+
+.btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+/* Player Info */
+.player-info {
+    display: flex;
+    gap: 25px;
+    margin: 30px 0;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.player-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    border-radius: 20px;
+    text-align: center;
+    min-width: 150px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    border: 3px solid transparent;
+    transition: all 0.3s ease;
+    will-change: transform;
+}
+
+.player-card.active {
+    background: linear-gradient(45deg, var(--candy-yellow), var(--candy-orange));
+    transform: scale(1.1);
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+    border: 3px solid white;
+}
+
+.player-name {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 15px;
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
+}
+
+.player-piece-preview {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    border: 3px solid white;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+/* Player Score Row */
+.player-score-row {
+    display: flex;
+    width: 100%;
+    background: linear-gradient(135deg, rgba(255, 107, 157, 0.1), rgba(196, 69, 105, 0.1));
+    border-top: 3px solid rgba(255, 255, 255, 0.3);
+    padding: 15px 20px;
+    gap: 10px;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    /* Don't shrink the score row */
+    height: fit-content;
+}
+
+.player-score-card {
+    flex: 1;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.9);
+    border-radius: 15px;
+    padding: 8px 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    gap: 10px;
+}
+
+.player-score-card.active {
+    border-color: #FF6B9D;
+    box-shadow: 0 6px 25px rgba(255, 107, 157, 0.3);
+    transform: translateY(-2px);
+}
+
+.player-score-avatar {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.player-score-avatar .character-asset {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: 0;
+}
+
+.player-score-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.player-score-name {
+    font-size: 0.9rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 2px;
+    text-align: left;
+}
+
+.player-score-progress {
+    font-size: 0.7rem;
+    color: #666;
+    text-align: left;
+    margin-bottom: 2px;
+}
+
+.player-score-percentage {
+    font-size: 1rem;
+    font-weight: bold;
+    color: #FF6B9D;
+    text-align: left;
+}
+
+/* Victory Screen */
+.victory-screen {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+}
+
+#confetti-canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.victory-content {
+    background: linear-gradient(45deg, var(--sunshine-yellow), var(--candy-orange));
+    padding: 60px;
+    border-radius: 30px;
+    text-align: center;
+    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+    animation: victory-bounce 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    border: 5px solid white;
+    will-change: transform;
+    position: relative;
+    z-index: 2;
+}
+
+.victory-title {
+    font-size: 4rem;
+    color: white;
+    text-shadow: 4px 4px 0px var(--purple);
+    margin-bottom: 30px;
+    animation: celebration-pulse 1s ease-in-out infinite;
+}
+
+.victory-message {
+    font-size: 2rem;
+    color: white;
+    margin-bottom: 40px;
+    text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);
+}
+
+.victory-player-avatar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 2rem;
+    animation: victoryBounce 1s ease infinite alternate;
+}
+
+.victory-player-avatar .victory-avatar {
+    width: 150px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 5rem;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.victory-player-avatar .victory-avatar-image {
+    width: 150px;
+    height: 150px;
+    object-fit: contain;
+    border-radius: 0;
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.3));
+}
+
+.confetti {
+    position: absolute;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    animation: confetti-fall 3s linear infinite;
+    will-change: transform;
+}
+
+.floating-candy {
+    position: fixed;
+    font-size: 3rem;
+    animation: float 6s ease-in-out infinite;
+    pointer-events: none;
+    z-index: 1;
+    will-change: transform;
+}

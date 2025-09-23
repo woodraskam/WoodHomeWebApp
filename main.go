@@ -31,24 +31,35 @@ func main() {
 	config.APIBaseURL = getEnv("WOODHOME_API_URL", "http://localhost:8080")
 	config.Port = getEnv("PORT", "3000")
 
-	// Setup routes
-	r := mux.NewRouter()
-
-	// Static files
-	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
-
-	// Main routes
-	r.HandleFunc("/", homeHandler).Methods("GET")
-	r.HandleFunc("/api/health", healthCheckHandler).Methods("GET")
-	r.HandleFunc("/api/connectivity", connectivityTestHandler).Methods("GET")
-
-	// API proxy routes
-	r.HandleFunc("/api/woodhome/{path:.*}", proxyToWoodHomeAPI).Methods("GET", "POST", "PUT", "DELETE")
+	// Setup routes using standard http package for testing
+	// Register specific routes first (most specific to least specific)
+	http.HandleFunc("/play/CandyLand", candyLandHandler)
+	http.HandleFunc("/play/Candyland", candyLandHandler) // Handle lowercase variation
+	http.HandleFunc("/candyland", candyLandHandler) // Keep simple path as backup
+	http.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Test route called for path: %s", r.URL.Path)
+		w.Write([]byte("Test route is working!"))
+	})
+	http.HandleFunc("/api/health", healthCheckHandler)
+	http.HandleFunc("/api/connectivity", connectivityTestHandler)
+	
+	// Static files (register before catch-all)
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
+	
+	// Root handler last (catch-all)
+	http.HandleFunc("/", homeHandler)
+	
+	log.Printf("Routes registered:")
+	log.Printf("  GET /games/CandyLand")
+	log.Printf("  GET /games/Candyland")
+	log.Printf("  GET /api/health")
+	log.Printf("  GET /api/connectivity")
+	log.Printf("  GET / (catch-all)")
 
 	log.Printf("Starting WoodHome WebApp on port %s", config.Port)
 	log.Printf("WoodHome API URL: %s", config.APIBaseURL)
 
-	if err := http.ListenAndServe(":"+config.Port, r); err != nil {
+	if err := http.ListenAndServe(":"+config.Port, nil); err != nil {
 		log.Fatal("Server failed to start:", err)
 	}
 }
@@ -75,6 +86,30 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func candyLandHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("CandyLand handler called for path: %s", r.URL.Path)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	// Try to parse the template with error handling
+	tmpl, err := template.ParseFiles("templates/candyland.html")
+	if err != nil {
+		log.Printf("Template parsing error: %v", err)
+		http.Error(w, "Template parsing error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	data := map[string]interface{}{
+		"Title": "CandyLand Adventure - Mark Woodraska",
+	}
+
+	if err := tmpl.Execute(w, data); err != nil {
+		log.Printf("Template execution error: %v", err)
+		http.Error(w, "Template execution error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	log.Printf("CandyLand template executed successfully")
 }
 
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {

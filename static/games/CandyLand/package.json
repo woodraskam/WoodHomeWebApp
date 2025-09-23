@@ -1,0 +1,52 @@
+{
+  "name": "candyland-adventure",
+  "version": "1.0.0",
+  "description": "A fully functional Candyland board game clone designed for 3-year-olds with vibrant animations and engaging gameplay",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "dev": "python -m http.server 8000",
+    "build": "echo 'No build step required - this is a vanilla HTML/CSS/JS project'",
+    "test": "echo 'No tests specified'",
+    "lint": "echo 'Linting would go here'",
+    "deploy": "echo 'Deployment script would go here'"
+  },
+  "keywords": [
+    "candyland",
+    "board-game",
+    "kids",
+    "game",
+    "html5",
+    "javascript",
+    "css3",
+    "animations",
+    "web-audio"
+  ],
+  "author": "Candyland Adventure Team",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-username/candyland-adventure.git"
+  },
+  "bugs": {
+    "url": "https://github.com/your-username/candyland-adventure/issues"
+  },
+  "homepage": "https://your-username.github.io/candyland-adventure",
+  "engines": {
+    "node": ">=14.0.0"
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not dead",
+    "not ie 11"
+  ],
+  "devDependencies": {},
+  "dependencies": {},
+  "files": [
+    "index.html",
+    "src/",
+    "assets/",
+    "README.md"
+  ]
+}
