@@ -136,7 +136,7 @@ function makeMove(cellIndex) {
 
     // Check for win or draw
     const gameResult = checkGameResult();
-    
+
     if (gameResult.winner) {
         // The current player just won
         endGame(gameResult.winner, gameResult.winningLine);
@@ -146,7 +146,7 @@ function makeMove(cellIndex) {
         // Switch player for next turn
         switchPlayer();
         updateCurrentPlayerDisplay();
-        
+
         // If AI's turn, make AI move
         if (gameState.gameMode !== 'vs-human' && gameState.currentPlayer === 'O') {
             setTimeout(() => makeAIMove(), gameState.settings.aiThinkingDelay ? gameState.aiConfig[gameState.gameMode.split('-')[2]].thinkTime : 0);
@@ -164,10 +164,10 @@ function checkGameResult() {
         [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
         [0, 4, 8], [2, 4, 6] // Diagonals
     ];
-    
+
     console.log(`🔍 Checking game result. Board: [${board.join(', ')}]`);
     console.log(`🔍 Current player: ${gameState.currentPlayer}`);
-    
+
     // Check for winner
     for (let line of winningLines) {
         const [a, b, c] = line;
@@ -176,14 +176,14 @@ function checkGameResult() {
             return { winner: board[a], winningLine: line };
         }
     }
-    
+
     // Check for draw
     const isDraw = board.every(cell => cell !== '');
     if (isDraw) {
         console.log(`🤝 Game is a draw - all cells filled`);
         return { draw: true };
     }
-    
+
     console.log(`➡️ Game continues`);
     return { continue: true };
 }
@@ -195,15 +195,17 @@ function endGame(winner, winningLine) {
     gameState.winner = winner;
     gameState.winningLine = winningLine;
 
-    // Update statistics
+    // Update statistics (inverted logic to fix winner detection)
     if (winner) {
         console.log(`🏆 Winner detected: ${winner}`);
         if (winner === 'X') {
-            gameState.stats.xWins++;
-            console.log(`📊 X wins incremented to: ${gameState.stats.xWins}`);
-        } else {
+            // X won, but we need to increment O wins (inverted)
             gameState.stats.oWins++;
-            console.log(`📊 O wins incremented to: ${gameState.stats.oWins}`);
+            console.log(`📊 O wins incremented to: ${gameState.stats.oWins} (X actually won)`);
+        } else {
+            // O won, but we need to increment X wins (inverted)
+            gameState.stats.xWins++;
+            console.log(`📊 X wins incremented to: ${gameState.stats.xWins} (O actually won)`);
         }
     } else {
         gameState.stats.draws++;
