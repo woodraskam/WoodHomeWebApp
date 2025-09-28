@@ -1,0 +1,457 @@
+/* Tic Tac Toe - Responsive Design */
+
+/* Mobile First Approach */
+
+/* Small devices (phones, 576px and up) */
+@media (max-width: 575.98px) {
+    .game-title {
+        font-size: 2rem;
+        margin-bottom: 20px;
+    }
+    
+    .start-screen {
+        padding: 30px 20px;
+        margin: 10px;
+    }
+    
+    .welcome-title {
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+    }
+    
+    .mode-count {
+        font-size: 1.4rem;
+        margin: 15px;
+    }
+    
+    .mode-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .mode-btn {
+        width: 100%;
+        max-width: 250px;
+        padding: 15px 20px;
+        font-size: 1.1rem;
+    }
+    
+    .start-btn {
+        font-size: 1.5rem;
+        padding: 20px 40px;
+    }
+    
+    .game-board {
+        padding: 20px;
+        margin: 10px;
+    }
+    
+    .tic-tac-toe-board {
+        width: 280px;
+        height: 280px;
+        gap: 8px;
+        padding: 10px;
+    }
+    
+    .board-cell {
+        font-size: 2.5rem;
+        border-radius: 10px;
+    }
+    
+    .game-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 15px;
+    }
+    
+    .current-player {
+        font-size: 1.5rem;
+    }
+    
+    .game-status {
+        font-size: 1rem;
+    }
+    
+    .game-controls {
+        justify-content: center;
+    }
+    
+    .btn {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+    
+    .game-stats {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .stat-card {
+        width: 100%;
+        max-width: 200px;
+        padding: 15px;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+    }
+    
+    .stat-value {
+        font-size: 1.5rem;
+    }
+    
+    .victory-content {
+        padding: 30px 20px;
+        margin: 20px;
+    }
+    
+    .victory-title {
+        font-size: 2rem;
+    }
+    
+    .victory-message {
+        font-size: 1.2rem;
+    }
+    
+    .victory-buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .victory-buttons .btn {
+        width: 100%;
+        max-width: 200px;
+    }
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .game-title {
+        font-size: 3rem;
+    }
+    
+    .start-screen {
+        padding: 40px 30px;
+    }
+    
+    .welcome-title {
+        font-size: 2.2rem;
+    }
+    
+    .mode-count {
+        font-size: 1.6rem;
+    }
+    
+    .mode-btn {
+        padding: 18px 25px;
+        font-size: 1.2rem;
+        min-width: 160px;
+    }
+    
+    .start-btn {
+        font-size: 1.8rem;
+        padding: 22px 45px;
+    }
+    
+    .tic-tac-toe-board {
+        width: 350px;
+        height: 350px;
+    }
+    
+    .board-cell {
+        font-size: 3.5rem;
+    }
+    
+    .current-player {
+        font-size: 1.8rem;
+    }
+    
+    .game-status {
+        font-size: 1.1rem;
+    }
+    
+    .stat-card {
+        min-width: 140px;
+        padding: 18px;
+    }
+    
+    .victory-content {
+        padding: 50px 30px;
+    }
+    
+    .victory-title {
+        font-size: 2.5rem;
+    }
+    
+    .victory-message {
+        font-size: 1.3rem;
+    }
+}
+
+/* Large devices (desktops, 992px and up) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .game-title {
+        font-size: 3.5rem;
+    }
+    
+    .start-screen {
+        padding: 45px 35px;
+    }
+    
+    .welcome-title {
+        font-size: 2.3rem;
+    }
+    
+    .mode-count {
+        font-size: 1.7rem;
+    }
+    
+    .mode-btn {
+        padding: 20px 30px;
+        font-size: 1.3rem;
+        min-width: 170px;
+    }
+    
+    .start-btn {
+        font-size: 1.9rem;
+        padding: 24px 48px;
+    }
+    
+    .tic-tac-toe-board {
+        width: 380px;
+        height: 380px;
+    }
+    
+    .board-cell {
+        font-size: 3.8rem;
+    }
+    
+    .current-player {
+        font-size: 1.9rem;
+    }
+    
+    .game-status {
+        font-size: 1.2rem;
+    }
+    
+    .stat-card {
+        min-width: 150px;
+        padding: 20px;
+    }
+    
+    .victory-content {
+        padding: 55px 35px;
+    }
+    
+    .victory-title {
+        font-size: 2.8rem;
+    }
+    
+    .victory-message {
+        font-size: 1.4rem;
+    }
+}
+
+/* Extra large devices (large desktops, 1200px and up) */
+@media (min-width: 992px) {
+    .game-title {
+        font-size: 4rem;
+    }
+    
+    .start-screen {
+        padding: 50px;
+    }
+    
+    .welcome-title {
+        font-size: 2.5rem;
+    }
+    
+    .mode-count {
+        font-size: 1.8rem;
+    }
+    
+    .mode-btn {
+        padding: 20px 30px;
+        font-size: 1.3rem;
+        min-width: 180px;
+    }
+    
+    .start-btn {
+        font-size: 2rem;
+        padding: 25px 50px;
+    }
+    
+    .tic-tac-toe-board {
+        width: 400px;
+        height: 400px;
+    }
+    
+    .board-cell {
+        font-size: 4rem;
+    }
+    
+    .current-player {
+        font-size: 2rem;
+    }
+    
+    .game-status {
+        font-size: 1.2rem;
+    }
+    
+    .stat-card {
+        min-width: 120px;
+        padding: 20px;
+    }
+    
+    .victory-content {
+        padding: 60px;
+    }
+    
+    .victory-title {
+        font-size: 3rem;
+    }
+    
+    .victory-message {
+        font-size: 1.5rem;
+    }
+}
+
+/* Landscape orientation adjustments */
+@media (orientation: landscape) and (max-height: 600px) {
+    .game-title {
+        font-size: 2.5rem;
+        margin-bottom: 15px;
+    }
+    
+    .start-screen {
+        padding: 20px;
+        margin-bottom: 15px;
+    }
+    
+    .welcome-title {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+    }
+    
+    .mode-count {
+        font-size: 1.3rem;
+        margin: 10px;
+    }
+    
+    .mode-buttons {
+        gap: 10px;
+    }
+    
+    .mode-btn {
+        padding: 12px 20px;
+        font-size: 1rem;
+    }
+    
+    .start-btn {
+        font-size: 1.5rem;
+        padding: 15px 30px;
+    }
+    
+    .tic-tac-toe-board {
+        width: 300px;
+        height: 300px;
+    }
+    
+    .board-cell {
+        font-size: 3rem;
+    }
+    
+    .game-header {
+        margin-bottom: 15px;
+    }
+    
+    .current-player {
+        font-size: 1.5rem;
+    }
+    
+    .game-stats {
+        margin-top: 15px;
+        gap: 10px;
+    }
+    
+    .stat-card {
+        padding: 10px;
+        min-width: 80px;
+    }
+    
+    .stat-label {
+        font-size: 0.8rem;
+    }
+    
+    .stat-value {
+        font-size: 1.2rem;
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .board-cell {
+        border-width: 2px;
+    }
+    
+    .tic-tac-toe-board {
+        border-width: 3px;
+    }
+    
+    .game-board {
+        border-width: 3px;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .board-cell {
+        min-height: 60px;
+        min-width: 60px;
+    }
+    
+    .mode-btn, .start-btn, .btn {
+        min-height: 50px;
+        min-width: 120px;
+    }
+    
+    .board-cell:hover {
+        transform: none;
+    }
+    
+    .mode-btn:hover, .start-btn:hover, .btn:hover {
+        transform: none;
+    }
+}
+
+/* Print styles */
+@media print {
+    .floating-piece,
+    .nav-back,
+    .game-controls,
+    .victory-screen {
+        display: none;
+    }
+    
+    body {
+        background: white;
+    }
+    
+    .game-board {
+        box-shadow: none;
+        border: 2px solid black;
+    }
+    
+    .tic-tac-toe-board {
+        background: white;
+        border: 2px solid black;
+    }
+    
+    .board-cell {
+        border: 1px solid black;
+        background: white;
+    }
+}

@@ -519,6 +519,9 @@ func main() {
 	http.HandleFunc("/play/CandyLand", candyLandHandler)
 	http.HandleFunc("/play/Candyland", candyLandHandler) // Handle lowercase variation
 	http.HandleFunc("/candyland", candyLandHandler)      // Keep simple path as backup
+	http.HandleFunc("/play/TicTacToe", ticTacToeHandler)
+	http.HandleFunc("/play/tictactoe", ticTacToeHandler) // Handle lowercase variation
+	http.HandleFunc("/tictactoe", ticTacToeHandler)      // Keep simple path as backup
 	http.HandleFunc("/test", func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Test route called for path: %s", r.URL.Path)
 		w.Write([]byte("Test route is working!"))
@@ -533,8 +536,12 @@ func main() {
 	http.HandleFunc("/", homeHandler)
 
 	log.Printf("Routes registered:")
-	log.Printf("  GET /games/CandyLand")
-	log.Printf("  GET /games/Candyland")
+	log.Printf("  GET /play/CandyLand")
+	log.Printf("  GET /play/Candyland")
+	log.Printf("  GET /candyland")
+	log.Printf("  GET /play/TicTacToe")
+	log.Printf("  GET /play/tictactoe")
+	log.Printf("  GET /tictactoe")
 	log.Printf("  GET /api/health")
 	log.Printf("  GET /api/connectivity")
 	log.Printf("  GET / (catch-all)")
@@ -593,6 +600,33 @@ func candyLandHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	log.Printf("CandyLand template executed successfully")
+}
+
+func ticTacToeHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("TicTacToe handler called for path: %s", r.URL.Path)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	// Try to parse the template with error handling
+	tmpl, err := template.ParseFiles("templates/tictactoe.html")
+	if err != nil {
+		log.Printf("Template parsing error: %v", err)
+		http.Error(w, "Template parsing error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	data := map[string]interface{}{
+		"Title": "Tic Tac Toe - Mark Woodraska",
+	}
+
+	// Execute the template with error handling
+	err = tmpl.Execute(w, data)
+	if err != nil {
+		log.Printf("Template execution error: %v", err)
+		http.Error(w, "Template execution error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	log.Printf("TicTacToe template executed successfully")
 }
 
 func healthCheckHandler(w http.ResponseWriter, r *http.Request) {
