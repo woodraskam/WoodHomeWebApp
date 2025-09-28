@@ -10,14 +10,14 @@ let gameState = {
     gameEnded: false,
     winner: null,
     winningLine: null,
-    
+
     // Statistics
     stats: {
         xWins: 0,
         oWins: 0,
         draws: 0
     },
-    
+
     // AI configuration
     aiConfig: {
         easy: {
@@ -31,7 +31,7 @@ let gameState = {
             thinkTime: 1500 // 1.5 second delay
         }
     },
-    
+
     // Game settings
     settings: {
         soundEnabled: true,
@@ -43,7 +43,7 @@ let gameState = {
 // Initialize game state
 function initializeGameState() {
     console.log('🎯 Initializing Tic Tac Toe game state...');
-    
+
     // Reset game state
     gameState.currentPlayer = 'X';
     gameState.gameBoard = ['', '', '', '', '', '', '', '', ''];
@@ -51,10 +51,10 @@ function initializeGameState() {
     gameState.gameEnded = false;
     gameState.winner = null;
     gameState.winningLine = null;
-    
+
     // Load saved statistics
     loadGameStats();
-    
+
     console.log('✅ Game state initialized');
 }
 
@@ -73,8 +73,12 @@ function loadGameStats() {
     try {
         const savedStats = localStorage.getItem('tictactoe-stats');
         if (savedStats) {
-            gameState.stats = { ...gameState.stats, ...JSON.parse(savedStats) };
-            console.log('📊 Game statistics loaded:', gameState.stats);
+            const loadedStats = JSON.parse(savedStats);
+            console.log('📊 Loaded stats from localStorage:', loadedStats);
+            gameState.stats = { ...gameState.stats, ...loadedStats };
+            console.log('📊 Final stats after merge:', gameState.stats);
+        } else {
+            console.log('📊 No saved stats found, using defaults');
         }
     } catch (error) {
         console.warn('⚠️ Could not load game statistics:', error);
@@ -86,10 +90,21 @@ function updateStatsDisplay() {
     const xWinsEl = document.getElementById('x-wins');
     const oWinsEl = document.getElementById('o-wins');
     const drawsEl = document.getElementById('draws');
-    
-    if (xWinsEl) xWinsEl.textContent = gameState.stats.xWins;
-    if (oWinsEl) oWinsEl.textContent = gameState.stats.oWins;
-    if (drawsEl) drawsEl.textContent = gameState.stats.draws;
+
+    console.log(`📊 Updating stats display: X=${gameState.stats.xWins}, O=${gameState.stats.oWins}, Draws=${gameState.stats.draws}`);
+
+    if (xWinsEl) {
+        xWinsEl.textContent = gameState.stats.xWins;
+        console.log(`📊 Set X wins element to: ${gameState.stats.xWins}`);
+    }
+    if (oWinsEl) {
+        oWinsEl.textContent = gameState.stats.oWins;
+        console.log(`📊 Set O wins element to: ${gameState.stats.oWins}`);
+    }
+    if (drawsEl) {
+        drawsEl.textContent = gameState.stats.draws;
+        console.log(`📊 Set draws element to: ${gameState.stats.draws}`);
+    }
 }
 
 // Set game mode
@@ -114,15 +129,16 @@ function makeMove(cellIndex) {
     if (!gameState.gameActive || gameState.gameEnded || gameState.gameBoard[cellIndex] !== '') {
         return false;
     }
-    
+
     // Make the move
     gameState.gameBoard[cellIndex] = gameState.currentPlayer;
     console.log(`🎯 Move made: ${gameState.currentPlayer} at position ${cellIndex}`);
-    
+
     // Check for win or draw
     const gameResult = checkGameResult();
     
     if (gameResult.winner) {
+        // The current player just won
         endGame(gameResult.winner, gameResult.winningLine);
     } else if (gameResult.draw) {
         endGame(null, null);
@@ -136,7 +152,7 @@ function makeMove(cellIndex) {
             setTimeout(() => makeAIMove(), gameState.settings.aiThinkingDelay ? gameState.aiConfig[gameState.gameMode.split('-')[2]].thinkTime : 0);
         }
     }
-    
+
     return true;
 }
 
@@ -149,10 +165,14 @@ function checkGameResult() {
         [0, 4, 8], [2, 4, 6] // Diagonals
     ];
     
+    console.log(`🔍 Checking game result. Board: [${board.join(', ')}]`);
+    console.log(`🔍 Current player: ${gameState.currentPlayer}`);
+    
     // Check for winner
     for (let line of winningLines) {
         const [a, b, c] = line;
         if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+            console.log(`🏆 Winner found! Line [${line.join(', ')}] has ${board[a]} in positions ${a}, ${b}, ${c}`);
             return { winner: board[a], winningLine: line };
         }
     }
@@ -160,9 +180,11 @@ function checkGameResult() {
     // Check for draw
     const isDraw = board.every(cell => cell !== '');
     if (isDraw) {
+        console.log(`🤝 Game is a draw - all cells filled`);
         return { draw: true };
     }
     
+    console.log(`➡️ Game continues`);
     return { continue: true };
 }
 
@@ -172,24 +194,28 @@ function endGame(winner, winningLine) {
     gameState.gameEnded = true;
     gameState.winner = winner;
     gameState.winningLine = winningLine;
-    
+
     // Update statistics
     if (winner) {
+        console.log(`🏆 Winner detected: ${winner}`);
         if (winner === 'X') {
             gameState.stats.xWins++;
+            console.log(`📊 X wins incremented to: ${gameState.stats.xWins}`);
         } else {
             gameState.stats.oWins++;
+            console.log(`📊 O wins incremented to: ${gameState.stats.oWins}`);
         }
     } else {
         gameState.stats.draws++;
+        console.log(`📊 Draws incremented to: ${gameState.stats.draws}`);
     }
-    
+
     // Save statistics
     saveGameStats();
     updateStatsDisplay();
-    
+
     console.log(`🏁 Game ended. Winner: ${winner || 'Draw'}`);
-    
+
     // Show victory screen
     showVictoryScreen(winner, winningLine);
 }
@@ -202,7 +228,7 @@ function resetGame() {
     gameState.gameEnded = false;
     gameState.winner = null;
     gameState.winningLine = null;
-    
+
     console.log('🔄 Game reset');
 }
 
@@ -232,9 +258,9 @@ function getGameMode() {
 
 // Check if it's AI's turn
 function isAITurn() {
-    return gameState.gameMode !== 'vs-human' && 
-           gameState.currentPlayer === 'O' && 
-           isGameActive();
+    return gameState.gameMode !== 'vs-human' &&
+        gameState.currentPlayer === 'O' &&
+        isGameActive();
 }
 
 // Make functions globally accessible
