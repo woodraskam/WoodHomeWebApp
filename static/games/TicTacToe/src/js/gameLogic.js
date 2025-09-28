@@ -124,6 +124,7 @@ function updateCurrentPlayerDisplay() {
     const gameMode = getGameMode();
 
     console.log(`👤 Updating display: currentPlayer=${currentPlayer}, gameMode=${gameMode}`);
+    console.log(`👤 gameState.currentPlayer=${gameState.currentPlayer}`);
 
     let playerText = `Player ${currentPlayer}'s Turn`;
 

@@ -124,40 +124,79 @@ function switchPlayer() {
     console.log(`👤 Current player: ${gameState.currentPlayer}`);
 }
 
-// Make a move on the board
+// Make a move on the board - REWRITTEN FROM SCRATCH
 function makeMove(cellIndex) {
+    // Validate move
     if (!gameState.gameActive || gameState.gameEnded || gameState.gameBoard[cellIndex] !== '') {
+        console.log(`❌ Invalid move: cell ${cellIndex} already occupied or game not active`);
         return false;
     }
-
-    console.log(`🎯 About to make move: ${gameState.currentPlayer} at position ${cellIndex}`);
-    console.log(`🎯 Board before move: [${gameState.gameBoard.join(', ')}]`);
-
-    // Make the move
-    gameState.gameBoard[cellIndex] = gameState.currentPlayer;
-    console.log(`🎯 Move made: ${gameState.currentPlayer} at position ${cellIndex}`);
+    
+    // Get the player whose turn it is
+    const currentPlayer = gameState.currentPlayer;
+    console.log(`🎯 ${currentPlayer} making move at position ${cellIndex}`);
+    
+    // Place the piece
+    gameState.gameBoard[cellIndex] = currentPlayer;
     console.log(`🎯 Board after move: [${gameState.gameBoard.join(', ')}]`);
+    
+    // Update the display to show the piece
+    updateCellDisplay(cellIndex, currentPlayer);
+    
+    // Check if this move won the game
+    const winner = checkForWinner();
+    if (winner) {
+        console.log(`🏆 ${winner} wins!`);
+        endGame(winner);
+        return true;
+    }
+    
+    // Check if board is full (draw)
+    if (gameState.gameBoard.every(cell => cell !== '')) {
+        console.log(`🤝 Game is a draw!`);
+        endGame(null);
+        return true;
+    }
+    
+    // Switch to next player
+    gameState.currentPlayer = gameState.currentPlayer === 'X' ? 'O' : 'X';
+    console.log(`👤 Next player: ${gameState.currentPlayer}`);
+    updateCurrentPlayerDisplay();
+    
+    // If AI's turn, make AI move
+    if (gameState.gameMode !== 'vs-human' && gameState.currentPlayer === 'O') {
+        setTimeout(() => makeAIMove(), 500);
+    }
+    
+    return true;
+}
 
-    // Check for win or draw
-    const gameResult = checkGameResult();
-
-    if (gameResult.winner) {
-        // The current player just won
-        endGame(gameResult.winner, gameResult.winningLine);
-    } else if (gameResult.draw) {
-        endGame(null, null);
-    } else {
-        // Switch player for next turn
-        switchPlayer();
-        updateCurrentPlayerDisplay();
-
-        // If AI's turn, make AI move
-        if (gameState.gameMode !== 'vs-human' && gameState.currentPlayer === 'O') {
-            setTimeout(() => makeAIMove(), gameState.settings.aiThinkingDelay ? gameState.aiConfig[gameState.gameMode.split('-')[2]].thinkTime : 0);
+// Check for winner - SIMPLE AND CLEAN
+function checkForWinner() {
+    const board = gameState.gameBoard;
+    const winningLines = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+        [0, 4, 8], [2, 4, 6] // Diagonals
+    ];
+    
+    for (let line of winningLines) {
+        const [a, b, c] = line;
+        if (board[a] && board[a] === board[b] && board[a] === board[c]) {
+            console.log(`🏆 Winner found: ${board[a]} in line [${line.join(', ')}]`);
+            return board[a];
         }
     }
+    return null;
+}
 
-    return true;
+// Update cell display - SIMPLE
+function updateCellDisplay(cellIndex, player) {
+    const cell = document.querySelector(`[data-cell="${cellIndex}"]`);
+    if (cell) {
+        cell.textContent = player;
+        cell.classList.add('occupied');
+    }
 }
 
 // Check game result (win, draw, or continue)
@@ -193,35 +232,38 @@ function checkGameResult() {
 }
 
 // End the game
-function endGame(winner, winningLine) {
+function endGame(winner) {
     gameState.gameActive = false;
     gameState.gameEnded = true;
     gameState.winner = winner;
-    gameState.winningLine = winningLine;
 
     // Update statistics
     if (winner) {
-        console.log(`🏆 Winner detected: ${winner}`);
+        console.log(`🏆 Winner: ${winner}`);
         if (winner === 'X') {
             gameState.stats.xWins++;
-            console.log(`📊 X wins incremented to: ${gameState.stats.xWins}`);
+            console.log(`📊 X wins: ${gameState.stats.xWins}`);
         } else {
             gameState.stats.oWins++;
-            console.log(`📊 O wins incremented to: ${gameState.stats.oWins}`);
+            console.log(`📊 O wins: ${gameState.stats.oWins}`);
         }
     } else {
         gameState.stats.draws++;
-        console.log(`📊 Draws incremented to: ${gameState.stats.draws}`);
+        console.log(`📊 Draws: ${gameState.stats.draws}`);
     }
 
-    // Save statistics
+    // Save and display statistics
     saveGameStats();
     updateStatsDisplay();
 
-    console.log(`🏁 Game ended. Winner: ${winner || 'Draw'}`);
-
     // Show victory screen
-    showVictoryScreen(winner, winningLine);
+    if (winner) {
+        showVictoryScreen(winner);
+    } else {
+        showVictoryScreen('Draw');
+    }
+
+    console.log(`🏁 Game ended. Winner: ${winner || 'Draw'}`);
 }
 
 // Reset the game
