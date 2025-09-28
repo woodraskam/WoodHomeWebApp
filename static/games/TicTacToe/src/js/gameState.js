@@ -130,9 +130,13 @@ function makeMove(cellIndex) {
         return false;
     }
 
+    console.log(`🎯 About to make move: ${gameState.currentPlayer} at position ${cellIndex}`);
+    console.log(`🎯 Board before move: [${gameState.gameBoard.join(', ')}]`);
+
     // Make the move
     gameState.gameBoard[cellIndex] = gameState.currentPlayer;
     console.log(`🎯 Move made: ${gameState.currentPlayer} at position ${cellIndex}`);
+    console.log(`🎯 Board after move: [${gameState.gameBoard.join(', ')}]`);
 
     // Check for win or draw
     const gameResult = checkGameResult();
@@ -195,17 +199,15 @@ function endGame(winner, winningLine) {
     gameState.winner = winner;
     gameState.winningLine = winningLine;
 
-    // Update statistics (inverted logic to fix winner detection)
+    // Update statistics
     if (winner) {
         console.log(`🏆 Winner detected: ${winner}`);
         if (winner === 'X') {
-            // X won, but we need to increment O wins (inverted)
-            gameState.stats.oWins++;
-            console.log(`📊 O wins incremented to: ${gameState.stats.oWins} (X actually won)`);
-        } else {
-            // O won, but we need to increment X wins (inverted)
             gameState.stats.xWins++;
-            console.log(`📊 X wins incremented to: ${gameState.stats.xWins} (O actually won)`);
+            console.log(`📊 X wins incremented to: ${gameState.stats.xWins}`);
+        } else {
+            gameState.stats.oWins++;
+            console.log(`📊 O wins incremented to: ${gameState.stats.oWins}`);
         }
     } else {
         gameState.stats.draws++;
