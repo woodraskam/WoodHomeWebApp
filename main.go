@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	"github.com/joho/godotenv"
 	_ "github.com/microsoft/go-mssqldb"
 	"gopkg.in/gomail.v2"
 )
@@ -139,6 +140,30 @@ func initDatabase() error {
 	database := getEnv("DB_NAME", "WoodHome")
 	useTrustedConnection := getEnv("DB_TRUSTED_CONNECTION", "true")
 
+	// First connect to master database to create WoodHome database if it doesn't exist
+	masterConnStr := fmt.Sprintf("server=%s;port=%s;database=master;trusted_connection=%s;encrypt=disable;trustservercertificate=true",
+		server, port, useTrustedConnection)
+
+	masterDb, err := sql.Open("sqlserver", masterConnStr)
+	if err != nil {
+		return err
+	}
+
+	// Test master connection
+	if err = masterDb.Ping(); err != nil {
+		return err
+	}
+
+	// Create WoodHome database if it doesn't exist
+	_, err = masterDb.Exec(fmt.Sprintf("IF NOT EXISTS (SELECT name FROM sys.databases WHERE name = '%s') CREATE DATABASE [%s]", database, database))
+	if err != nil {
+		return err
+	}
+
+	// Close master connection
+	masterDb.Close()
+
+	// Now connect to WoodHome database
 	connStr := fmt.Sprintf("server=%s;port=%s;database=%s;trusted_connection=%s;encrypt=disable;trustservercertificate=true",
 		server, port, database, useTrustedConnection)
 
@@ -199,14 +224,19 @@ func (c *CribbageGameManager) CreateGame(player1Email string) (*Game, error) {
 	gameID := generateGameID()
 	now := time.Now()
 
+	log.Printf("Creating game with ID: %s for player: %s", gameID, player1Email)
+
 	_, err := c.db.Exec(`
 		INSERT INTO cribbage_games (id, player1_email, status, current_phase, created_at, updated_at)
-		VALUES (?, ?, 'waiting', 'waiting', ?, ?)
+		VALUES (@p1, @p2, 'waiting', 'waiting', @p3, @p4)
 	`, gameID, player1Email, now, now)
 
 	if err != nil {
+		log.Printf("CreateGame error: %v", err)
 		return nil, err
 	}
+
+	log.Printf("Game created successfully: %s", gameID)
 
 	game := &Game{
 		ID:           gameID,
@@ -223,28 +253,57 @@ func (c *CribbageGameManager) CreateGame(player1Email string) (*Game, error) {
 func (c *CribbageGameManager) JoinGame(gameID, player2Email string) error {
 	_, err := c.db.Exec(`
 		UPDATE cribbage_games 
-		SET player2_email = ?, status = 'active', current_phase = 'deal', updated_at = ?
-		WHERE id = ? AND player2_email IS NULL
+		SET player2_email = @p1, status = 'active', current_phase = 'deal', updated_at = @p2
+		WHERE id = @p3 AND player2_email IS NULL
 	`, player2Email, time.Now(), gameID)
 
 	return err
 }
 
 func (c *CribbageGameManager) GetGame(gameID string) (*Game, error) {
+	log.Printf("GetGame called with gameID: %s", gameID)
+
 	var game Game
+	var player2Email sql.NullString
+	var player1Score, player2Score sql.NullInt32
+	var currentPhase, currentPlayer, gameData sql.NullString
+
 	err := c.db.QueryRow(`
 		SELECT id, player1_email, player2_email, status, player1_score, player2_score,
 		       current_phase, current_player, game_data, created_at, updated_at
-		FROM cribbage_games WHERE id = ?
+		FROM cribbage_games WHERE id = @p1
 	`, gameID).Scan(
-		&game.ID, &game.Player1Email, &game.Player2Email, &game.Status,
-		&game.Player1Score, &game.Player2Score, &game.CurrentPhase,
-		&game.CurrentPlayer, &game.GameData, &game.CreatedAt, &game.UpdatedAt,
+		&game.ID, &game.Player1Email, &player2Email, &game.Status,
+		&player1Score, &player2Score, &currentPhase,
+		&currentPlayer, &gameData, &game.CreatedAt, &game.UpdatedAt,
 	)
 
 	if err != nil {
+		log.Printf("GetGame error for %s: %v", gameID, err)
 		return nil, err
 	}
+
+	// Handle NULL values
+	if player2Email.Valid {
+		game.Player2Email = player2Email.String
+	}
+	if player1Score.Valid {
+		game.Player1Score = int(player1Score.Int32)
+	}
+	if player2Score.Valid {
+		game.Player2Score = int(player2Score.Int32)
+	}
+	if currentPhase.Valid {
+		game.CurrentPhase = currentPhase.String
+	}
+	if currentPlayer.Valid {
+		game.CurrentPlayer = currentPlayer.String
+	}
+	if gameData.Valid {
+		game.GameData = gameData.String
+	}
+
+	log.Printf("GetGame success for %s: %+v", gameID, game)
 
 	return &game, nil
 }
@@ -272,7 +331,7 @@ func (c *CribbageGameManager) CreateToken(gameID, userEmail string) (string, err
 
 	_, err := c.db.Exec(`
 		INSERT INTO cribbage_game_tokens (token, game_id, user_email, expires_at)
-		VALUES (?, ?, ?, ?)
+		VALUES (@p1, @p2, @p3, @p4)
 	`, token, gameID, userEmail, expiresAt)
 
 	if err != nil {
@@ -286,7 +345,7 @@ func (c *CribbageGameManager) ValidateToken(token string) (*GameToken, error) {
 	var gameToken GameToken
 	err := c.db.QueryRow(`
 		SELECT token, game_id, user_email, expires_at, created_at
-		FROM cribbage_game_tokens WHERE token = ? AND expires_at > ?
+		FROM cribbage_game_tokens WHERE token = @p1 AND expires_at > @p2
 	`, token, time.Now()).Scan(
 		&gameToken.Token, &gameToken.GameID, &gameToken.UserEmail,
 		&gameToken.ExpiresAt, &gameToken.CreatedAt,
@@ -357,6 +416,11 @@ func (e *EmailService) SendGameEndNotification(gameID, playerEmail, winner strin
 }
 
 func (e *EmailService) sendEmail(to, subject, body string) error {
+	// Log email attempt for debugging
+	log.Printf("Attempting to send email to: %s", to)
+	log.Printf("SMTP Host: %s, Port: %d", e.smtpHost, e.smtpPort)
+	log.Printf("From Email: %s", e.fromEmail)
+
 	m := gomail.NewMessage()
 	m.SetHeader("From", e.fromEmail)
 	m.SetHeader("To", to)
@@ -366,9 +430,11 @@ func (e *EmailService) sendEmail(to, subject, body string) error {
 	d := gomail.NewDialer(e.smtpHost, e.smtpPort, e.fromEmail, e.fromPassword)
 
 	if err := d.DialAndSend(m); err != nil {
+		log.Printf("Email send failed: %v", err)
 		return err
 	}
 
+	log.Printf("Email sent successfully to: %s", to)
 	return nil
 }
 
@@ -382,8 +448,25 @@ func generateToken() string {
 }
 
 func main() {
+	// Load .env file
+	err := godotenv.Load()
+	if err != nil {
+		log.Println("Warning: .env file not found, using system environment variables")
+	}
+
+	// Set up file logging
+	logFile, err := os.OpenFile("woodhome.log", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0666)
+	if err != nil {
+		log.Fatalf("Failed to open log file: %v", err)
+	}
+	defer logFile.Close()
+
+	// Create multi-writer to log to both file and console
+	multiWriter := io.MultiWriter(os.Stdout, logFile)
+	log.SetOutput(multiWriter)
+
 	// Initialize database
-	err := initDatabase()
+	err = initDatabase()
 	if err != nil {
 		log.Fatal("Failed to initialize database:", err)
 	}
@@ -406,6 +489,13 @@ func main() {
 		fromEmail:    config.FromEmail,
 		fromPassword: config.FromPassword,
 	}
+
+	// Log email configuration for debugging
+	log.Printf("Email configuration loaded:")
+	log.Printf("  SMTP Host: %s", config.SMTPHost)
+	log.Printf("  SMTP Port: %d", config.SMTPPort)
+	log.Printf("  From Email: %s", config.FromEmail)
+	log.Printf("  Password length: %d characters", len(config.FromPassword))
 
 	// cribbageManager is already initialized in initDatabase()
 
@@ -1159,18 +1249,18 @@ func gameUpdatesHandler(w http.ResponseWriter, r *http.Request) {
 
 // Cribbage-specific error handling and logging
 func logCribbageError(operation string, err error, gameID string, playerEmail string) {
-	log.Printf("Cribbage Error - Operation: %s, GameID: %s, Player: %s, Error: %v", 
+	log.Printf("Cribbage Error - Operation: %s, GameID: %s, Player: %s, Error: %v",
 		operation, gameID, playerEmail, err)
 }
 
 func handleCribbageError(w http.ResponseWriter, operation string, err error, gameID string, playerEmail string) {
 	logCribbageError(operation, err, gameID, playerEmail)
-	
+
 	response := APIResponse{
 		Status:  "error",
 		Message: fmt.Sprintf("Cribbage %s failed: %v", operation, err),
 	}
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusInternalServerError)
 	json.NewEncoder(w).Encode(response)
