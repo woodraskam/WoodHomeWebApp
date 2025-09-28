@@ -54,13 +54,10 @@ function handleCellClick(cellIndex) {
 
     console.log(`🎯 Cell clicked: ${cellIndex}`);
 
-    // Make the move
+    // Make the move (this already updates the display)
     const moveSuccessful = makeMove(cellIndex);
 
     if (moveSuccessful) {
-        // Update the UI
-        updateCellDisplay(cellIndex);
-
         // Play sound effect
         playSoundEffect('move');
 

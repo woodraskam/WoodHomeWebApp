@@ -131,18 +131,18 @@ function makeMove(cellIndex) {
         console.log(`❌ Invalid move: cell ${cellIndex} already occupied or game not active`);
         return false;
     }
-    
+
     // Get the player whose turn it is
     const currentPlayer = gameState.currentPlayer;
     console.log(`🎯 ${currentPlayer} making move at position ${cellIndex}`);
-    
+
     // Place the piece
     gameState.gameBoard[cellIndex] = currentPlayer;
     console.log(`🎯 Board after move: [${gameState.gameBoard.join(', ')}]`);
-    
+
     // Update the display to show the piece
     updateCellDisplay(cellIndex, currentPlayer);
-    
+
     // Check if this move won the game
     const winner = checkForWinner();
     if (winner) {
@@ -150,24 +150,24 @@ function makeMove(cellIndex) {
         endGame(winner);
         return true;
     }
-    
+
     // Check if board is full (draw)
     if (gameState.gameBoard.every(cell => cell !== '')) {
         console.log(`🤝 Game is a draw!`);
         endGame(null);
         return true;
     }
-    
+
     // Switch to next player
     gameState.currentPlayer = gameState.currentPlayer === 'X' ? 'O' : 'X';
     console.log(`👤 Next player: ${gameState.currentPlayer}`);
     updateCurrentPlayerDisplay();
-    
+
     // If AI's turn, make AI move
     if (gameState.gameMode !== 'vs-human' && gameState.currentPlayer === 'O') {
         setTimeout(() => makeAIMove(), 500);
     }
-    
+
     return true;
 }
 
@@ -179,7 +179,7 @@ function checkForWinner() {
         [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
         [0, 4, 8], [2, 4, 6] // Diagonals
     ];
-    
+
     for (let line of winningLines) {
         const [a, b, c] = line;
         if (board[a] && board[a] === board[b] && board[a] === board[c]) {
