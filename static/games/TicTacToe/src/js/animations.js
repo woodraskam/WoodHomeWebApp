@@ -340,6 +340,25 @@ function addScreenShakeAnimation() {
     }, 300);
 }
 
+// Make functions globally accessible
+window.initializeAnimations = initializeAnimations;
+window.createConfettiEffect = createConfettiEffect;
+window.playSoundEffect = playSoundEffect;
+window.addCellEntranceAnimation = addCellEntranceAnimation;
+window.addWinningLineAnimation = addWinningLineAnimation;
+window.addBoardShakeAnimation = addBoardShakeAnimation;
+window.addVictoryScreenAnimation = addVictoryScreenAnimation;
+window.addFloatingPiecesAnimation = addFloatingPiecesAnimation;
+window.addButtonHoverAnimation = addButtonHoverAnimation;
+window.addCellHoverAnimation = addCellHoverAnimation;
+window.addGameBoardEntranceAnimation = addGameBoardEntranceAnimation;
+window.addStartScreenFadeOutAnimation = addStartScreenFadeOutAnimation;
+window.addGameBoardFadeInAnimation = addGameBoardFadeInAnimation;
+window.addAIThinkingAnimation = addAIThinkingAnimation;
+window.removeAIThinkingAnimation = removeAIThinkingAnimation;
+window.addCelebrationAnimation = addCelebrationAnimation;
+window.addScreenShakeAnimation = addScreenShakeAnimation;
+
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {

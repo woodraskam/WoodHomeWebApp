@@ -371,6 +371,24 @@ function setupGameEventListeners() {
     console.log('🎮 Game event listeners setup');
 }
 
+// Make functions globally accessible
+window.initializeGameLogic = initializeGameLogic;
+window.createGameBoard = createGameBoard;
+window.handleCellClick = handleCellClick;
+window.updateCellDisplay = updateCellDisplay;
+window.updateCurrentPlayerDisplay = updateCurrentPlayerDisplay;
+window.updateGameStatus = updateGameStatus;
+window.showWinningLine = showWinningLine;
+window.hideWinningLine = hideWinningLine;
+window.resetBoardDisplay = resetBoardDisplay;
+window.startGame = startGame;
+window.showVictoryScreen = showVictoryScreen;
+window.hideVictoryScreen = hideVictoryScreen;
+window.playAgain = playAgain;
+window.goHome = goHome;
+window.hideStartScreen = hideStartScreen;
+window.showGameBoard = showGameBoard;
+
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {

@@ -326,6 +326,19 @@ function getStrategicMove() {
     return availableMoves[0];
 }
 
+// Make functions globally accessible
+window.makeAIMove = makeAIMove;
+window.getEasyAIMove = getEasyAIMove;
+window.getHardAIMove = getHardAIMove;
+window.getSmartAIMove = getSmartAIMove;
+window.minimax = minimax;
+window.showAIThinking = showAIThinking;
+window.hideAIThinking = hideAIThinking;
+window.getAIDifficultyDescription = getAIDifficultyDescription;
+window.canAIWin = canAIWin;
+window.needsToBlock = needsToBlock;
+window.getStrategicMove = getStrategicMove;
+
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {

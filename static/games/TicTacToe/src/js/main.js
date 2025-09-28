@@ -199,50 +199,8 @@ function selectGameMode(mode) {
     }
 }
 
-// Start game function
-function startGame() {
-    if (!gameState.gameMode) {
-        console.error('❌ No game mode selected');
-        return;
-    }
-    
-    console.log(`🎮 Starting game in ${gameState.gameMode} mode`);
-    
-    // Start the game
-    startGame();
-}
-
-// Reset game function
-function resetGame() {
-    console.log('🔄 Resetting game...');
-    
-    // Reset game state
-    resetGame();
-    
-    // Reset board display
-    resetBoardDisplay();
-    
-    // Update displays
-    updateCurrentPlayerDisplay();
-    updateGameStatus('Make your move!');
-    
-    // If AI goes first, make AI move
-    if (gameState.gameMode !== 'vs-human' && gameState.currentPlayer === 'O') {
-        setTimeout(() => makeAIMove(), 1000);
-    }
-}
-
-// Play again function
-function playAgain() {
-    console.log('🔄 Playing again...');
-    playAgain();
-}
-
-// Go home function
-function goHome() {
-    console.log('🏠 Going home...');
-    goHome();
-}
+// Make functions globally accessible
+window.selectGameMode = selectGameMode;
 
 // Feature detection
 function detectFeatures() {

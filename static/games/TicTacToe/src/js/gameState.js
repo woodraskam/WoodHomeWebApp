@@ -237,6 +237,20 @@ function isAITurn() {
            isGameActive();
 }
 
+// Make functions globally accessible
+window.gameState = gameState;
+window.initializeGameState = initializeGameState;
+window.setGameMode = setGameMode;
+window.getCurrentPlayer = getCurrentPlayer;
+window.makeMove = makeMove;
+window.resetGame = resetGame;
+window.startNewGame = startNewGame;
+window.getGameBoard = getGameBoard;
+window.isGameActive = isGameActive;
+window.getGameMode = getGameMode;
+window.isAITurn = isAITurn;
+window.updateStatsDisplay = updateStatsDisplay;
+
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
