@@ -39,8 +39,7 @@
                         Start a new cribbage game and invite a friend to join.
                     </p>
 
-                    <form class="cribbage-form create-game-form" hx-post="/api/cribbage/create" hx-target="#game-result"
-                        hx-indicator="#create-loading">
+                    <form class="cribbage-form create-game-form" onsubmit="handleCreateGame(event)">
                         <div class="form-group">
                             <label for="playerEmail" class="form-label">Your Email</label>
                             <input type="email" id="playerEmail" name="playerEmail" class="form-input" required
@@ -66,8 +65,7 @@
                         Enter a game ID to join an existing cribbage game.
                     </p>
 
-                    <form class="cribbage-form join-game-form" hx-post="/api/cribbage/join" hx-target="#game-result"
-                        hx-indicator="#join-loading">
+                    <form class="cribbage-form join-game-form" onsubmit="handleJoinGame(event)">
                         <div class="form-group">
                             <label for="gameId" class="form-label">Game ID</label>
                             <input type="text" id="gameId" name="gameId" class="form-input" required
@@ -143,31 +141,7 @@
 
             // Handle form submissions
             document.addEventListener('DOMContentLoaded', function () {
-                // HTMX event handlers
-                document.body.addEventListener('htmx:beforeRequest', function (event) {
-                    const form = event.target.closest('form');
-                    if (form) {
-                        const loadingElement = form.querySelector('.loading');
-                        const textElement = form.querySelector('.loading').nextElementSibling;
-                        if (loadingElement) loadingElement.classList.remove('hidden');
-                        if (textElement) textElement.classList.add('hidden');
-                    }
-                });
-
-                document.body.addEventListener('htmx:afterRequest', function (event) {
-                    const form = event.target.closest('form');
-                    if (form) {
-                        const loadingElement = form.querySelector('.loading');
-                        const textElement = form.querySelector('.loading').nextElementSibling;
-                        if (loadingElement) loadingElement.classList.add('hidden');
-                        if (textElement) textElement.classList.remove('hidden');
-                    }
-                });
-
-                document.body.addEventListener('htmx:responseError', function (event) {
-                    console.error('HTMX error:', event.detail);
-                    showError('An error occurred. Please try again.');
-                });
+                // HTMX event handlers removed - using native JavaScript fetch instead
             });
 
             function showError(message) {
@@ -184,6 +158,157 @@
                 successDiv.textContent = message;
                 document.getElementById('game-result').appendChild(successDiv);
                 document.getElementById('game-result').classList.remove('hidden');
+            }
+
+            // Custom form handler for create game
+            function handleCreateGame(event) {
+                event.preventDefault();
+
+                const form = event.target;
+
+                // Prevent double submission
+                if (form.dataset.submitting === 'true') {
+                    console.log('Form already submitting, ignoring duplicate submission');
+                    return;
+                }
+                form.dataset.submitting = 'true';
+
+                const formData = new FormData(form);
+                const playerEmail = formData.get('playerEmail');
+
+                console.log('Creating game for:', playerEmail);
+
+                // Show loading and disable submit button
+                const submitButton = form.querySelector('button[type="submit"]');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    submitButton.textContent = 'Creating...';
+                }
+
+                const loadingElement = form.querySelector('.loading');
+                const textElement = form.querySelector('.loading').nextElementSibling;
+                if (loadingElement) loadingElement.classList.remove('hidden');
+                if (textElement) textElement.classList.add('hidden');
+
+                // Make API call
+                fetch('/api/cribbage/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ playerEmail: playerEmail })
+                })
+                    .then(response => {
+                        console.log('Raw response:', response);
+                        return response.json();
+                    })
+                    .then(data => {
+                        console.log('API Response:', data);
+                        console.log('Data structure:', JSON.stringify(data, null, 2));
+
+                        // Hide loading
+                        if (loadingElement) loadingElement.classList.add('hidden');
+                        if (textElement) textElement.classList.remove('hidden');
+
+                        if (data.status === 'success' && data.data) {
+                            const gameId = data.data.gameId;
+                            const playerEmail = data.data.playerEmail;
+
+                            console.log('Game created - ID:', gameId, 'Email:', playerEmail);
+                            console.log('gameId type:', typeof gameId, 'value:', gameId);
+                            console.log('playerEmail type:', typeof playerEmail, 'value:', playerEmail);
+
+                            if (gameId && playerEmail) {
+                                const redirectUrl = `/play/WoodraskaCribbage/board/?gameId=${gameId}&playerEmail=${encodeURIComponent(playerEmail)}`;
+                                console.log('Redirecting to:', redirectUrl);
+                                window.location.href = redirectUrl;
+                            }
+                        } else {
+                            showError(data.message || 'Failed to create game');
+                            form.dataset.submitting = 'false'; // Reset flag on error
+
+                            // Re-enable button on error
+                            if (submitButton) {
+                                submitButton.disabled = false;
+                                submitButton.textContent = 'Create Game';
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showError('An error occurred. Please try again.');
+
+                        // Hide loading
+                        if (loadingElement) loadingElement.classList.add('hidden');
+                        if (textElement) textElement.classList.remove('hidden');
+
+                        // Reset submission flag on error
+                        form.dataset.submitting = 'false';
+
+                        // Re-enable button on error
+                        if (submitButton) {
+                            submitButton.disabled = false;
+                            submitButton.textContent = 'Create Game';
+                        }
+                    });
+            }
+
+            // Custom form handler for join game
+            function handleJoinGame(event) {
+                event.preventDefault();
+
+                const form = event.target;
+                const formData = new FormData(form);
+                const gameId = formData.get('gameId');
+                const playerEmail = formData.get('playerEmail');
+
+                console.log('Joining game:', gameId, 'for:', playerEmail);
+
+                // Show loading
+                const loadingElement = form.querySelector('.loading');
+                const textElement = form.querySelector('.loading').nextElementSibling;
+                if (loadingElement) loadingElement.classList.remove('hidden');
+                if (textElement) textElement.classList.add('hidden');
+
+                // Make API call
+                fetch('/api/cribbage/join', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ gameId: gameId, playerEmail: playerEmail })
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('API Response:', data);
+
+                        // Hide loading
+                        if (loadingElement) loadingElement.classList.add('hidden');
+                        if (textElement) textElement.classList.remove('hidden');
+
+                        if (data.status === 'success' && data.data) {
+                            const gameId = data.data.gameId;
+                            const playerEmail = data.data.playerEmail;
+
+                            console.log('Game joined - ID:', gameId, 'Email:', playerEmail);
+
+                            if (gameId && playerEmail) {
+                                const redirectUrl = `/play/WoodraskaCribbage/board/?gameId=${gameId}&playerEmail=${encodeURIComponent(playerEmail)}`;
+                                console.log('Redirecting to:', redirectUrl);
+                                window.location.href = redirectUrl;
+                            }
+                        } else {
+                            showError(data.message || 'Failed to join game');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showError('An error occurred. Please try again.');
+
+                        // Hide loading
+                        if (loadingElement) loadingElement.classList.add('hidden');
+                        if (textElement) textElement.classList.remove('hidden');
+                    });
             }
         </script>
     </body>
