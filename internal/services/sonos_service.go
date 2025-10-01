@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"sync"
 	"time"
@@ -21,6 +22,7 @@ type SonosService struct {
 	httpClient    *http.Client
 	mu            sync.RWMutex
 	lastUpdate    time.Time
+	jishiURL      string
 }
 
 // NewSonosService creates a new SonosService instance
@@ -41,6 +43,7 @@ func NewSonosService(config *models.SonosServiceConfig) *SonosService {
 		httpClient: &http.Client{
 			Timeout: config.Timeout,
 		},
+		jishiURL: config.JishiURL,
 	}
 }
 
@@ -285,4 +288,156 @@ func (s *SonosService) updateDeviceStatus(ctx context.Context) {
 	}
 
 	s.lastUpdate = time.Now()
+}
+
+// Jishi API Methods for Device Control
+
+// PlayDevice plays a specific device via Jishi API
+func (s *SonosService) PlayDevice(ctx context.Context, deviceName string) error {
+	url := fmt.Sprintf("%s/%s/play", s.jishiURL, deviceName)
+	return s.executeJishiCommand(ctx, url, "play", deviceName)
+}
+
+// PauseDevice pauses a specific device via Jishi API
+func (s *SonosService) PauseDevice(ctx context.Context, deviceName string) error {
+	url := fmt.Sprintf("%s/%s/pause", s.jishiURL, deviceName)
+	return s.executeJishiCommand(ctx, url, "pause", deviceName)
+}
+
+// StopDevice stops a specific device via Jishi API
+func (s *SonosService) StopDevice(ctx context.Context, deviceName string) error {
+	url := fmt.Sprintf("%s/%s/stop", s.jishiURL, deviceName)
+	return s.executeJishiCommand(ctx, url, "stop", deviceName)
+}
+
+// NextTrack skips to next track on a device via Jishi API
+func (s *SonosService) NextTrack(ctx context.Context, deviceName string) error {
+	url := fmt.Sprintf("%s/%s/next", s.jishiURL, deviceName)
+	return s.executeJishiCommand(ctx, url, "next", deviceName)
+}
+
+// PreviousTrack skips to previous track on a device via Jishi API
+func (s *SonosService) PreviousTrack(ctx context.Context, deviceName string) error {
+	url := fmt.Sprintf("%s/%s/previous", s.jishiURL, deviceName)
+	return s.executeJishiCommand(ctx, url, "previous", deviceName)
+}
+
+// SetVolume sets volume for a device via Jishi API
+func (s *SonosService) SetVolume(ctx context.Context, deviceName string, volume int) error {
+	url := fmt.Sprintf("%s/%s/volume/%d", s.jishiURL, deviceName, volume)
+	return s.executeJishiCommand(ctx, url, "volume", deviceName)
+}
+
+// SetMute sets mute state for a device via Jishi API
+func (s *SonosService) SetMute(ctx context.Context, deviceName string, mute bool) error {
+	action := "mute"
+	if !mute {
+		action = "unmute"
+	}
+	url := fmt.Sprintf("%s/%s/%s", s.jishiURL, deviceName, action)
+	return s.executeJishiCommand(ctx, url, action, deviceName)
+}
+
+// Group Management Methods
+
+// CreateGroup creates a new group via Jishi API
+func (s *SonosService) CreateGroup(ctx context.Context, coordinatorName string, memberNames []string) error {
+	if len(memberNames) == 0 {
+		return fmt.Errorf("no member rooms provided")
+	}
+
+	logrus.Debugf("Creating group with coordinator %s and members: %v", coordinatorName, memberNames)
+
+	// First, ensure the coordinator is not in any group
+	if err := s.LeaveGroup(ctx, coordinatorName); err != nil {
+		logrus.Debugf("Coordinator %s was not in a group or error occurred: %v", coordinatorName, err)
+	}
+
+	// Join each member room to the coordinator
+	for i, memberName := range memberNames {
+		if memberName != coordinatorName {
+			url := fmt.Sprintf("%s/%s/join/%s", s.jishiURL, memberName, coordinatorName)
+			if err := s.executeJishiCommand(ctx, url, "join", memberName); err != nil {
+				return fmt.Errorf("failed to join %s to group: %w", memberName, err)
+			}
+
+			// Add a small delay between group operations to allow Sonos to process
+			if i < len(memberNames)-1 {
+				time.Sleep(2 * time.Second)
+			}
+		}
+	}
+
+	logrus.Debugf("Group created successfully with coordinator %s", coordinatorName)
+	return nil
+}
+
+// JoinGroup adds a device to an existing group via Jishi API
+func (s *SonosService) JoinGroup(ctx context.Context, deviceName, targetDeviceName string) error {
+	url := fmt.Sprintf("%s/%s/join/%s", s.jishiURL, deviceName, targetDeviceName)
+	return s.executeJishiCommand(ctx, url, "join", deviceName)
+}
+
+// LeaveGroup removes a device from its current group via Jishi API
+func (s *SonosService) LeaveGroup(ctx context.Context, deviceName string) error {
+	url := fmt.Sprintf("%s/%s/leave", s.jishiURL, deviceName)
+	return s.executeJishiCommand(ctx, url, "leave", deviceName)
+}
+
+// PlayGroup plays a group via Jishi API
+func (s *SonosService) PlayGroup(ctx context.Context, coordinatorName string) error {
+	url := fmt.Sprintf("%s/%s/play", s.jishiURL, coordinatorName)
+	return s.executeJishiCommand(ctx, url, "play", coordinatorName)
+}
+
+// PauseGroup pauses a group via Jishi API
+func (s *SonosService) PauseGroup(ctx context.Context, coordinatorName string) error {
+	url := fmt.Sprintf("%s/%s/pause", s.jishiURL, coordinatorName)
+	return s.executeJishiCommand(ctx, url, "pause", coordinatorName)
+}
+
+// StopGroup stops a group via Jishi API
+func (s *SonosService) StopGroup(ctx context.Context, coordinatorName string) error {
+	url := fmt.Sprintf("%s/%s/stop", s.jishiURL, coordinatorName)
+	return s.executeJishiCommand(ctx, url, "stop", coordinatorName)
+}
+
+// SetGroupVolume sets volume for a group via Jishi API
+func (s *SonosService) SetGroupVolume(ctx context.Context, coordinatorName string, volume int) error {
+	url := fmt.Sprintf("%s/%s/volume/%d", s.jishiURL, coordinatorName, volume)
+	return s.executeJishiCommand(ctx, url, "volume", coordinatorName)
+}
+
+// SetGroupMute sets mute state for a group via Jishi API
+func (s *SonosService) SetGroupMute(ctx context.Context, coordinatorName string, mute bool) error {
+	action := "mute"
+	if !mute {
+		action = "unmute"
+	}
+	url := fmt.Sprintf("%s/%s/%s", s.jishiURL, coordinatorName, action)
+	return s.executeJishiCommand(ctx, url, action, coordinatorName)
+}
+
+// executeJishiCommand executes a command via Jishi API
+func (s *SonosService) executeJishiCommand(ctx context.Context, url, action, deviceName string) error {
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return fmt.Errorf("failed to create request: %w", err)
+	}
+
+	logrus.Debugf("Executing %s command on %s via Jishi API: %s", action, deviceName, url)
+
+	resp, err := s.httpClient.Do(req)
+	if err != nil {
+		return fmt.Errorf("failed to execute %s command: %w", action, err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		body, _ := io.ReadAll(resp.Body)
+		return fmt.Errorf("Jishi API returned status %d for %s: %s", resp.StatusCode, action, string(body))
+	}
+
+	logrus.Debugf("%s command executed successfully on %s", action, deviceName)
+	return nil
 }

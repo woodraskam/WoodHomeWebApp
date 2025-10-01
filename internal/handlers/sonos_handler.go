@@ -122,7 +122,13 @@ func (h *SonosHandler) PlayDevice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// TODO: Implement actual play command via Jishi API
+	ctx := r.Context()
+	if err := h.sonosService.PlayDevice(ctx, device.Name); err != nil {
+		logrus.Errorf("Failed to play device %s: %v", device.Name, err)
+		http.Error(w, "Failed to play device: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
 	logrus.Infof("Playing device: %s", device.Name)
 	
 	w.Header().Set("Content-Type", "application/json")
@@ -144,7 +150,13 @@ func (h *SonosHandler) PauseDevice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// TODO: Implement actual pause command via Jishi API
+	ctx := r.Context()
+	if err := h.sonosService.PauseDevice(ctx, device.Name); err != nil {
+		logrus.Errorf("Failed to pause device %s: %v", device.Name, err)
+		http.Error(w, "Failed to pause device: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
 	logrus.Infof("Pausing device: %s", device.Name)
 	
 	w.Header().Set("Content-Type", "application/json")
@@ -166,7 +178,13 @@ func (h *SonosHandler) StopDevice(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// TODO: Implement actual stop command via Jishi API
+	ctx := r.Context()
+	if err := h.sonosService.StopDevice(ctx, device.Name); err != nil {
+		logrus.Errorf("Failed to stop device %s: %v", device.Name, err)
+		http.Error(w, "Failed to stop device: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
 	logrus.Infof("Stopping device: %s", device.Name)
 	
 	w.Header().Set("Content-Type", "application/json")
@@ -188,7 +206,13 @@ func (h *SonosHandler) NextTrack(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// TODO: Implement actual next command via Jishi API
+	ctx := r.Context()
+	if err := h.sonosService.NextTrack(ctx, device.Name); err != nil {
+		logrus.Errorf("Failed to skip to next track on device %s: %v", device.Name, err)
+		http.Error(w, "Failed to skip to next track: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
 	logrus.Infof("Next track on device: %s", device.Name)
 	
 	w.Header().Set("Content-Type", "application/json")
@@ -210,7 +234,13 @@ func (h *SonosHandler) PreviousTrack(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// TODO: Implement actual previous command via Jishi API
+	ctx := r.Context()
+	if err := h.sonosService.PreviousTrack(ctx, device.Name); err != nil {
+		logrus.Errorf("Failed to skip to previous track on device %s: %v", device.Name, err)
+		http.Error(w, "Failed to skip to previous track: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
 	logrus.Infof("Previous track on device: %s", device.Name)
 	
 	w.Header().Set("Content-Type", "application/json")
@@ -246,7 +276,13 @@ func (h *SonosHandler) SetVolume(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// TODO: Implement actual volume command via Jishi API
+	ctx := r.Context()
+	if err := h.sonosService.SetVolume(ctx, device.Name, request.Volume); err != nil {
+		logrus.Errorf("Failed to set volume on device %s: %v", device.Name, err)
+		http.Error(w, "Failed to set volume: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
 	logrus.Infof("Setting volume to %d on device: %s", request.Volume, device.Name)
 	
 	w.Header().Set("Content-Type", "application/json")
@@ -278,7 +314,13 @@ func (h *SonosHandler) SetMute(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// TODO: Implement actual mute command via Jishi API
+	ctx := r.Context()
+	if err := h.sonosService.SetMute(ctx, device.Name, request.Mute); err != nil {
+		logrus.Errorf("Failed to set mute on device %s: %v", device.Name, err)
+		http.Error(w, "Failed to set mute: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
 	logrus.Infof("Setting mute to %t on device: %s", request.Mute, device.Name)
 	
 	w.Header().Set("Content-Type", "application/json")
@@ -301,7 +343,13 @@ func (h *SonosHandler) PlayGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// TODO: Implement actual group play command via Jishi API
+	ctx := r.Context()
+	if err := h.sonosService.PlayGroup(ctx, group.Coordinator.Name); err != nil {
+		logrus.Errorf("Failed to play group %s: %v", group.ID, err)
+		http.Error(w, "Failed to play group: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
 	logrus.Infof("Playing group: %s", group.ID)
 	
 	w.Header().Set("Content-Type", "application/json")
@@ -436,7 +484,13 @@ func (h *SonosHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// TODO: Implement actual group creation via Jishi API
+	ctx := r.Context()
+	if err := h.sonosService.CreateGroup(ctx, request.Coordinator, request.Members); err != nil {
+		logrus.Errorf("Failed to create group: %v", err)
+		http.Error(w, "Failed to create group: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
 	logrus.Infof("Creating group with coordinator: %s, members: %v", request.Coordinator, request.Members)
 	
 	w.Header().Set("Content-Type", "application/json")
