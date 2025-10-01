@@ -79,15 +79,15 @@ Implementation checklist for Material Design 3 upgrade of WoodHome WebApp, follo
 - [x] Test responsive behavior across devices
 
 #### 3.2 Sonos Control Dashboard Upgrade
-- [ ] Convert header to Material Design 3 top app bar
-- [ ] Update device cards to Material Design 3 cards with proper states
-- [ ] Convert control buttons to Material Design 3 button variants
-- [ ] Implement Material Design 3 sliders for volume controls
-- [ ] Convert modal dialogs to Material Design 3 dialogs
-- [ ] Update status indicators to Material Design 3 status system
-- [ ] Refactor `static/sonos/css/sonos-dashboard.css` for Material Design 3 compliance
-- [ ] Implement proper Material Design 3 layout patterns
-- [ ] Test Sonos functionality with new components
+- [x] Convert header to Material Design 3 top app bar
+- [x] Update device cards to Material Design 3 cards with proper states
+- [x] Convert control buttons to Material Design 3 button variants
+- [x] Implement Material Design 3 sliders for volume controls
+- [x] Convert modal dialogs to Material Design 3 dialogs
+- [x] Update status indicators to Material Design 3 status system
+- [x] Refactor `static/sonos/css/sonos-dashboard.css` for Material Design 3 compliance
+- [x] Implement proper Material Design 3 layout patterns
+- [x] Test Sonos functionality with new components
 
 
 #### 3.4 Weather Widget Integration

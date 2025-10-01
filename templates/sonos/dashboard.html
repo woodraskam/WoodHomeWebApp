@@ -5,17 +5,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sonos Control - WoodHome</title>
     <link rel="stylesheet" href="/static/css/material-design-3.css">
+    <link rel="stylesheet" href="/static/css/md3-components.css">
+    <link rel="stylesheet" href="/static/css/md3-icons.css">
     <link rel="stylesheet" href="/static/sonos/css/sonos-dashboard.css">
     <link rel="stylesheet" href="/static/sonos/css/sonos-responsive.css">
 </head>
 <body>
     <div class="sonos-container">
         <!-- Header -->
-        <header class="sonos-header">
-            <h1>🎵 Sonos Control</h1>
-            <div class="sonos-status">
-                <span id="connection-status" class="status-indicator offline">Offline</span>
-                <span id="device-count" class="device-count">0 devices</span>
+        <header class="md3-top-app-bar">
+            <div class="container">
+                <div class="app-bar-content">
+                    <h1 class="md3-title">
+                        <span class="material-symbols-outlined">music_note</span>
+                        Sonos Control
+                    </h1>
+                    <div class="md3-actions">
+                        <div class="sonos-status">
+                            <span id="connection-status" class="status-indicator offline">Offline</span>
+                            <span id="device-count" class="device-count">0 devices</span>
+                        </div>
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -23,49 +34,89 @@
         <main class="sonos-dashboard">
             <!-- Quick Actions -->
             <section class="actions-section">
-                <h2>⚡ Quick Actions</h2>
-                <div class="quick-actions">
-                    <button id="play-all" class="action-btn play-btn">Play All</button>
-                    <button id="pause-all" class="action-btn pause-btn">Pause All</button>
-                    <button id="stop-all" class="action-btn stop-btn">Stop All</button>
-                    <button id="refresh-devices" class="action-btn refresh-btn">Refresh</button>
+                <div class="md3-card">
+                    <div class="md3-card-header">
+                        <h2 class="md3-card-title">Quick Actions</h2>
+                        <span class="material-symbols-outlined primary">flash_on</span>
+                    </div>
+                    <div class="md3-card-content">
+                        <div class="quick-actions">
+                            <button id="play-all" class="md3-btn md3-btn-filled">
+                                <span class="material-symbols-outlined">play_arrow</span>
+                                Play All
+                            </button>
+                            <button id="pause-all" class="md3-btn md3-btn-outlined">
+                                <span class="material-symbols-outlined">pause</span>
+                                Pause All
+                            </button>
+                            <button id="stop-all" class="md3-btn md3-btn-outlined">
+                                <span class="material-symbols-outlined">stop</span>
+                                Stop All
+                            </button>
+                            <button id="refresh-devices" class="md3-btn md3-btn-text">
+                                <span class="material-symbols-outlined">refresh</span>
+                                Refresh
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </section>
 
             <!-- Unified View -->
             <section class="unified-section">
-                <h2>🎵 Rooms & Groups</h2>
-                <div class="sonos-unified-view">
-                    <div id="unified-device-list" class="device-list">
-                        <!-- Unified list of devices and groups will be populated here -->
+                <div class="md3-card">
+                    <div class="md3-card-header">
+                        <h2 class="md3-card-title">Rooms & Groups</h2>
+                        <span class="material-symbols-outlined primary">speaker_group</span>
+                    </div>
+                    <div class="md3-card-content">
+                        <div class="sonos-unified-view">
+                            <div id="unified-device-list" class="device-list">
+                                <!-- Unified list of devices and groups will be populated here -->
+                            </div>
+                        </div>
                     </div>
                 </div>
             </section>
         </main>
 
         <!-- Device Modal -->
-        <div id="device-modal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="modal-device-name">Device Control</h3>
-                    <span class="close">&times;</span>
+        <div id="device-modal" class="md3-dialog-overlay">
+            <div class="md3-dialog">
+                <div class="md3-dialog-header">
+                    <h3 id="modal-device-name" class="md3-dialog-title">Device Control</h3>
+                    <button class="icon-button" onclick="closeDeviceModal()">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
                 </div>
-                <div class="modal-body">
+                <div class="md3-dialog-content">
                     <div class="device-controls">
                         <div class="playback-controls">
-                            <button id="modal-play" class="control-btn play">▶️</button>
-                            <button id="modal-pause" class="control-btn pause">⏸️</button>
-                            <button id="modal-stop" class="control-btn stop">⏹️</button>
-                            <button id="modal-next" class="control-btn next">⏭️</button>
-                            <button id="modal-previous" class="control-btn previous">⏮️</button>
+                            <button id="modal-play" class="md3-btn md3-btn-filled">
+                                <span class="material-symbols-outlined">play_arrow</span>
+                            </button>
+                            <button id="modal-pause" class="md3-btn md3-btn-outlined">
+                                <span class="material-symbols-outlined">pause</span>
+                            </button>
+                            <button id="modal-stop" class="md3-btn md3-btn-outlined">
+                                <span class="material-symbols-outlined">stop</span>
+                            </button>
+                            <button id="modal-next" class="md3-btn md3-btn-outlined">
+                                <span class="material-symbols-outlined">skip_next</span>
+                            </button>
+                            <button id="modal-previous" class="md3-btn md3-btn-outlined">
+                                <span class="material-symbols-outlined">skip_previous</span>
+                            </button>
                         </div>
                         <div class="volume-controls">
                             <label for="volume-slider">Volume:</label>
-                            <input type="range" id="volume-slider" min="0" max="100" value="0">
+                            <input type="range" id="volume-slider" min="0" max="100" value="0" class="md3-slider">
                             <span id="volume-display">0%</span>
                         </div>
                         <div class="mute-controls">
-                            <button id="mute-btn" class="control-btn mute">🔇</button>
+                            <button id="mute-btn" class="md3-btn md3-btn-text">
+                                <span class="material-symbols-outlined">volume_off</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -73,17 +124,19 @@
         </div>
 
         <!-- Group Modal -->
-        <div id="group-modal" class="modal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Create Group</h3>
-                    <span class="close">&times;</span>
+        <div id="group-modal" class="md3-dialog-overlay">
+            <div class="md3-dialog">
+                <div class="md3-dialog-header">
+                    <h3 class="md3-dialog-title">Create Group</h3>
+                    <button class="icon-button" onclick="closeGroupModal()">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
                 </div>
-                <div class="modal-body">
+                <div class="md3-dialog-content">
                     <div class="group-creation">
                         <div class="coordinator-selection">
                             <label for="coordinator-select">Coordinator Room:</label>
-                            <select id="coordinator-select">
+                            <select id="coordinator-select" class="md3-select">
                                 <option value="">Select coordinator...</option>
                             </select>
                         </div>
@@ -93,14 +146,20 @@
                                 <!-- Member checkboxes will be populated -->
                             </div>
                         </div>
-                        <button id="create-group-btn" class="action-btn create-btn">Create Group</button>
                     </div>
+                </div>
+                <div class="md3-dialog-actions">
+                    <button id="create-group-btn" class="md3-btn md3-btn-filled">
+                        <span class="material-symbols-outlined">group_add</span>
+                        Create Group
+                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <!-- Scripts -->
+    <script src="/static/js/icon-manager.js"></script>
     <script src="/static/sonos/js/sonos-websocket.js?v=2"></script>
     <script src="/static/sonos/js/sonos-dashboard.js?v=2"></script>
     <script src="/static/sonos/js/sonos-device-control.js?v=2"></script>
