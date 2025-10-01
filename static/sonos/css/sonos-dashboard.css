@@ -1,21 +1,30 @@
-/* Sonos Dashboard Styles */
+/* Sonos Dashboard Styles - Material Design 3 Compatible */
 .sonos-container {
     width: 100%;
     margin: 0 auto;
     padding: 20px;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    font-family: var(--md-sys-typescale-body-large-font);
 }
 
-.sonos-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-    padding: 20px;
+/* Override Material Design 3 top app bar for Sonos */
+.sonos-container .md3-top-app-bar {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 12px;
     color: white;
+    border-radius: 12px;
+    margin-bottom: 30px;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.sonos-container .md3-title {
+    color: white;
+    font-size: 2rem;
+    font-weight: 600;
+}
+
+.sonos-container .md3-actions {
+    display: flex;
+    gap: 20px;
+    align-items: center;
 }
 
 .sonos-header h1 {
@@ -30,23 +39,27 @@
     align-items: center;
 }
 
-.status-indicator {
+/* Material Design 3 compatible status indicators */
+.sonos-container .status-indicator {
     padding: 8px 16px;
-    border-radius: 20px;
+    border-radius: var(--md-sys-shape-corner-extra-large);
     font-size: 0.9rem;
     font-weight: 500;
     text-transform: uppercase;
     letter-spacing: 0.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
 }
 
-.status-indicator.online {
-    background: #4CAF50;
-    color: white;
+.sonos-container .status-indicator.online {
+    background: var(--md-sys-color-tertiary-container);
+    color: var(--md-sys-color-on-tertiary-container);
 }
 
-.status-indicator.offline {
-    background: #f44336;
-    color: white;
+.sonos-container .status-indicator.offline {
+    background: var(--md-sys-color-error-container);
+    color: var(--md-sys-color-on-error-container);
 }
 
 .device-count {
@@ -318,18 +331,31 @@
     font-weight: 600;
 }
 
-.quick-actions {
+/* Material Design 3 compatible quick actions */
+.sonos-container .quick-actions {
     display: flex;
     gap: 15px;
     flex-wrap: wrap;
 }
 
-.quick-actions .action-btn {
+.sonos-container .quick-actions .md3-btn {
     flex: 1;
     min-width: 120px;
     padding: 12px 20px;
     font-size: 1rem;
     font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--md-sys-shape-corner-large);
+    font-family: var(--md-sys-typescale-label-large-font);
+    line-height: var(--md-sys-typescale-label-large-line-height);
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-height: 40px;
+    gap: 8px;
+    border: none;
 }
 
 /* Modal Styles */
