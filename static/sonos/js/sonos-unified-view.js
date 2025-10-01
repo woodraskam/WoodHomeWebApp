@@ -496,7 +496,6 @@ class SonosUnifiedView {
                 ${group.members.map(member => `
                     <div class="member-device" data-device-id="${member.uuid}">
                         <span class="member-name">${member.name}</span>
-                        <span class="member-status">Grouped</span>
                     </div>
                 `).join('')}
             </div>

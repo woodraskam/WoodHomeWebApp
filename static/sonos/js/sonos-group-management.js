@@ -66,6 +66,7 @@ class SonosGroupManagement {
             // Add to member checkboxes
             const checkboxContainer = document.createElement('div');
             checkboxContainer.className = 'member-checkbox';
+            checkboxContainer.setAttribute('data-device-uuid', device.uuid);
             
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
@@ -79,6 +80,21 @@ class SonosGroupManagement {
             checkboxContainer.appendChild(checkbox);
             checkboxContainer.appendChild(label);
             memberCheckboxes.appendChild(checkboxContainer);
+        });
+
+        // Add event listener to coordinator select to hide coordinator from member list
+        coordinatorSelect.addEventListener('change', () => {
+            const selectedCoordinator = coordinatorSelect.value;
+            const memberCheckboxes = document.querySelectorAll('.member-checkbox');
+            
+            memberCheckboxes.forEach(checkboxContainer => {
+                const deviceUuid = checkboxContainer.getAttribute('data-device-uuid');
+                if (deviceUuid === selectedCoordinator) {
+                    checkboxContainer.style.display = 'none';
+                } else {
+                    checkboxContainer.style.display = 'block';
+                }
+            });
         });
     }
 
