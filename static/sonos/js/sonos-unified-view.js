@@ -247,69 +247,58 @@ class SonosUnifiedView {
 
     async refreshView() {
         try {
-            // Reload devices and groups from API
-            const [devicesResponse, groupsResponse] = await Promise.all([
-                fetch('/api/sonos/devices'),
-                fetch('/api/sonos/groups')
-            ]);
-            
-            if (!devicesResponse.ok || !groupsResponse.ok) {
-                console.error('API responses not ok:', {
-                    devices: devicesResponse.status,
-                    groups: groupsResponse.status
-                });
-                throw new Error('Failed to fetch data from API');
-            }
-            
-            const devices = await devicesResponse.json();
-            const groups = await groupsResponse.json();
-            
-            console.log('Raw API responses:', { devices, groups });
-            console.log('Devices type:', typeof devices, 'Is array:', Array.isArray(devices));
-            console.log('Groups type:', typeof groups, 'Is array:', Array.isArray(groups));
-            
-            // Handle different response formats
-            let devicesArray = [];
-            let groupsArray = [];
-            
-            if (Array.isArray(devices)) {
-                devicesArray = devices;
-            } else if (devices && typeof devices === 'object') {
-                // If it's an object, try to extract array from common properties
-                if (devices.devices && Array.isArray(devices.devices)) {
-                    devicesArray = devices.devices;
-                } else if (devices.data && Array.isArray(devices.data)) {
-                    devicesArray = devices.data;
-                } else {
-                    // Convert object values to array
-                    devicesArray = Object.values(devices);
+            // Get data from the main dashboard
+            if (window.sonosDashboard && window.sonosDashboard.devices && window.sonosDashboard.groups) {
+                console.log('Refreshing from main dashboard data');
+                this.updateView(window.sonosDashboard.devices, window.sonosDashboard.groups);
+            } else {
+                console.log('Main dashboard not available, using API directly');
+                // Fallback to direct API calls if main dashboard is not available
+                const [devicesResponse, groupsResponse] = await Promise.all([
+                    fetch('/api/sonos/devices'),
+                    fetch('/api/sonos/groups')
+                ]);
+                
+                if (!devicesResponse.ok || !groupsResponse.ok) {
+                    throw new Error('Failed to fetch data from API');
                 }
-            }
-            
-            if (Array.isArray(groups)) {
-                groupsArray = groups;
-            } else if (groups && typeof groups === 'object') {
-                // If it's an object, try to extract array from common properties
-                if (groups.groups && Array.isArray(groups.groups)) {
-                    groupsArray = groups.groups;
-                } else if (groups.data && Array.isArray(groups.data)) {
-                    groupsArray = groups.data;
-                } else {
-                    // Convert object values to array
-                    groupsArray = Object.values(groups);
+                
+                const devices = await devicesResponse.json();
+                const groups = await groupsResponse.json();
+                
+                // Handle different response formats
+                let devicesArray = [];
+                let groupsArray = [];
+                
+                if (Array.isArray(devices)) {
+                    devicesArray = devices;
+                } else if (devices && typeof devices === 'object') {
+                    if (devices.devices && Array.isArray(devices.devices)) {
+                        devicesArray = devices.devices;
+                    } else if (devices.data && Array.isArray(devices.data)) {
+                        devicesArray = devices.data;
+                    } else {
+                        devicesArray = Object.values(devices);
+                    }
                 }
+                
+                if (Array.isArray(groups)) {
+                    groupsArray = groups;
+                } else if (groups && typeof groups === 'object') {
+                    if (groups.groups && Array.isArray(groups.groups)) {
+                        groupsArray = groups.groups;
+                    } else if (groups.data && Array.isArray(groups.data)) {
+                        groupsArray = groups.data;
+                    } else {
+                        groupsArray = Object.values(groups);
+                    }
+                }
+                
+                this.updateView(devicesArray, groupsArray);
             }
-            
-            console.log('Processed arrays:', { devicesArray, groupsArray });
-            console.log('Devices count:', devicesArray.length, 'Groups count:', groupsArray.length);
-            
-            this.updateView(devicesArray, groupsArray);
         } catch (error) {
             console.error('Failed to refresh view:', error);
             this.showError('Failed to refresh device list');
-            
-            // For testing, show some mock data
-            this.showMockData();
         }
     }
 
@@ -524,7 +513,15 @@ class SonosUnifiedView {
 
     async loadInitialData() {
         try {
-            await this.refreshView();
+            // Get data from the main dashboard instead of making our own API calls
+            if (window.sonosDashboard && window.sonosDashboard.devices && window.sonosDashboard.groups) {
+                console.log('Getting data from main dashboard');
+                this.updateView(window.sonosDashboard.devices, window.sonosDashboard.groups);
+            } else {
+                console.log('Main dashboard not ready, waiting...');
+                // Wait a bit for the main dashboard to load
+                setTimeout(() => this.loadInitialData(), 1000);
+            }
         } catch (error) {
             console.error('Failed to load initial data:', error);
             this.showError('Failed to load devices and groups');

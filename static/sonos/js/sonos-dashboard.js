@@ -24,9 +24,6 @@ class SonosDashboard {
         
         this.deviceControl.init();
         this.groupManagement.init();
-        
-        // Disable old dashboard rendering when using unified view
-        this.useUnifiedView = true;
     }
 
     setupEventListeners() {
@@ -126,11 +123,7 @@ class SonosDashboard {
             
             if (response.ok) {
                 this.devices = data.devices;
-                
-                // Only render if not using unified view
-                if (!this.useUnifiedView) {
-                    this.renderDevices();
-                }
+                this.renderDevices();
                 this.updateDeviceCount();
             } else {
                 console.error('Failed to load devices:', data);
@@ -147,11 +140,7 @@ class SonosDashboard {
             
             if (response.ok) {
                 this.groups = data.groups;
-                
-                // Only render if not using unified view
-                if (!this.useUnifiedView) {
-                    this.renderGroups();
-                }
+                this.renderGroups();
             } else {
                 console.error('Failed to load groups:', data);
             }
