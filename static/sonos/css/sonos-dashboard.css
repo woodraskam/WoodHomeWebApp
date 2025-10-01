@@ -518,19 +518,19 @@
 
 /* Unified View Styles */
 .sonos-unified-view {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 360px));
+    display: flex;
+    flex-wrap: wrap;
     gap: 16px;
     margin-top: 20px;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 0 20px;
 }
 
 .device-list {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(300px, 360px));
+    display: flex;
+    flex-wrap: wrap;
     gap: 16px;
-    justify-content: center;
+    justify-content: flex-start;
     padding: 0 20px;
 }
 
@@ -542,6 +542,8 @@
     cursor: grab;
     transition: all 0.2s ease;
     border-left: 4px solid #2196F3;
+    width: 500px;
+    flex-shrink: 0;
 }
 
 .sonos-card:hover {

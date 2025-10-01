@@ -4,9 +4,12 @@
 @media (min-width: 769px) and (max-width: 1200px) {
     .sonos-unified-view,
     .device-list {
-        grid-template-columns: repeat(auto-fill, minmax(280px, 320px));
         gap: 14px;
         padding: 0 15px;
+    }
+    
+    .sonos-card {
+        width: 400px;
     }
 }
 
@@ -37,12 +40,16 @@
         gap: 15px;
     }
 
-    /* Unified view responsive grid */
+    /* Unified view responsive flexbox */
     .sonos-unified-view,
     .device-list {
-        grid-template-columns: 1fr;
         gap: 12px;
         padding: 0 10px;
+    }
+    
+    .sonos-card {
+        width: 100%;
+        max-width: 100%;
     }
 
     .device-card {
