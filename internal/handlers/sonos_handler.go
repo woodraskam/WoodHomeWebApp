@@ -3,6 +3,7 @@ package handlers
 import (
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"woodhome-webapp/internal/services"
 
@@ -255,6 +256,7 @@ func (h *SonosHandler) PreviousTrack(w http.ResponseWriter, r *http.Request) {
 func (h *SonosHandler) SetVolume(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	uuid := vars["uuid"]
+	volumeStr := vars["volume"]
 	
 	device, exists := h.sonosService.GetDevice(uuid)
 	if !exists {
@@ -262,35 +264,33 @@ func (h *SonosHandler) SetVolume(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// Parse volume from request body
-	var request struct {
-		Volume int `json:"volume"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+	// Parse volume from URL parameter
+	volume, err := strconv.Atoi(volumeStr)
+	if err != nil {
+		http.Error(w, "Invalid volume parameter", http.StatusBadRequest)
 		return
 	}
 	
-	if request.Volume < 0 || request.Volume > 100 {
+	if volume < 0 || volume > 100 {
 		http.Error(w, "Volume must be between 0 and 100", http.StatusBadRequest)
 		return
 	}
 	
 	ctx := r.Context()
-	if err := h.sonosService.SetVolume(ctx, device.Name, request.Volume); err != nil {
+	if err := h.sonosService.SetVolume(ctx, device.Name, volume); err != nil {
 		logrus.Errorf("Failed to set volume on device %s: %v", device.Name, err)
 		http.Error(w, "Failed to set volume: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 	
-	logrus.Infof("Setting volume to %d on device: %s", request.Volume, device.Name)
+	logrus.Infof("Setting volume to %d on device: %s", volume, device.Name)
 	
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"status": "success",
 		"action": "volume",
 		"device": device.Name,
-		"volume": request.Volume,
+		"volume": volume,
 	})
 }
 
@@ -408,6 +408,7 @@ func (h *SonosHandler) StopGroup(w http.ResponseWriter, r *http.Request) {
 func (h *SonosHandler) SetGroupVolume(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
+	volumeStr := vars["volume"]
 	
 	group, exists := h.sonosService.GetGroup(id)
 	if !exists {
@@ -415,29 +416,33 @@ func (h *SonosHandler) SetGroupVolume(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	// Parse volume from request body
-	var request struct {
-		Volume int `json:"volume"`
-	}
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, "Invalid request body", http.StatusBadRequest)
+	// Parse volume from URL parameter
+	volume, err := strconv.Atoi(volumeStr)
+	if err != nil {
+		http.Error(w, "Invalid volume parameter", http.StatusBadRequest)
 		return
 	}
 	
-	if request.Volume < 0 || request.Volume > 100 {
+	if volume < 0 || volume > 100 {
 		http.Error(w, "Volume must be between 0 and 100", http.StatusBadRequest)
 		return
 	}
 	
-	// TODO: Implement actual group volume command via Jishi API
-	logrus.Infof("Setting group volume to %d on group: %s", request.Volume, group.ID)
+	ctx := r.Context()
+	if err := h.sonosService.SetGroupVolume(ctx, group.Coordinator.Name, volume); err != nil {
+		logrus.Errorf("Failed to set group volume on group %s: %v", group.ID, err)
+		http.Error(w, "Failed to set group volume: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
+	logrus.Infof("Setting group volume to %d on group: %s", volume, group.ID)
 	
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"status": "success",
 		"action": "volume",
 		"group":  group.ID,
-		"volume": request.Volume,
+		"volume": volume,
 	})
 }
 
