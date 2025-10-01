@@ -5,6 +5,8 @@ class SonosDashboard {
         this.groups = [];
         this.websocket = null;
         this.isConnected = false;
+        this.deviceControl = null;
+        this.groupManagement = null;
         
         this.init();
     }
@@ -14,6 +16,13 @@ class SonosDashboard {
         this.connectWebSocket();
         this.loadDevices();
         this.loadGroups();
+        
+        // Initialize sub-modules
+        this.deviceControl = new SonosDeviceControl(this);
+        this.groupManagement = new SonosGroupManagement(this);
+        
+        this.deviceControl.init();
+        this.groupManagement.init();
     }
 
     setupEventListeners() {
@@ -22,6 +31,19 @@ class SonosDashboard {
         document.getElementById('pause-all')?.addEventListener('click', () => this.pauseAllDevices());
         document.getElementById('stop-all')?.addEventListener('click', () => this.stopAllDevices());
         document.getElementById('refresh-devices')?.addEventListener('click', () => this.refreshDevices());
+        
+        // Group management button
+        const createGroupBtn = document.createElement('button');
+        createGroupBtn.id = 'create-group';
+        createGroupBtn.className = 'action-btn create-btn';
+        createGroupBtn.textContent = 'Create Group';
+        createGroupBtn.addEventListener('click', () => this.groupManagement.openGroupModal());
+        
+        // Add to quick actions if it doesn't exist
+        const quickActions = document.querySelector('.quick-actions');
+        if (quickActions && !document.getElementById('create-group')) {
+            quickActions.appendChild(createGroupBtn);
+        }
 
         // Modal close buttons
         document.querySelectorAll('.close').forEach(closeBtn => {
@@ -146,7 +168,11 @@ class SonosDashboard {
         deviceGrid.querySelectorAll('.device-card').forEach(card => {
             card.addEventListener('click', (e) => {
                 if (!e.target.closest('.control-btn')) {
-                    this.openDeviceModal(device);
+                    const deviceUuid = card.dataset.deviceId;
+                    const device = this.devices.find(d => d.uuid === deviceUuid);
+                    if (device) {
+                        this.deviceControl.openDeviceModal(device);
+                    }
                 }
             });
         });
@@ -168,12 +194,12 @@ class SonosDashboard {
                     <div class="device-model">${device.model || 'Sonos'}</div>
                 </div>
                 <div class="device-controls">
-                    <button class="control-btn play" onclick="sonosDashboard.playDevice('${device.uuid}')" ${!device.is_online ? 'disabled' : ''}>▶️</button>
-                    <button class="control-btn pause" onclick="sonosDashboard.pauseDevice('${device.uuid}')" ${!device.is_online ? 'disabled' : ''}>⏸️</button>
-                    <button class="control-btn stop" onclick="sonosDashboard.stopDevice('${device.uuid}')" ${!device.is_online ? 'disabled' : ''}>⏹️</button>
+                    <button class="control-btn play" onclick="sonosDashboard.deviceControl.playDevice('${device.uuid}')" ${!device.is_online ? 'disabled' : ''}>▶️</button>
+                    <button class="control-btn pause" onclick="sonosDashboard.deviceControl.pauseDevice('${device.uuid}')" ${!device.is_online ? 'disabled' : ''}>⏸️</button>
+                    <button class="control-btn stop" onclick="sonosDashboard.deviceControl.stopDevice('${device.uuid}')" ${!device.is_online ? 'disabled' : ''}>⏹️</button>
                     <div class="volume-control">
                         <input type="range" class="volume-slider" min="0" max="100" value="${device.volume || 0}" 
-                               onchange="sonosDashboard.setVolume('${device.uuid}', this.value)" ${!device.is_online ? 'disabled' : ''}>
+                               onchange="sonosDashboard.deviceControl.setVolume('${device.uuid}', this.value)" ${!device.is_online ? 'disabled' : ''}>
                         <span class="volume-display">${device.volume || 0}%</span>
                     </div>
                 </div>
@@ -215,10 +241,10 @@ class SonosDashboard {
                     ${memberTags}
                 </div>
                 <div class="group-actions">
-                    <button class="action-btn" onclick="sonosDashboard.playGroup('${group.id}')">▶️ Play</button>
-                    <button class="action-btn" onclick="sonosDashboard.pauseGroup('${group.id}')">⏸️ Pause</button>
-                    <button class="action-btn" onclick="sonosDashboard.stopGroup('${group.id}')">⏹️ Stop</button>
-                    <button class="action-btn danger" onclick="sonosDashboard.dissolveGroup('${group.id}')">🔓 Dissolve</button>
+                    <button class="action-btn" onclick="sonosDashboard.groupManagement.playGroup('${group.id}')">▶️ Play</button>
+                    <button class="action-btn" onclick="sonosDashboard.groupManagement.pauseGroup('${group.id}')">⏸️ Pause</button>
+                    <button class="action-btn" onclick="sonosDashboard.groupManagement.stopGroup('${group.id}')">⏹️ Stop</button>
+                    <button class="action-btn danger" onclick="sonosDashboard.groupManagement.dissolveGroup('${group.id}')">🔓 Dissolve</button>
                 </div>
             </div>
         `;
@@ -251,6 +277,12 @@ class SonosDashboard {
             
             // Re-render the specific device card
             deviceCard.outerHTML = this.createDeviceCard(device);
+            
+            // Update device control modal if it's open for this device
+            if (this.deviceControl && this.deviceControl.currentDevice && 
+                this.deviceControl.currentDevice.uuid === device.uuid) {
+                this.deviceControl.updateDevice(device);
+            }
         }
     }
 
