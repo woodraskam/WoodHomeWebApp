@@ -23,6 +23,7 @@ type SonosService struct {
 	mu            sync.RWMutex
 	lastUpdate    time.Time
 	jishiURL      string
+	jishiManager  *JishiServerManager
 }
 
 // NewSonosService creates a new SonosService instance
@@ -36,6 +37,9 @@ func NewSonosService(config *models.SonosServiceConfig) *SonosService {
 		}
 	}
 
+	// Create Jishi server manager
+	jishiManager := NewJishiServerManager(5005)
+
 	return &SonosService{
 		config:  config,
 		devices: make(map[string]*models.SonosDevice),
@@ -43,7 +47,8 @@ func NewSonosService(config *models.SonosServiceConfig) *SonosService {
 		httpClient: &http.Client{
 			Timeout: config.Timeout,
 		},
-		jishiURL: config.JishiURL,
+		jishiURL:     config.JishiURL,
+		jishiManager: jishiManager,
 	}
 }
 
@@ -51,10 +56,25 @@ func NewSonosService(config *models.SonosServiceConfig) *SonosService {
 func (s *SonosService) Start(ctx context.Context) error {
 	logrus.Info("Starting Sonos service...")
 	
+	// Start Jishi server if not running
+	if !s.jishiManager.IsJishiRunning() {
+		logrus.Info("Starting internal Jishi server...")
+		if err := s.jishiManager.StartJishi(); err != nil {
+			logrus.Warnf("Failed to start internal Jishi server: %v", err)
+			logrus.Warnf("Will attempt to use external Jishi server at %s", s.config.JishiURL)
+		} else {
+			// Update Jishi URL to use internal server
+			s.jishiURL = s.jishiManager.GetJishiURL()
+			logrus.Infof("Using internal Jishi server at %s", s.jishiURL)
+		}
+	} else {
+		logrus.Info("Jishi server is already running")
+	}
+	
 	// Test Jishi API connection
 	if err := s.testJishiConnection(ctx); err != nil {
 		logrus.Warnf("Jishi API connection test failed: %v", err)
-		logrus.Warnf("Make sure Jishi API is running at %s", s.config.JishiURL)
+		logrus.Warnf("Make sure Jishi API is running at %s", s.jishiURL)
 	} else {
 		logrus.Info("Jishi API connection successful")
 	}
@@ -76,6 +96,13 @@ func (s *SonosService) Stop() error {
 	logrus.Info("Stopping Sonos service...")
 	s.mu.Lock()
 	defer s.mu.Unlock()
+
+	// Stop Jishi server if we started it
+	if s.jishiManager != nil {
+		if err := s.jishiManager.StopJishi(); err != nil {
+			logrus.Warnf("Failed to stop Jishi server: %v", err)
+		}
+	}
 
 	// Clear devices and groups
 	s.devices = make(map[string]*models.SonosDevice)
@@ -450,5 +477,59 @@ func (s *SonosService) executeJishiCommand(ctx context.Context, url, action, dev
 	}
 
 	logrus.Infof("%s command executed successfully on %s", action, deviceName)
+	return nil
+}
+
+// Jishi Server Management Methods
+
+// GetJishiStatus returns the status of the Jishi server
+func (s *SonosService) GetJishiStatus() map[string]interface{} {
+	if s.jishiManager == nil {
+		return map[string]interface{}{
+			"is_running": false,
+			"error":      "Jishi manager not initialized",
+		}
+	}
+	return s.jishiManager.GetStatus()
+}
+
+// StartJishiServer starts the internal Jishi server
+func (s *SonosService) StartJishiServer() error {
+	if s.jishiManager == nil {
+		return fmt.Errorf("Jishi manager not initialized")
+	}
+	
+	if err := s.jishiManager.StartJishi(); err != nil {
+		return err
+	}
+	
+	// Update Jishi URL to use internal server
+	s.jishiURL = s.jishiManager.GetJishiURL()
+	logrus.Infof("Jishi server started at %s", s.jishiURL)
+	return nil
+}
+
+// StopJishiServer stops the internal Jishi server
+func (s *SonosService) StopJishiServer() error {
+	if s.jishiManager == nil {
+		return fmt.Errorf("Jishi manager not initialized")
+	}
+	
+	return s.jishiManager.StopJishi()
+}
+
+// RestartJishiServer restarts the internal Jishi server
+func (s *SonosService) RestartJishiServer() error {
+	if s.jishiManager == nil {
+		return fmt.Errorf("Jishi manager not initialized")
+	}
+	
+	if err := s.jishiManager.RestartJishi(); err != nil {
+		return err
+	}
+	
+	// Update Jishi URL to use internal server
+	s.jishiURL = s.jishiManager.GetJishiURL()
+	logrus.Infof("Jishi server restarted at %s", s.jishiURL)
 	return nil
 }
