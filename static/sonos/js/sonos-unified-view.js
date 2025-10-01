@@ -632,7 +632,7 @@ class SonosUnifiedView {
     // Public methods for external control
     async playGroup(groupId) {
         try {
-            const response = await fetch(`/api/sonos/group/${groupId}/play`, {
+            const response = await fetch(`/api/sonos/groups/${groupId}/play`, {
                 method: 'POST'
             });
 
@@ -647,7 +647,7 @@ class SonosUnifiedView {
 
     async pauseGroup(groupId) {
         try {
-            const response = await fetch(`/api/sonos/group/${groupId}/pause`, {
+            const response = await fetch(`/api/sonos/groups/${groupId}/pause`, {
                 method: 'POST'
             });
 
@@ -662,7 +662,7 @@ class SonosUnifiedView {
 
     async stopGroup(groupId) {
         try {
-            const response = await fetch(`/api/sonos/group/${groupId}/stop`, {
+            const response = await fetch(`/api/sonos/groups/${groupId}/stop`, {
                 method: 'POST'
             });
 
@@ -677,7 +677,7 @@ class SonosUnifiedView {
 
     async setGroupVolume(groupId, volume) {
         try {
-            const response = await fetch(`/api/sonos/group/${groupId}/volume/${volume}`, {
+            const response = await fetch(`/api/sonos/groups/${groupId}/volume/${volume}`, {
                 method: 'POST'
             });
 
@@ -692,7 +692,7 @@ class SonosUnifiedView {
 
     async playDevice(deviceId) {
         try {
-            const response = await fetch(`/api/sonos/device/${deviceId}/play`, {
+            const response = await fetch(`/api/sonos/devices/${deviceId}/play`, {
                 method: 'POST'
             });
 
@@ -707,7 +707,7 @@ class SonosUnifiedView {
 
     async pauseDevice(deviceId) {
         try {
-            const response = await fetch(`/api/sonos/device/${deviceId}/pause`, {
+            const response = await fetch(`/api/sonos/devices/${deviceId}/pause`, {
                 method: 'POST'
             });
 
@@ -722,7 +722,7 @@ class SonosUnifiedView {
 
     async stopDevice(deviceId) {
         try {
-            const response = await fetch(`/api/sonos/device/${deviceId}/stop`, {
+            const response = await fetch(`/api/sonos/devices/${deviceId}/stop`, {
                 method: 'POST'
             });
 
@@ -737,7 +737,7 @@ class SonosUnifiedView {
 
     async setDeviceVolume(deviceId, volume) {
         try {
-            const response = await fetch(`/api/sonos/device/${deviceId}/volume/${volume}`, {
+            const response = await fetch(`/api/sonos/devices/${deviceId}/volume/${volume}`, {
                 method: 'POST'
             });
 
