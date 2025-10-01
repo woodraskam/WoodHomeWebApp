@@ -493,7 +493,7 @@ class SonosUnifiedView {
                 </div>
             </div>
             <div class="group-members">
-                ${group.members.map(member => `
+                ${group.members.filter(member => member.uuid !== group.coordinator?.uuid).map(member => `
                     <div class="member-device" data-device-id="${member.uuid}">
                         <span class="member-name">${member.name}</span>
                     </div>
