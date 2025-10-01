@@ -1,5 +1,15 @@
 /* Responsive Design for Sonos Dashboard */
 
+/* Tablet and Medium Screens */
+@media (min-width: 769px) and (max-width: 1200px) {
+    .sonos-unified-view,
+    .device-list {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 320px));
+        gap: 14px;
+        padding: 0 15px;
+    }
+}
+
 /* Mobile First Approach */
 @media (max-width: 768px) {
     .sonos-container {
@@ -25,6 +35,14 @@
     .device-grid {
         grid-template-columns: 1fr;
         gap: 15px;
+    }
+
+    /* Unified view responsive grid */
+    .sonos-unified-view,
+    .device-list {
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 0 10px;
     }
 
     .device-card {

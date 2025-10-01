@@ -518,16 +518,20 @@
 
 /* Unified View Styles */
 .sonos-unified-view {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 360px));
+    gap: 16px;
     margin-top: 20px;
+    justify-content: center;
+    padding: 0 20px;
 }
 
 .device-list {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 360px));
+    gap: 16px;
+    justify-content: center;
+    padding: 0 20px;
 }
 
 /* Unified Cards */
