@@ -68,15 +68,15 @@ Implementation checklist for Material Design 3 upgrade of WoodHome WebApp, follo
 **Status**: ⏳ Pending
 
 #### 3.1 Main Dashboard Upgrade
-- [ ] Convert app bar to Material Design 3 top app bar
-- [ ] Update status cards to Material Design 3 card components
-- [ ] Convert quick actions to Material Design 3 chips or buttons
-- [ ] Implement Material Design 3 status indicators for API status
-- [ ] Integrate weather widget with Material Design 3 styling
-- [ ] Update games section with Material Design 3 cards and elevation
-- [ ] Implement proper semantic HTML structure
-- [ ] Add Material Design 3 navigation patterns
-- [ ] Test responsive behavior across devices
+- [x] Convert app bar to Material Design 3 top app bar
+- [x] Update status cards to Material Design 3 card components
+- [x] Convert quick actions to Material Design 3 chips or buttons
+- [x] Implement Material Design 3 status indicators for API status
+- [x] Integrate weather widget with Material Design 3 styling
+- [x] Update games section with Material Design 3 cards and elevation
+- [x] Implement proper semantic HTML structure
+- [x] Add Material Design 3 navigation patterns
+- [x] Test responsive behavior across devices
 
 #### 3.2 Sonos Control Dashboard Upgrade
 - [ ] Convert header to Material Design 3 top app bar

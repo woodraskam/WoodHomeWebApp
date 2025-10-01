@@ -8,14 +8,16 @@
 
         <!-- Material Design 3 CSS -->
         <link rel="stylesheet" href="/static/css/material-design-3.css">
+        <link rel="stylesheet" href="/static/css/md3-components.css">
+        <link rel="stylesheet" href="/static/css/md3-icons.css">
 
         <!-- Google Fonts - Roboto -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
 
-        <!-- Material Icons -->
-        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+        <!-- Material Symbols -->
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block" rel="stylesheet">
 
         <!-- Weather Widget CSS -->
         <link rel="stylesheet" href="/static/css/weather-new.css">
@@ -26,13 +28,18 @@
 
     <body>
         <!-- App Bar -->
-        <header class="app-bar">
+        <header class="md3-top-app-bar">
             <div class="container">
                 <div class="app-bar-content">
-                    <h1 class="app-title title-large">🏠 WoodHome</h1>
-                    <div class="status-indicator" id="connection-status">
-                        <span class="material-icons">wifi_off</span>
-                        <span>Checking connection...</span>
+                    <h1 class="md3-title">
+                        <span class="material-symbols-outlined">home</span>
+                        WoodHome
+                    </h1>
+                    <div class="md3-actions">
+                        <div class="status-indicator" id="connection-status">
+                            <span class="material-symbols-outlined">wifi_off</span>
+                            <span>Checking connection...</span>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -42,24 +49,29 @@
         <main class="main-content">
             <div class="container">
                 <!-- Welcome Section -->
-                <div class="card card-elevated">
-                    <h2 class="headline-large" style="margin-bottom: 16px;">Welcome to WoodHome Dashboard</h2>
-                    <p class="body-large" style="margin-bottom: 24px; color: var(--md-sys-color-on-surface-variant);">
-                        Your modern home automation control center. Monitor and manage your smart home devices with
-                        ease.
-                    </p>
-                    <div class="grid grid-2">
-                        <div>
-                            <h3 class="title-large" style="margin-bottom: 8px;">API Status</h3>
-                            <p class="body-large" style="color: var(--md-sys-color-on-surface-variant);">
-                                Connected to: <code>{{.APIBaseURL}}</code>
-                            </p>
-                        </div>
-                        <div>
-                            <h3 class="title-large" style="margin-bottom: 8px;">Last Updated</h3>
-                            <p class="body-large" style="color: var(--md-sys-color-on-surface-variant);">
-                                {{.CurrentTime}}
-                            </p>
+                <div class="md3-card md3-card-elevated">
+                    <div class="md3-card-header">
+                        <h2 class="md3-card-title">Welcome to WoodHome Dashboard</h2>
+                        <span class="material-symbols-outlined primary">home</span>
+                    </div>
+                    <div class="md3-card-content">
+                        <p class="body-large text-surface-variant">
+                            Your modern home automation control center. Monitor and manage your smart home devices with
+                            ease.
+                        </p>
+                        <div class="grid grid-2">
+                            <div>
+                                <h3 class="title-large">API Status</h3>
+                                <p class="body-large text-surface-variant">
+                                    Connected to: <code>{{.APIBaseURL}}</code>
+                                </p>
+                            </div>
+                            <div>
+                                <h3 class="title-large">Last Updated</h3>
+                                <p class="body-large text-surface-variant">
+                                    {{.CurrentTime}}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -70,146 +82,154 @@
                 </div>
 
                 <!-- API Connectivity Test -->
-                <div class="card">
-                    <h3 class="title-large" style="margin-bottom: 16px;">API Connectivity Test</h3>
-                    <p class="body-large" style="margin-bottom: 24px; color: var(--md-sys-color-on-surface-variant);">
-                        Test the connection to your WoodHome API and verify all endpoints are working correctly.
-                    </p>
-
-                    <div class="grid grid-2">
-                        <div>
-                            <button class="btn btn-primary" hx-get="/api/connectivity" hx-target="#connectivity-result"
-                                hx-indicator="#connectivity-loading">
-                                <span class="material-icons">wifi</span>
-                                Test API Connection
-                            </button>
-                            <div id="connectivity-loading" class="loading"></div>
-                        </div>
-                        <div>
-                            <button class="btn btn-secondary" hx-get="/api/health" hx-target="#health-result"
-                                hx-indicator="#health-loading">
-                                <span class="material-icons">health_and_safety</span>
-                                Check WebApp Health
-                            </button>
-                            <div id="health-loading" class="loading"></div>
-                        </div>
+                <div class="md3-card">
+                    <div class="md3-card-header">
+                        <h3 class="md3-card-title">API Connectivity Test</h3>
+                        <span class="material-symbols-outlined primary">wifi</span>
                     </div>
-
-                    <div id="connectivity-result" style="margin-top: 16px;"></div>
-                    <div id="health-result" style="margin-top: 16px;"></div>
+                    <div class="md3-card-content">
+                        <p class="body-large text-surface-variant">
+                            Test the connection to your WoodHome API and verify all endpoints are working correctly.
+                        </p>
+                        <div class="grid grid-2">
+                            <div>
+                                <button class="md3-btn md3-btn-filled" hx-get="/api/connectivity" hx-target="#connectivity-result"
+                                    hx-indicator="#connectivity-loading">
+                                    <span class="material-symbols-outlined">wifi</span>
+                                    Test API Connection
+                                </button>
+                                <div id="connectivity-loading" class="loading"></div>
+                            </div>
+                            <div>
+                                <button class="md3-btn md3-btn-outlined" hx-get="/api/health" hx-target="#health-result"
+                                    hx-indicator="#health-loading">
+                                    <span class="material-symbols-outlined">health_and_safety</span>
+                                    Check WebApp Health
+                                </button>
+                                <div id="health-loading" class="loading"></div>
+                            </div>
+                        </div>
+                        <div id="connectivity-result" class="spacing-md"></div>
+                        <div id="health-result" class="spacing-md"></div>
+                    </div>
                 </div>
 
                 <!-- Games Section -->
-                <div class="card">
-                    <h3 class="title-large" style="margin-bottom: 16px;">🎮 Games</h3>
-                    <p class="body-large" style="margin-bottom: 24px; color: var(--md-sys-color-on-surface-variant);">
-                        Enjoy some fun games while managing your smart home.
-                    </p>
-
-                    <div class="grid grid-2">
-                        <div>
-                            <a href="/play/CandyLand" class="btn btn-primary"
-                                style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-                                <span>🍭</span>
-                                <span>CandyLand Adventure</span>
-                            </a>
-                            <p class="body-small"
-                                style="margin-top: 8px; color: var(--md-sys-color-on-surface-variant);">
-                                A magical board game adventure for all ages
-                            </p>
-                        </div>
-                        <div>
-                            <a href="/play/cribbage" class="btn btn-primary"
-                                style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
-                                <span>🃏</span>
-                                <span>Woodraska Cribbage</span>
-                            </a>
-                            <p class="body-small"
-                                style="margin-top: 8px; color: var(--md-sys-color-on-surface-variant);">
-                                Classic two-player card game with split-screen play
-                            </p>
+                <div class="md3-card">
+                    <div class="md3-card-header">
+                        <h3 class="md3-card-title">Games</h3>
+                        <span class="material-symbols-outlined primary">sports_esports</span>
+                    </div>
+                    <div class="md3-card-content">
+                        <p class="body-large text-surface-variant">
+                            Enjoy some fun games while managing your smart home.
+                        </p>
+                        <div class="grid grid-2">
+                            <div>
+                                <a href="/play/CandyLand" class="md3-btn md3-btn-filled"
+                                    style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                                    <span class="material-symbols-outlined">cake</span>
+                                    <span>CandyLand Adventure</span>
+                                </a>
+                                <p class="body-small text-surface-variant spacing-sm">
+                                    A magical board game adventure for all ages
+                                </p>
+                            </div>
+                            <div>
+                                <a href="/play/cribbage" class="md3-btn md3-btn-filled"
+                                    style="text-decoration: none; display: inline-flex; align-items: center; gap: 8px;">
+                                    <span class="material-symbols-outlined">style</span>
+                                    <span>Woodraska Cribbage</span>
+                                </a>
+                                <p class="body-small text-surface-variant spacing-sm">
+                                    Classic two-player card game with split-screen play
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 <!-- Quick Actions -->
-                <div class="card">
-                    <h3 class="title-large" style="margin-bottom: 16px;">Quick Actions</h3>
-                    <p class="body-large" style="margin-bottom: 24px; color: var(--md-sys-color-on-surface-variant);">
-                        Common operations to get you started with your WoodHome system.
-                    </p>
-
-                    <div class="grid grid-3">
-                        <button class="btn btn-outlined" onclick="showComingSoon('Device Management')">
-                            <span class="material-icons">devices</span>
-                            Device Management
-                        </button>
-                        <button class="btn btn-outlined" onclick="showComingSoon('Room Control')">
-                            <span class="material-icons">room</span>
-                            Room Control
-                        </button>
-                        <button class="btn btn-outlined" onclick="showComingSoon('Automation')">
-                            <span class="material-icons">auto_awesome</span>
-                            Automation
-                        </button>
-                        <button class="btn btn-outlined" onclick="showComingSoon('Energy Monitor')">
-                            <span class="material-icons">monitor</span>
-                            Energy Monitor
-                        </button>
-                        <button class="btn btn-outlined" onclick="showComingSoon('Security')">
-                            <span class="material-icons">security</span>
-                            Security
-                        </button>
-                        <button class="btn btn-outlined" onclick="showComingSoon('Settings')">
-                            <span class="material-icons">settings</span>
-                            Settings
-                        </button>
+                <div class="md3-card">
+                    <div class="md3-card-header">
+                        <h3 class="md3-card-title">Quick Actions</h3>
+                        <span class="material-symbols-outlined primary">flash_on</span>
+                    </div>
+                    <div class="md3-card-content">
+                        <p class="body-large text-surface-variant">
+                            Common operations to get you started with your WoodHome system.
+                        </p>
+                        <div class="grid grid-3">
+                            <button class="md3-chip md3-chip-action" onclick="showComingSoon('Device Management')">
+                                <span class="material-symbols-outlined">devices</span>
+                                Device Management
+                            </button>
+                            <button class="md3-chip md3-chip-action" onclick="showComingSoon('Room Control')">
+                                <span class="material-symbols-outlined">room</span>
+                                Room Control
+                            </button>
+                            <button class="md3-chip md3-chip-action" onclick="showComingSoon('Automation')">
+                                <span class="material-symbols-outlined">auto_awesome</span>
+                                Automation
+                            </button>
+                            <button class="md3-chip md3-chip-action" onclick="showComingSoon('Energy Monitor')">
+                                <span class="material-symbols-outlined">monitor</span>
+                                Energy Monitor
+                            </button>
+                            <button class="md3-chip md3-chip-action" onclick="showComingSoon('Security')">
+                                <span class="material-symbols-outlined">security</span>
+                                Security
+                            </button>
+                            <button class="md3-chip md3-chip-action" onclick="showComingSoon('Settings')">
+                                <span class="material-symbols-outlined">settings</span>
+                                Settings
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- API Endpoints -->
-                <div class="card">
-                    <h3 class="title-large" style="margin-bottom: 16px;">API Endpoints</h3>
-                    <p class="body-large" style="margin-bottom: 24px; color: var(--md-sys-color-on-surface-variant);">
-                        Available API endpoints for integration and testing.
-                    </p>
-
-                    <div class="grid grid-2">
-                        <div>
-                            <h4 class="label-large" style="margin-bottom: 8px;">WebApp Endpoints</h4>
-                            <ul style="list-style: none; padding: 0;">
-                                <li style="margin-bottom: 8px;">
-                                    <code
-                                        style="background: var(--md-sys-color-surface-container-high); padding: 4px 8px; border-radius: 4px;">
-                                    GET /api/health
-                                </code>
-                                    <span
-                                        style="margin-left: 8px; color: var(--md-sys-color-on-surface-variant);">WebApp
-                                        health check</span>
-                                </li>
-                                <li style="margin-bottom: 8px;">
-                                    <code
-                                        style="background: var(--md-sys-color-surface-container-high); padding: 4px 8px; border-radius: 4px;">
-                                    GET /api/connectivity
-                                </code>
-                                    <span style="margin-left: 8px; color: var(--md-sys-color-on-surface-variant);">API
-                                        connectivity test</span>
-                                </li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="label-large" style="margin-bottom: 8px;">WoodHome API Proxy</h4>
-                            <ul style="list-style: none; padding: 0;">
-                                <li style="margin-bottom: 8px;">
-                                    <code
-                                        style="background: var(--md-sys-color-surface-container-high); padding: 4px 8px; border-radius: 4px;">
-                                    /api/woodhome/*
-                                </code>
-                                    <span
-                                        style="margin-left: 8px; color: var(--md-sys-color-on-surface-variant);">Proxied
-                                        to {{.APIBaseURL}}</span>
-                                </li>
-                            </ul>
+                <div class="md3-card">
+                    <div class="md3-card-header">
+                        <h3 class="md3-card-title">API Endpoints</h3>
+                        <span class="material-symbols-outlined primary">api</span>
+                    </div>
+                    <div class="md3-card-content">
+                        <p class="body-large text-surface-variant">
+                            Available API endpoints for integration and testing.
+                        </p>
+                        <div class="grid grid-2">
+                            <div>
+                                <h4 class="label-large">WebApp Endpoints</h4>
+                                <div class="md3-list">
+                                    <div class="md3-list-item">
+                                        <span class="material-symbols-outlined">health_and_safety</span>
+                                        <div class="md3-list-item-content">
+                                            <div class="md3-list-item-title">GET /api/health</div>
+                                            <div class="md3-list-item-subtitle">WebApp health check</div>
+                                        </div>
+                                    </div>
+                                    <div class="md3-list-item">
+                                        <span class="material-symbols-outlined">wifi</span>
+                                        <div class="md3-list-item-content">
+                                            <div class="md3-list-item-title">GET /api/connectivity</div>
+                                            <div class="md3-list-item-subtitle">API connectivity test</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <h4 class="label-large">WoodHome API Proxy</h4>
+                                <div class="md3-list">
+                                    <div class="md3-list-item">
+                                        <span class="material-symbols-outlined">link</span>
+                                        <div class="md3-list-item-content">
+                                            <div class="md3-list-item-title">/api/woodhome/*</div>
+                                            <div class="md3-list-item-subtitle">Proxied to {{.APIBaseURL}}</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -217,7 +237,7 @@
         </main>
 
         <!-- Toast Notification -->
-        <div id="toast" style="
+        <div id="toast" class="md3-dialog-overlay" style="
         position: fixed;
         bottom: 24px;
         right: 24px;
@@ -233,7 +253,7 @@
         max-width: 400px;
     ">
             <div style="display: flex; align-items: center; gap: 12px;">
-                <span class="material-icons" id="toast-icon">info</span>
+                <span class="material-symbols-outlined" id="toast-icon">info</span>
                 <span id="toast-message">Message</span>
             </div>
         </div>
@@ -258,7 +278,7 @@
             function updateConnectionStatus(status, icon, text) {
                 const statusEl = document.getElementById('connection-status');
                 statusEl.className = `status-indicator status-${status}`;
-                statusEl.innerHTML = `<span class="material-icons">${icon}</span><span>${text}</span>`;
+                statusEl.innerHTML = `<span class="material-symbols-outlined">${icon}</span><span>${text}</span>`;
             }
 
             function showComingSoon(feature) {
@@ -302,21 +322,21 @@
                         if (response.status === 'success') {
                             target.innerHTML = `
                             <div class="status-indicator status-success">
-                                <span class="material-icons">check_circle</span>
+                                <span class="material-symbols-outlined">check_circle</span>
                                 <span>${response.message}</span>
                             </div>
                         `;
                         } else if (response.status === 'error') {
                             target.innerHTML = `
                             <div class="status-indicator status-error">
-                                <span class="material-icons">error</span>
+                                <span class="material-symbols-outlined">error</span>
                                 <span>${response.message}</span>
                             </div>
                         `;
                         } else {
                             target.innerHTML = `
                             <div class="status-indicator status-warning">
-                                <span class="material-icons">warning</span>
+                                <span class="material-symbols-outlined">warning</span>
                                 <span>${response.message}</span>
                             </div>
                         `;
@@ -331,6 +351,9 @@
 
         <!-- Weather Widget JavaScript -->
         <script src="/static/js/weather-new.js"></script>
+        
+        <!-- Icon Manager -->
+        <script src="/static/js/icon-manager.js"></script>
     </body>
 
 </html>
