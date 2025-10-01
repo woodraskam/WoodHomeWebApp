@@ -462,12 +462,12 @@ class SonosUnifiedView {
                     <span class="device-status">${group.status || '[No music selected]'}</span>
                 </div>
                 <div class="device-controls">
-                    <button class="control-btn play" onclick="sonosDashboard.playGroup('${group.id}')">▶️</button>
-                    <button class="control-btn pause" onclick="sonosDashboard.pauseGroup('${group.id}')">⏸️</button>
-                    <button class="control-btn stop" onclick="sonosDashboard.stopGroup('${group.id}')">⏹️</button>
+                    <button class="control-btn play" onclick="sonosUnifiedView.playGroup('${group.id}')">▶️</button>
+                    <button class="control-btn pause" onclick="sonosUnifiedView.pauseGroup('${group.id}')">⏸️</button>
+                    <button class="control-btn stop" onclick="sonosUnifiedView.stopGroup('${group.id}')">⏹️</button>
                     <div class="volume-control">
                         <input type="range" min="0" max="100" value="${group.volume}" 
-                               onchange="sonosDashboard.setGroupVolume('${group.id}', this.value)">
+                               onchange="sonosUnifiedView.setGroupVolume('${group.id}', this.value)">
                         <span class="volume-display">${group.volume}%</span>
                     </div>
                 </div>
@@ -490,14 +490,14 @@ class SonosUnifiedView {
                 <span class="device-status">${device.status || '[No music selected]'}</span>
             </div>
             <div class="device-controls">
-                <button class="control-btn play" onclick="sonosDashboard.playDevice('${device.id}')">▶️</button>
-                <button class="control-btn pause" onclick="sonosDashboard.pauseDevice('${device.id}')">⏸️</button>
-                <button class="control-btn stop" onclick="sonosDashboard.stopDevice('${device.id}')">⏹️</button>
-                <div class="volume-control">
-                    <input type="range" min="0" max="100" value="${device.volume}" 
-                           onchange="sonosDashboard.setDeviceVolume('${device.id}', this.value)">
-                    <span class="volume-display">${device.volume}%</span>
-                </div>
+        <button class="control-btn play" onclick="sonosUnifiedView.playDevice('${device.id}')">▶️</button>
+        <button class="control-btn pause" onclick="sonosUnifiedView.pauseDevice('${device.id}')">⏸️</button>
+        <button class="control-btn stop" onclick="sonosUnifiedView.stopDevice('${device.id}')">⏹️</button>
+        <div class="volume-control">
+            <input type="range" min="0" max="100" value="${device.volume}" 
+                   onchange="sonosUnifiedView.setDeviceVolume('${device.id}', this.value)">
+            <span class="volume-display">${device.volume}%</span>
+        </div>
             </div>
         `;
     }

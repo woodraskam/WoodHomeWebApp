@@ -42,14 +42,14 @@ func (h *SonosHandler) RegisterRoutes(router *mux.Router) {
 	sonosRouter.HandleFunc("/devices/{uuid}/previous", h.PreviousTrack).Methods("POST")
 	
 	// Volume routes
-	sonosRouter.HandleFunc("/devices/{uuid}/volume", h.SetVolume).Methods("POST")
+	sonosRouter.HandleFunc("/devices/{uuid}/volume/{volume}", h.SetVolume).Methods("POST")
 	sonosRouter.HandleFunc("/devices/{uuid}/mute", h.SetMute).Methods("POST")
 	
 	// Group routes
 	sonosRouter.HandleFunc("/groups/{id}/play", h.PlayGroup).Methods("POST")
 	sonosRouter.HandleFunc("/groups/{id}/pause", h.PauseGroup).Methods("POST")
 	sonosRouter.HandleFunc("/groups/{id}/stop", h.StopGroup).Methods("POST")
-	sonosRouter.HandleFunc("/groups/{id}/volume", h.SetGroupVolume).Methods("POST")
+	sonosRouter.HandleFunc("/groups/{id}/volume/{volume}", h.SetGroupVolume).Methods("POST")
 	sonosRouter.HandleFunc("/groups/{id}/mute", h.SetGroupMute).Methods("POST")
 	
 	// Group management routes
