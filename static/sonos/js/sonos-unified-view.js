@@ -253,14 +253,79 @@ class SonosUnifiedView {
                 fetch('/api/sonos/groups')
             ]);
             
+            if (!devicesResponse.ok || !groupsResponse.ok) {
+                console.error('API responses not ok:', {
+                    devices: devicesResponse.status,
+                    groups: groupsResponse.status
+                });
+                throw new Error('Failed to fetch data from API');
+            }
+            
             const devices = await devicesResponse.json();
             const groups = await groupsResponse.json();
             
-            this.updateView(devices, groups);
+            console.log('Raw API responses:', { devices, groups });
+            
+            // Ensure we have arrays
+            const devicesArray = Array.isArray(devices) ? devices : [];
+            const groupsArray = Array.isArray(groups) ? groups : [];
+            
+            console.log('Processed arrays:', { devicesArray, groupsArray });
+            
+            this.updateView(devicesArray, groupsArray);
         } catch (error) {
             console.error('Failed to refresh view:', error);
             this.showError('Failed to refresh device list');
+            
+            // For testing, show some mock data
+            this.showMockData();
         }
+    }
+
+    showMockData() {
+        const mockDevices = [
+            {
+                uuid: 'device-1',
+                name: 'Living Room',
+                playback_state: 'STOPPED',
+                volume: 50,
+                current_track: null,
+                group_id: null
+            },
+            {
+                uuid: 'device-2',
+                name: 'Kitchen',
+                playback_state: 'PLAYING',
+                volume: 75,
+                current_track: { title: 'Test Song', artist: 'Test Artist' },
+                group_id: 'group-1'
+            },
+            {
+                uuid: 'device-3',
+                name: 'Office',
+                playback_state: 'PAUSED',
+                volume: 30,
+                current_track: null,
+                group_id: 'group-1'
+            }
+        ];
+
+        const mockGroups = [
+            {
+                id: 'group-1',
+                coordinator: { name: 'Kitchen', uuid: 'device-2' },
+                members: [
+                    { name: 'Kitchen', uuid: 'device-2' },
+                    { name: 'Office', uuid: 'device-3' }
+                ],
+                playback_state: 'PLAYING',
+                volume: 75,
+                current_track: { title: 'Test Song', artist: 'Test Artist' }
+            }
+        ];
+
+        console.log('Showing mock data for testing');
+        this.updateView(mockDevices, mockGroups);
     }
 
     updateView(devices, groups) {
@@ -411,7 +476,20 @@ class SonosUnifiedView {
         } catch (error) {
             console.error('Failed to load initial data:', error);
             this.showError('Failed to load devices and groups');
+            
+            // Show empty state if API is not available
+            this.showEmptyState();
         }
+    }
+
+    showEmptyState() {
+        this.container.innerHTML = `
+            <div class="empty-state">
+                <h3>No Sonos devices found</h3>
+                <p>Make sure your Sonos devices are connected and the Jishi API is running.</p>
+                <button onclick="sonosUnifiedView.refreshView()" class="action-btn">Retry</button>
+            </div>
+        `;
     }
 
     setupWebSocket() {
