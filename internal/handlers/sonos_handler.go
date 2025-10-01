@@ -1,0 +1,501 @@
+package handlers
+
+import (
+	"encoding/json"
+	"net/http"
+
+	"woodhome-webapp/internal/services"
+
+	"github.com/gorilla/mux"
+	"github.com/sirupsen/logrus"
+)
+
+// SonosHandler handles HTTP requests for Sonos operations
+type SonosHandler struct {
+	sonosService *services.SonosService
+}
+
+// NewSonosHandler creates a new SonosHandler instance
+func NewSonosHandler(sonosService *services.SonosService) *SonosHandler {
+	return &SonosHandler{
+		sonosService: sonosService,
+	}
+}
+
+// RegisterRoutes registers all Sonos routes
+func (h *SonosHandler) RegisterRoutes(router *mux.Router) {
+	sonosRouter := router.PathPrefix("/api/sonos").Subrouter()
+	
+	// Device routes
+	sonosRouter.HandleFunc("/devices", h.GetDevices).Methods("GET")
+	sonosRouter.HandleFunc("/devices/{uuid}", h.GetDevice).Methods("GET")
+	
+	// Group routes
+	sonosRouter.HandleFunc("/groups", h.GetGroups).Methods("GET")
+	sonosRouter.HandleFunc("/groups/{id}", h.GetGroup).Methods("GET")
+	
+	// Playback routes
+	sonosRouter.HandleFunc("/devices/{uuid}/play", h.PlayDevice).Methods("POST")
+	sonosRouter.HandleFunc("/devices/{uuid}/pause", h.PauseDevice).Methods("POST")
+	sonosRouter.HandleFunc("/devices/{uuid}/stop", h.StopDevice).Methods("POST")
+	sonosRouter.HandleFunc("/devices/{uuid}/next", h.NextTrack).Methods("POST")
+	sonosRouter.HandleFunc("/devices/{uuid}/previous", h.PreviousTrack).Methods("POST")
+	
+	// Volume routes
+	sonosRouter.HandleFunc("/devices/{uuid}/volume", h.SetVolume).Methods("POST")
+	sonosRouter.HandleFunc("/devices/{uuid}/mute", h.SetMute).Methods("POST")
+	
+	// Group routes
+	sonosRouter.HandleFunc("/groups/{id}/play", h.PlayGroup).Methods("POST")
+	sonosRouter.HandleFunc("/groups/{id}/pause", h.PauseGroup).Methods("POST")
+	sonosRouter.HandleFunc("/groups/{id}/stop", h.StopGroup).Methods("POST")
+	sonosRouter.HandleFunc("/groups/{id}/volume", h.SetGroupVolume).Methods("POST")
+	sonosRouter.HandleFunc("/groups/{id}/mute", h.SetGroupMute).Methods("POST")
+	
+	// Group management routes
+	sonosRouter.HandleFunc("/groups", h.CreateGroup).Methods("POST")
+	sonosRouter.HandleFunc("/groups/{id}/join/{deviceUuid}", h.JoinGroup).Methods("POST")
+	sonosRouter.HandleFunc("/groups/{id}/leave/{deviceUuid}", h.LeaveGroup).Methods("POST")
+	sonosRouter.HandleFunc("/groups/{id}/dissolve", h.DissolveGroup).Methods("POST")
+}
+
+// GetDevices returns all discovered devices
+func (h *SonosHandler) GetDevices(w http.ResponseWriter, r *http.Request) {
+	devices := h.sonosService.GetDevices()
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"devices": devices,
+		"count":   len(devices),
+	})
+}
+
+// GetDevice returns a specific device
+func (h *SonosHandler) GetDevice(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	uuid := vars["uuid"]
+	
+	device, exists := h.sonosService.GetDevice(uuid)
+	if !exists {
+		http.Error(w, "Device not found", http.StatusNotFound)
+		return
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(device)
+}
+
+// GetGroups returns all active groups
+func (h *SonosHandler) GetGroups(w http.ResponseWriter, r *http.Request) {
+	groups := h.sonosService.GetGroups()
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"groups": groups,
+		"count":  len(groups),
+	})
+}
+
+// GetGroup returns a specific group
+func (h *SonosHandler) GetGroup(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	
+	group, exists := h.sonosService.GetGroup(id)
+	if !exists {
+		http.Error(w, "Group not found", http.StatusNotFound)
+		return
+	}
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(group)
+}
+
+// PlayDevice plays a specific device
+func (h *SonosHandler) PlayDevice(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	uuid := vars["uuid"]
+	
+	device, exists := h.sonosService.GetDevice(uuid)
+	if !exists {
+		http.Error(w, "Device not found", http.StatusNotFound)
+		return
+	}
+	
+	// TODO: Implement actual play command via Jishi API
+	logrus.Infof("Playing device: %s", device.Name)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "success",
+		"action": "play",
+		"device": device.Name,
+	})
+}
+
+// PauseDevice pauses a specific device
+func (h *SonosHandler) PauseDevice(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	uuid := vars["uuid"]
+	
+	device, exists := h.sonosService.GetDevice(uuid)
+	if !exists {
+		http.Error(w, "Device not found", http.StatusNotFound)
+		return
+	}
+	
+	// TODO: Implement actual pause command via Jishi API
+	logrus.Infof("Pausing device: %s", device.Name)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "success",
+		"action": "pause",
+		"device": device.Name,
+	})
+}
+
+// StopDevice stops a specific device
+func (h *SonosHandler) StopDevice(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	uuid := vars["uuid"]
+	
+	device, exists := h.sonosService.GetDevice(uuid)
+	if !exists {
+		http.Error(w, "Device not found", http.StatusNotFound)
+		return
+	}
+	
+	// TODO: Implement actual stop command via Jishi API
+	logrus.Infof("Stopping device: %s", device.Name)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "success",
+		"action": "stop",
+		"device": device.Name,
+	})
+}
+
+// NextTrack skips to next track on a device
+func (h *SonosHandler) NextTrack(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	uuid := vars["uuid"]
+	
+	device, exists := h.sonosService.GetDevice(uuid)
+	if !exists {
+		http.Error(w, "Device not found", http.StatusNotFound)
+		return
+	}
+	
+	// TODO: Implement actual next command via Jishi API
+	logrus.Infof("Next track on device: %s", device.Name)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "success",
+		"action": "next",
+		"device": device.Name,
+	})
+}
+
+// PreviousTrack skips to previous track on a device
+func (h *SonosHandler) PreviousTrack(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	uuid := vars["uuid"]
+	
+	device, exists := h.sonosService.GetDevice(uuid)
+	if !exists {
+		http.Error(w, "Device not found", http.StatusNotFound)
+		return
+	}
+	
+	// TODO: Implement actual previous command via Jishi API
+	logrus.Infof("Previous track on device: %s", device.Name)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "success",
+		"action": "previous",
+		"device": device.Name,
+	})
+}
+
+// SetVolume sets volume for a device
+func (h *SonosHandler) SetVolume(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	uuid := vars["uuid"]
+	
+	device, exists := h.sonosService.GetDevice(uuid)
+	if !exists {
+		http.Error(w, "Device not found", http.StatusNotFound)
+		return
+	}
+	
+	// Parse volume from request body
+	var request struct {
+		Volume int `json:"volume"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	
+	if request.Volume < 0 || request.Volume > 100 {
+		http.Error(w, "Volume must be between 0 and 100", http.StatusBadRequest)
+		return
+	}
+	
+	// TODO: Implement actual volume command via Jishi API
+	logrus.Infof("Setting volume to %d on device: %s", request.Volume, device.Name)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status": "success",
+		"action": "volume",
+		"device": device.Name,
+		"volume": request.Volume,
+	})
+}
+
+// SetMute sets mute state for a device
+func (h *SonosHandler) SetMute(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	uuid := vars["uuid"]
+	
+	device, exists := h.sonosService.GetDevice(uuid)
+	if !exists {
+		http.Error(w, "Device not found", http.StatusNotFound)
+		return
+	}
+	
+	// Parse mute from request body
+	var request struct {
+		Mute bool `json:"mute"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	
+	// TODO: Implement actual mute command via Jishi API
+	logrus.Infof("Setting mute to %t on device: %s", request.Mute, device.Name)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status": "success",
+		"action": "mute",
+		"device": device.Name,
+		"mute":   request.Mute,
+	})
+}
+
+// PlayGroup plays a group
+func (h *SonosHandler) PlayGroup(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	
+	group, exists := h.sonosService.GetGroup(id)
+	if !exists {
+		http.Error(w, "Group not found", http.StatusNotFound)
+		return
+	}
+	
+	// TODO: Implement actual group play command via Jishi API
+	logrus.Infof("Playing group: %s", group.ID)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "success",
+		"action": "play",
+		"group":  group.ID,
+	})
+}
+
+// PauseGroup pauses a group
+func (h *SonosHandler) PauseGroup(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	
+	group, exists := h.sonosService.GetGroup(id)
+	if !exists {
+		http.Error(w, "Group not found", http.StatusNotFound)
+		return
+	}
+	
+	// TODO: Implement actual group pause command via Jishi API
+	logrus.Infof("Pausing group: %s", group.ID)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "success",
+		"action": "pause",
+		"group":  group.ID,
+	})
+}
+
+// StopGroup stops a group
+func (h *SonosHandler) StopGroup(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	
+	group, exists := h.sonosService.GetGroup(id)
+	if !exists {
+		http.Error(w, "Group not found", http.StatusNotFound)
+		return
+	}
+	
+	// TODO: Implement actual group stop command via Jishi API
+	logrus.Infof("Stopping group: %s", group.ID)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "success",
+		"action": "stop",
+		"group":  group.ID,
+	})
+}
+
+// SetGroupVolume sets volume for a group
+func (h *SonosHandler) SetGroupVolume(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	
+	group, exists := h.sonosService.GetGroup(id)
+	if !exists {
+		http.Error(w, "Group not found", http.StatusNotFound)
+		return
+	}
+	
+	// Parse volume from request body
+	var request struct {
+		Volume int `json:"volume"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	
+	if request.Volume < 0 || request.Volume > 100 {
+		http.Error(w, "Volume must be between 0 and 100", http.StatusBadRequest)
+		return
+	}
+	
+	// TODO: Implement actual group volume command via Jishi API
+	logrus.Infof("Setting group volume to %d on group: %s", request.Volume, group.ID)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status": "success",
+		"action": "volume",
+		"group":  group.ID,
+		"volume": request.Volume,
+	})
+}
+
+// SetGroupMute sets mute state for a group
+func (h *SonosHandler) SetGroupMute(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	
+	group, exists := h.sonosService.GetGroup(id)
+	if !exists {
+		http.Error(w, "Group not found", http.StatusNotFound)
+		return
+	}
+	
+	// Parse mute from request body
+	var request struct {
+		Mute bool `json:"mute"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	
+	// TODO: Implement actual group mute command via Jishi API
+	logrus.Infof("Setting group mute to %t on group: %s", request.Mute, group.ID)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status": "success",
+		"action": "mute",
+		"group":  group.ID,
+		"mute":   request.Mute,
+	})
+}
+
+// CreateGroup creates a new group
+func (h *SonosHandler) CreateGroup(w http.ResponseWriter, r *http.Request) {
+	var request struct {
+		Coordinator string   `json:"coordinator"`
+		Members     []string `json:"members"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		http.Error(w, "Invalid request body", http.StatusBadRequest)
+		return
+	}
+	
+	// TODO: Implement actual group creation via Jishi API
+	logrus.Infof("Creating group with coordinator: %s, members: %v", request.Coordinator, request.Members)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status":      "success",
+		"action":      "create_group",
+		"coordinator": request.Coordinator,
+		"members":     request.Members,
+	})
+}
+
+// JoinGroup adds a device to a group
+func (h *SonosHandler) JoinGroup(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	deviceUuid := vars["deviceUuid"]
+	
+	// TODO: Implement actual join group command via Jishi API
+	logrus.Infof("Adding device %s to group %s", deviceUuid, id)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "success",
+		"action": "join_group",
+		"group":  id,
+		"device": deviceUuid,
+	})
+}
+
+// LeaveGroup removes a device from a group
+func (h *SonosHandler) LeaveGroup(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	deviceUuid := vars["deviceUuid"]
+	
+	// TODO: Implement actual leave group command via Jishi API
+	logrus.Infof("Removing device %s from group %s", deviceUuid, id)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "success",
+		"action": "leave_group",
+		"group":  id,
+		"device": deviceUuid,
+	})
+}
+
+// DissolveGroup dissolves a group
+func (h *SonosHandler) DissolveGroup(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id := vars["id"]
+	
+	// TODO: Implement actual group dissolution via Jishi API
+	logrus.Infof("Dissolving group: %s", id)
+	
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]string{
+		"status": "success",
+		"action": "dissolve_group",
+		"group":  id,
+	})
+}

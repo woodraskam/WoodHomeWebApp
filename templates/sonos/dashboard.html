@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sonos Control - WoodHome</title>
+    <link rel="stylesheet" href="/static/css/material-design-3.css">
+    <link rel="stylesheet" href="/static/sonos/css/sonos-dashboard.css">
+    <link rel="stylesheet" href="/static/sonos/css/sonos-responsive.css">
+</head>
+<body>
+    <div class="sonos-container">
+        <!-- Header -->
+        <header class="sonos-header">
+            <h1>🎵 Sonos Control</h1>
+            <div class="sonos-status">
+                <span id="connection-status" class="status-indicator offline">Offline</span>
+                <span id="device-count" class="device-count">0 devices</span>
+            </div>
+        </header>
+
+        <!-- Main Dashboard -->
+        <main class="sonos-dashboard">
+            <!-- Device Grid -->
+            <section class="device-section">
+                <h2>🏠 Rooms</h2>
+                <div id="device-grid" class="device-grid">
+                    <!-- Devices will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Group Management -->
+            <section class="group-section">
+                <h2>🔗 Groups</h2>
+                <div id="group-container" class="group-container">
+                    <!-- Groups will be populated by JavaScript -->
+                </div>
+            </section>
+
+            <!-- Quick Actions -->
+            <section class="actions-section">
+                <h2>⚡ Quick Actions</h2>
+                <div class="quick-actions">
+                    <button id="play-all" class="action-btn play-btn">Play All</button>
+                    <button id="pause-all" class="action-btn pause-btn">Pause All</button>
+                    <button id="stop-all" class="action-btn stop-btn">Stop All</button>
+                    <button id="refresh-devices" class="action-btn refresh-btn">Refresh</button>
+                </div>
+            </section>
+        </main>
+
+        <!-- Device Modal -->
+        <div id="device-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modal-device-name">Device Control</h3>
+                    <span class="close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="device-controls">
+                        <div class="playback-controls">
+                            <button id="modal-play" class="control-btn play">▶️</button>
+                            <button id="modal-pause" class="control-btn pause">⏸️</button>
+                            <button id="modal-stop" class="control-btn stop">⏹️</button>
+                            <button id="modal-next" class="control-btn next">⏭️</button>
+                            <button id="modal-previous" class="control-btn previous">⏮️</button>
+                        </div>
+                        <div class="volume-controls">
+                            <label for="volume-slider">Volume:</label>
+                            <input type="range" id="volume-slider" min="0" max="100" value="0">
+                            <span id="volume-display">0%</span>
+                        </div>
+                        <div class="mute-controls">
+                            <button id="mute-btn" class="control-btn mute">🔇</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Group Modal -->
+        <div id="group-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Create Group</h3>
+                    <span class="close">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="group-creation">
+                        <div class="coordinator-selection">
+                            <label for="coordinator-select">Coordinator Room:</label>
+                            <select id="coordinator-select">
+                                <option value="">Select coordinator...</option>
+                            </select>
+                        </div>
+                        <div class="member-selection">
+                            <label>Member Rooms:</label>
+                            <div id="member-checkboxes">
+                                <!-- Member checkboxes will be populated -->
+                            </div>
+                        </div>
+                        <button id="create-group-btn" class="action-btn create-btn">Create Group</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="/static/sonos/js/sonos-websocket.js"></script>
+    <script src="/static/sonos/js/sonos-dashboard.js"></script>
+    <script src="/static/sonos/js/sonos-device-control.js"></script>
+    <script src="/static/sonos/js/sonos-group-management.js"></script>
+</body>
+</html>

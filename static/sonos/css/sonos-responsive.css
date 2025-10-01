@@ -1,0 +1,292 @@
+/* Responsive Design for Sonos Dashboard */
+
+/* Mobile First Approach */
+@media (max-width: 768px) {
+    .sonos-container {
+        padding: 10px;
+    }
+
+    .sonos-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+        padding: 15px;
+    }
+
+    .sonos-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .sonos-status {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .device-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    .device-card {
+        padding: 15px;
+    }
+
+    .device-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+
+    .device-controls {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .volume-control {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .quick-actions {
+        flex-direction: column;
+    }
+
+    .quick-actions .action-btn {
+        min-width: auto;
+    }
+
+    .group-members {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .group-actions {
+        flex-direction: column;
+    }
+
+    .modal-content {
+        width: 95%;
+        margin: 10% auto;
+    }
+
+    .modal-header {
+        padding: 15px;
+    }
+
+    .modal-body {
+        padding: 15px;
+    }
+
+    .playback-controls {
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .volume-controls {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+/* Tablet Styles */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .device-grid {
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    }
+
+    .sonos-header {
+        padding: 20px;
+    }
+
+    .device-card {
+        padding: 18px;
+    }
+}
+
+/* Desktop Styles */
+@media (min-width: 1025px) {
+    .device-grid {
+        grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    }
+
+    .sonos-container {
+        padding: 30px;
+    }
+
+    .device-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 25px rgba(0, 0, 0, 0.15);
+    }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .control-btn,
+    .action-btn {
+        min-height: 44px;
+        min-width: 44px;
+        font-size: 1rem;
+    }
+
+    .device-card {
+        padding: 20px;
+    }
+
+    .volume-slider {
+        height: 8px;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+        width: 24px;
+        height: 24px;
+    }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .device-card {
+        border-width: 0.5px;
+    }
+
+    .modal-content {
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.2);
+    }
+}
+
+/* Landscape Mobile */
+@media (max-width: 768px) and (orientation: landscape) {
+    .sonos-header {
+        flex-direction: row;
+        padding: 10px 20px;
+    }
+
+    .sonos-header h1 {
+        font-size: 1.3rem;
+    }
+
+    .device-grid {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    }
+
+    .modal-content {
+        margin: 2% auto;
+        max-height: 90vh;
+        overflow-y: auto;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .sonos-header {
+        background: none !important;
+        color: black !important;
+        box-shadow: none !important;
+    }
+
+    .device-card,
+    .group-card {
+        box-shadow: none !important;
+        border: 1px solid #ccc !important;
+        break-inside: avoid;
+    }
+
+    .control-btn,
+    .action-btn {
+        display: none !important;
+    }
+
+    .modal {
+        display: none !important;
+    }
+}
+
+/* Accessibility Improvements */
+@media (prefers-reduced-motion: reduce) {
+    .device-card,
+    .control-btn,
+    .action-btn,
+    .modal-content {
+        transition: none !important;
+        animation: none !important;
+    }
+
+    .spinner {
+        animation: none !important;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    .sonos-container {
+        background-color: #1a1a1a;
+        color: #ffffff;
+    }
+
+    .device-card,
+    .group-card {
+        background-color: #2d2d2d;
+        border-color: #404040;
+        color: #ffffff;
+    }
+
+    .device-name,
+    .group-name {
+        color: #ffffff;
+    }
+
+    .device-room,
+    .device-model {
+        color: #cccccc;
+    }
+
+    .modal-content {
+        background-color: #2d2d2d;
+        color: #ffffff;
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
+    }
+
+    .volume-slider {
+        background: #404040;
+    }
+
+    .volume-slider::-webkit-slider-thumb {
+        background: #667eea;
+    }
+}
+
+/* Focus Styles for Keyboard Navigation */
+.control-btn:focus,
+.action-btn:focus,
+.device-card:focus {
+    outline: 2px solid #667eea;
+    outline-offset: 2px;
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    .device-card {
+        border: 2px solid #000000;
+    }
+
+    .device-card.online {
+        border-left: 6px solid #00ff00;
+    }
+
+    .device-card.offline {
+        border-left: 6px solid #ff0000;
+    }
+
+    .status-indicator.online {
+        background: #00ff00;
+        color: #000000;
+    }
+
+    .status-indicator.offline {
+        background: #ff0000;
+        color: #ffffff;
+    }
+}
