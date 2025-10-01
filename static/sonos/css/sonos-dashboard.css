@@ -515,3 +515,159 @@
     margin: 0;
     font-size: 0.9rem;
 }
+
+/* Unified View Styles */
+.sonos-unified-view {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: 20px;
+}
+
+.device-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Unified Cards */
+.sonos-card {
+    background: #2d2d2d;
+    border-radius: 8px;
+    padding: 16px;
+    cursor: grab;
+    transition: all 0.2s ease;
+    border-left: 4px solid #2196F3;
+}
+
+.sonos-card:hover {
+    background: #3a3a3a;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.sonos-card.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+    cursor: grabbing;
+}
+
+.sonos-card.group-card {
+    border-left-color: #4CAF50;
+}
+
+.sonos-card.individual-card {
+    border-left-color: #2196F3;
+}
+
+/* Group Card Structure */
+.group-card .coordinator {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #444;
+}
+
+.group-card .device-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.group-card .device-name {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #fff;
+}
+
+.group-card .device-status {
+    font-size: 0.9em;
+    color: #ccc;
+}
+
+.group-card .device-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.group-card .group-members {
+    margin-left: 16px;
+    border-left: 2px solid #555;
+    padding-left: 12px;
+}
+
+.group-card .member-device {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 4px 0;
+    color: #ccc;
+    font-size: 0.9em;
+}
+
+.group-card .member-name {
+    font-weight: 500;
+}
+
+.group-card .member-status {
+    color: #888;
+    font-size: 0.8em;
+}
+
+/* Individual Card Structure */
+.individual-card {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.individual-card .device-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.individual-card .device-name {
+    font-size: 1.1em;
+    font-weight: 600;
+    color: #fff;
+}
+
+.individual-card .device-status {
+    font-size: 0.9em;
+    color: #ccc;
+}
+
+.individual-card .device-controls {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+/* Drag and Drop Visual Feedback */
+.drop-zone {
+    border: 2px dashed #4CAF50;
+    background: rgba(76, 175, 80, 0.1);
+    border-radius: 8px;
+    padding: 16px;
+    text-align: center;
+    color: #4CAF50;
+    margin: 8px 0;
+}
+
+.drop-highlight {
+    border: 2px solid #4CAF50;
+    background: rgba(76, 175, 80, 0.2);
+    transform: scale(1.02);
+}
+
+.drag-preview {
+    position: fixed;
+    pointer-events: none;
+    z-index: 1000;
+    opacity: 0.8;
+    transform: rotate(5deg);
+}

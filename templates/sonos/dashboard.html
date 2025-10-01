@@ -21,22 +21,6 @@
 
         <!-- Main Dashboard -->
         <main class="sonos-dashboard">
-            <!-- Device Grid -->
-            <section class="device-section">
-                <h2>🏠 Rooms</h2>
-                <div id="device-grid" class="device-grid">
-                    <!-- Devices will be populated by JavaScript -->
-                </div>
-            </section>
-
-            <!-- Group Management -->
-            <section class="group-section">
-                <h2>🔗 Groups</h2>
-                <div id="group-container" class="group-container">
-                    <!-- Groups will be populated by JavaScript -->
-                </div>
-            </section>
-
             <!-- Quick Actions -->
             <section class="actions-section">
                 <h2>⚡ Quick Actions</h2>
@@ -45,6 +29,16 @@
                     <button id="pause-all" class="action-btn pause-btn">Pause All</button>
                     <button id="stop-all" class="action-btn stop-btn">Stop All</button>
                     <button id="refresh-devices" class="action-btn refresh-btn">Refresh</button>
+                </div>
+            </section>
+
+            <!-- Unified View -->
+            <section class="unified-section">
+                <h2>🎵 Rooms & Groups</h2>
+                <div class="sonos-unified-view">
+                    <div id="unified-device-list" class="device-list">
+                        <!-- Unified list of devices and groups will be populated here -->
+                    </div>
                 </div>
             </section>
         </main>
@@ -111,5 +105,6 @@
     <script src="/static/sonos/js/sonos-dashboard.js"></script>
     <script src="/static/sonos/js/sonos-device-control.js"></script>
     <script src="/static/sonos/js/sonos-group-management.js"></script>
+    <script src="/static/sonos/js/sonos-unified-view.js"></script>
 </body>
 </html>

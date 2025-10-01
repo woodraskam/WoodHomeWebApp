@@ -20,6 +20,7 @@ class SonosDashboard {
         // Initialize sub-modules
         this.deviceControl = new SonosDeviceControl(this);
         this.groupManagement = new SonosGroupManagement(this);
+        this.unifiedView = new SonosUnifiedView();
         
         this.deviceControl.init();
         this.groupManagement.init();

@@ -1,0 +1,573 @@
+/**
+ * Sonos Unified View - Manages the unified display of devices and groups
+ * with drag-and-drop functionality for group management
+ */
+class SonosUnifiedView {
+    constructor() {
+        this.devices = new Map();
+        this.groups = new Map();
+        this.dragState = null;
+        this.container = null;
+        this.init();
+    }
+
+    init() {
+        this.container = document.getElementById('unified-device-list');
+        if (!this.container) {
+            console.error('Unified device list container not found');
+            return;
+        }
+
+        this.setupDragAndDrop();
+        this.loadInitialData();
+        this.setupWebSocket();
+    }
+
+    setupDragAndDrop() {
+        this.container.addEventListener('dragstart', (e) => {
+            this.handleDragStart(e);
+        });
+        
+        this.container.addEventListener('dragover', (e) => {
+            this.handleDragOver(e);
+        });
+        
+        this.container.addEventListener('drop', (e) => {
+            this.handleDrop(e);
+        });
+        
+        this.container.addEventListener('dragend', (e) => {
+            this.handleDragEnd(e);
+        });
+
+        // Touch support for mobile
+        this.container.addEventListener('touchstart', (e) => {
+            this.handleTouchStart(e);
+        });
+
+        this.container.addEventListener('touchmove', (e) => {
+            this.handleTouchMove(e);
+        });
+
+        this.container.addEventListener('touchend', (e) => {
+            this.handleTouchEnd(e);
+        });
+    }
+
+    handleDragStart(e) {
+        const card = e.target.closest('.sonos-card');
+        if (!card) return;
+        
+        this.dragState = {
+            element: card,
+            type: card.classList.contains('group-card') ? 'group' : 'device',
+            id: card.dataset.groupId || card.dataset.deviceId
+        };
+        
+        card.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', this.dragState.id);
+        
+        // Create drag preview
+        this.createDragPreview(card);
+    }
+
+    handleDragOver(e) {
+        e.preventDefault();
+        const targetCard = e.target.closest('.sonos-card');
+        if (!targetCard || targetCard === this.dragState?.element) return;
+        
+        // Highlight valid drop targets
+        if (this.isValidDropTarget(targetCard)) {
+            targetCard.classList.add('drop-highlight');
+        }
+    }
+
+    handleDrop(e) {
+        e.preventDefault();
+        const targetCard = e.target.closest('.sonos-card');
+        if (!targetCard || !this.isValidDropTarget(targetCard)) return;
+        
+        this.performGroupOperation(targetCard);
+    }
+
+    handleDragEnd(e) {
+        const card = e.target.closest('.sonos-card');
+        if (card) {
+            card.classList.remove('dragging');
+        }
+        
+        // Remove all drop highlights
+        document.querySelectorAll('.drop-highlight').forEach(el => {
+            el.classList.remove('drop-highlight');
+        });
+        
+        // Remove drag preview
+        this.removeDragPreview();
+        
+        this.dragState = null;
+    }
+
+    handleTouchStart(e) {
+        const card = e.target.closest('.sonos-card');
+        if (!card) return;
+        
+        this.touchState = {
+            element: card,
+            startX: e.touches[0].clientX,
+            startY: e.touches[0].clientY,
+            type: card.classList.contains('group-card') ? 'group' : 'device',
+            id: card.dataset.groupId || card.dataset.deviceId
+        };
+    }
+
+    handleTouchMove(e) {
+        if (!this.touchState) return;
+        
+        const touch = e.touches[0];
+        const deltaX = touch.clientX - this.touchState.startX;
+        const deltaY = touch.clientY - this.touchState.startY;
+        
+        // Start drag if moved more than 10px
+        if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
+            this.touchState.element.classList.add('dragging');
+            this.createDragPreview(this.touchState.element);
+        }
+    }
+
+    handleTouchEnd(e) {
+        if (!this.touchState) return;
+        
+        const touch = e.changedTouches[0];
+        const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
+        const targetCard = targetElement?.closest('.sonos-card');
+        
+        if (targetCard && this.isValidDropTarget(targetCard)) {
+            this.performGroupOperation(targetCard);
+        }
+        
+        this.touchState.element.classList.remove('dragging');
+        this.removeDragPreview();
+        this.touchState = null;
+    }
+
+    isValidDropTarget(targetCard) {
+        if (!this.dragState && !this.touchState) return false;
+        
+        const dragState = this.dragState || this.touchState;
+        
+        // Can't drop on self
+        if (targetCard === dragState.element) return false;
+        
+        // Can drop individual devices on groups or other devices
+        if (dragState.type === 'device') {
+            return true;
+        }
+        
+        // Can drop groups on other groups (merge groups)
+        if (dragState.type === 'group') {
+            return targetCard.classList.contains('group-card');
+        }
+        
+        return false;
+    }
+
+    async performGroupOperation(targetCard) {
+        const targetId = targetCard.dataset.groupId || targetCard.dataset.deviceId;
+        const targetIsGroup = targetCard.classList.contains('group-card');
+        
+        const dragState = this.dragState || this.touchState;
+        
+        try {
+            if (dragState.type === 'device') {
+                if (targetIsGroup) {
+                    // Add device to existing group
+                    await this.addDeviceToGroup(dragState.id, targetId);
+                } else {
+                    // Create new group with both devices
+                    await this.createGroupWithDevices(targetId, [dragState.id]);
+                }
+            } else if (dragState.type === 'group') {
+                if (targetIsGroup) {
+                    // Merge groups
+                    await this.mergeGroups(dragState.id, targetId);
+                }
+            }
+            
+            // Refresh the view
+            await this.refreshView();
+            
+        } catch (error) {
+            console.error('Group operation failed:', error);
+            this.showError('Failed to update group: ' + error.message);
+        }
+    }
+
+    async addDeviceToGroup(deviceId, groupId) {
+        const response = await fetch(`/api/sonos/group/${groupId}/join/${deviceId}`, {
+            method: 'POST'
+        });
+        
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(error);
+        }
+    }
+
+    async createGroupWithDevices(coordinatorId, memberIds) {
+        const response = await fetch('/api/sonos/group/create', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                coordinator: coordinatorId,
+                members: memberIds
+            })
+        });
+        
+        if (!response.ok) {
+            const error = await response.text();
+            throw new Error(error);
+        }
+    }
+
+    async mergeGroups(sourceGroupId, targetGroupId) {
+        // Get source group members
+        const sourceGroup = this.groups.get(sourceGroupId);
+        if (!sourceGroup) return;
+        
+        // Add all source group members to target group
+        for (const memberId of sourceGroup.members) {
+            await this.addDeviceToGroup(memberId, targetGroupId);
+        }
+        
+        // Source group will be automatically dissolved when empty
+    }
+
+    async refreshView() {
+        try {
+            // Reload devices and groups from API
+            const [devicesResponse, groupsResponse] = await Promise.all([
+                fetch('/api/sonos/devices'),
+                fetch('/api/sonos/groups')
+            ]);
+            
+            const devices = await devicesResponse.json();
+            const groups = await groupsResponse.json();
+            
+            this.updateView(devices, groups);
+        } catch (error) {
+            console.error('Failed to refresh view:', error);
+            this.showError('Failed to refresh device list');
+        }
+    }
+
+    updateView(devices, groups) {
+        // Update internal maps
+        this.devices.clear();
+        this.groups.clear();
+        
+        devices.forEach(device => {
+            this.devices.set(device.uuid, device);
+        });
+        
+        groups.forEach(group => {
+            this.groups.set(group.id, group);
+        });
+        
+        // Create unified list of items to display
+        const items = this.createUnifiedItems(devices, groups);
+        
+        // Clear container
+        this.container.innerHTML = '';
+        
+        // Add items to container
+        items.forEach(item => {
+            const card = this.createCard(item);
+            this.container.appendChild(card);
+        });
+    }
+
+    createUnifiedItems(devices, groups) {
+        const items = [];
+        
+        // Add groups first
+        groups.forEach(group => {
+            items.push({
+                type: 'group',
+                id: group.id,
+                coordinator: group.coordinator,
+                members: group.members,
+                status: group.playback_state,
+                volume: group.volume,
+                currentTrack: group.current_track
+            });
+        });
+        
+        // Add individual devices (not in any group)
+        devices.forEach(device => {
+            if (!device.group_id) {
+                items.push({
+                    type: 'device',
+                    id: device.uuid,
+                    name: device.name,
+                    status: device.playback_state,
+                    volume: device.volume,
+                    currentTrack: device.current_track
+                });
+            }
+        });
+        
+        return items;
+    }
+
+    createCard(item) {
+        const card = document.createElement('div');
+        card.className = `sonos-card ${item.type}-card`;
+        card.draggable = true;
+        card.dataset[`${item.type}Id`] = item.id;
+        
+        if (item.type === 'group') {
+            card.innerHTML = this.createGroupCardHTML(item);
+        } else {
+            card.innerHTML = this.createDeviceCardHTML(item);
+        }
+        
+        return card;
+    }
+
+    createGroupCardHTML(group) {
+        return `
+            <div class="coordinator">
+                <div class="device-info">
+                    <span class="device-name">${group.coordinator.name}</span>
+                    <span class="device-status">${group.status || '[No music selected]'}</span>
+                </div>
+                <div class="device-controls">
+                    <button class="control-btn play" onclick="sonosDashboard.playGroup('${group.id}')">▶️</button>
+                    <button class="control-btn pause" onclick="sonosDashboard.pauseGroup('${group.id}')">⏸️</button>
+                    <button class="control-btn stop" onclick="sonosDashboard.stopGroup('${group.id}')">⏹️</button>
+                    <div class="volume-control">
+                        <input type="range" min="0" max="100" value="${group.volume}" 
+                               onchange="sonosDashboard.setGroupVolume('${group.id}', this.value)">
+                        <span class="volume-display">${group.volume}%</span>
+                    </div>
+                </div>
+            </div>
+            <div class="group-members">
+                ${group.members.map(member => `
+                    <div class="member-device" data-device-id="${member.uuid}">
+                        <span class="member-name">${member.name}</span>
+                        <span class="member-status">Grouped</span>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    createDeviceCardHTML(device) {
+        return `
+            <div class="device-info">
+                <span class="device-name">${device.name}</span>
+                <span class="device-status">${device.status || '[No music selected]'}</span>
+            </div>
+            <div class="device-controls">
+                <button class="control-btn play" onclick="sonosDashboard.playDevice('${device.id}')">▶️</button>
+                <button class="control-btn pause" onclick="sonosDashboard.pauseDevice('${device.id}')">⏸️</button>
+                <button class="control-btn stop" onclick="sonosDashboard.stopDevice('${device.id}')">⏹️</button>
+                <div class="volume-control">
+                    <input type="range" min="0" max="100" value="${device.volume}" 
+                           onchange="sonosDashboard.setDeviceVolume('${device.id}', this.value)">
+                    <span class="volume-display">${device.volume}%</span>
+                </div>
+            </div>
+        `;
+    }
+
+    createDragPreview(card) {
+        const preview = card.cloneNode(true);
+        preview.classList.add('drag-preview');
+        preview.style.position = 'fixed';
+        preview.style.pointerEvents = 'none';
+        preview.style.zIndex = '1000';
+        preview.style.opacity = '0.8';
+        preview.style.transform = 'rotate(5deg)';
+        
+        document.body.appendChild(preview);
+        this.dragPreview = preview;
+    }
+
+    removeDragPreview() {
+        if (this.dragPreview) {
+            document.body.removeChild(this.dragPreview);
+            this.dragPreview = null;
+        }
+    }
+
+    async loadInitialData() {
+        try {
+            await this.refreshView();
+        } catch (error) {
+            console.error('Failed to load initial data:', error);
+            this.showError('Failed to load devices and groups');
+        }
+    }
+
+    setupWebSocket() {
+        // WebSocket integration will be handled by the main dashboard
+        // This method is a placeholder for future WebSocket updates
+    }
+
+    showError(message) {
+        // Create error notification
+        const notification = document.createElement('div');
+        notification.className = 'error-notification';
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f44336;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            z-index: 1000;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Remove after 3 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 3000);
+    }
+
+    // Public methods for external control
+    async playGroup(groupId) {
+        try {
+            const response = await fetch(`/api/sonos/group/${groupId}/play`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to play group');
+            }
+        } catch (error) {
+            console.error('Failed to play group:', error);
+            this.showError('Failed to play group');
+        }
+    }
+
+    async pauseGroup(groupId) {
+        try {
+            const response = await fetch(`/api/sonos/group/${groupId}/pause`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to pause group');
+            }
+        } catch (error) {
+            console.error('Failed to pause group:', error);
+            this.showError('Failed to pause group');
+        }
+    }
+
+    async stopGroup(groupId) {
+        try {
+            const response = await fetch(`/api/sonos/group/${groupId}/stop`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to stop group');
+            }
+        } catch (error) {
+            console.error('Failed to stop group:', error);
+            this.showError('Failed to stop group');
+        }
+    }
+
+    async setGroupVolume(groupId, volume) {
+        try {
+            const response = await fetch(`/api/sonos/group/${groupId}/volume/${volume}`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to set group volume');
+            }
+        } catch (error) {
+            console.error('Failed to set group volume:', error);
+            this.showError('Failed to set group volume');
+        }
+    }
+
+    async playDevice(deviceId) {
+        try {
+            const response = await fetch(`/api/sonos/device/${deviceId}/play`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to play device');
+            }
+        } catch (error) {
+            console.error('Failed to play device:', error);
+            this.showError('Failed to play device');
+        }
+    }
+
+    async pauseDevice(deviceId) {
+        try {
+            const response = await fetch(`/api/sonos/device/${deviceId}/pause`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to pause device');
+            }
+        } catch (error) {
+            console.error('Failed to pause device:', error);
+            this.showError('Failed to pause device');
+        }
+    }
+
+    async stopDevice(deviceId) {
+        try {
+            const response = await fetch(`/api/sonos/device/${deviceId}/stop`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to stop device');
+            }
+        } catch (error) {
+            console.error('Failed to stop device:', error);
+            this.showError('Failed to stop device');
+        }
+    }
+
+    async setDeviceVolume(deviceId, volume) {
+        try {
+            const response = await fetch(`/api/sonos/device/${deviceId}/volume/${volume}`, {
+                method: 'POST'
+            });
+            
+            if (!response.ok) {
+                throw new Error('Failed to set device volume');
+            }
+        } catch (error) {
+            console.error('Failed to set device volume:', error);
+            this.showError('Failed to set device volume');
+        }
+    }
+}
+
+// Initialize unified view when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    window.sonosUnifiedView = new SonosUnifiedView();
+});
