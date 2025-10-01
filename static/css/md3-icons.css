@@ -1,0 +1,189 @@
+/* Material Symbols Integration - Material Design 3 Icons */
+
+/* Material Symbols Font Loading */
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&display=block');
+
+/* Material Symbols Base Styles */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Material Symbols Size Variants */
+.material-symbols-outlined.md-18 { font-size: 18px; }
+.material-symbols-outlined.md-20 { font-size: 20px; }
+.material-symbols-outlined.md-24 { font-size: 24px; }
+.material-symbols-outlined.md-36 { font-size: 36px; }
+.material-symbols-outlined.md-48 { font-size: 48px; }
+
+/* Material Symbols Weight Variants */
+.material-symbols-outlined.wght-100 { font-weight: 100; }
+.material-symbols-outlined.wght-200 { font-weight: 200; }
+.material-symbols-outlined.wght-300 { font-weight: 300; }
+.material-symbols-outlined.wght-400 { font-weight: 400; }
+.material-symbols-outlined.wght-500 { font-weight: 500; }
+.material-symbols-outlined.wght-600 { font-weight: 600; }
+.material-symbols-outlined.wght-700 { font-weight: 700; }
+
+/* Material Symbols Fill Variants */
+.material-symbols-outlined.fill-0 { font-variation-settings: 'FILL' 0; }
+.material-symbols-outlined.fill-1 { font-variation-settings: 'FILL' 1; }
+
+/* Material Symbols Grade Variants */
+.material-symbols-outlined.grade-25 { font-variation-settings: 'GRAD' -25; }
+.material-symbols-outlined.grade-0 { font-variation-settings: 'GRAD' 0; }
+.material-symbols-outlined.grade-200 { font-variation-settings: 'GRAD' 200; }
+
+/* Material Symbols Optical Size Variants */
+.material-symbols-outlined.opsz-20 { font-variation-settings: 'opsz' 20; }
+.material-symbols-outlined.opsz-24 { font-variation-settings: 'opsz' 24; }
+.material-symbols-outlined.opsz-40 { font-variation-settings: 'opsz' 40; }
+.material-symbols-outlined.opsz-48 { font-variation-settings: 'opsz' 48; }
+
+/* Icon Color Variants */
+.material-symbols-outlined.primary {
+  color: var(--md-sys-color-primary);
+}
+
+.material-symbols-outlined.on-primary {
+  color: var(--md-sys-color-on-primary);
+}
+
+.material-symbols-outlined.secondary {
+  color: var(--md-sys-color-secondary);
+}
+
+.material-symbols-outlined.on-secondary {
+  color: var(--md-sys-color-on-secondary);
+}
+
+.material-symbols-outlined.surface {
+  color: var(--md-sys-color-on-surface);
+}
+
+.material-symbols-outlined.surface-variant {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+.material-symbols-outlined.error {
+  color: var(--md-sys-color-error);
+}
+
+.material-symbols-outlined.on-error {
+  color: var(--md-sys-color-on-error);
+}
+
+/* Icon States */
+.material-symbols-outlined.disabled {
+  color: var(--md-sys-color-on-surface);
+  opacity: 0.38;
+}
+
+.material-symbols-outlined.hover {
+  transition: color 0.2s ease;
+}
+
+.material-symbols-outlined.hover:hover {
+  color: var(--md-sys-color-primary);
+}
+
+/* Icon Button Styles */
+.icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border-radius: var(--md-sys-shape-corner-large);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.icon-button:hover {
+  background-color: var(--md-sys-color-surface-container-high);
+}
+
+.icon-button:focus {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+.icon-button:active {
+  background-color: var(--md-sys-color-surface-container-highest);
+}
+
+/* Icon Button Sizes */
+.icon-button.small {
+  width: 40px;
+  height: 40px;
+}
+
+.icon-button.medium {
+  width: 48px;
+  height: 48px;
+}
+
+.icon-button.large {
+  width: 56px;
+  height: 56px;
+}
+
+/* Icon in Button */
+.btn .material-symbols-outlined {
+  font-size: 18px;
+  margin-right: 8px;
+}
+
+.btn.icon-only {
+  padding: 12px;
+  min-width: 48px;
+}
+
+.btn.icon-only .material-symbols-outlined {
+  margin-right: 0;
+}
+
+/* Icon in Card Header */
+.card-header .material-symbols-outlined {
+  color: var(--md-sys-color-primary);
+}
+
+/* Icon in Status Indicator */
+.status-indicator .material-symbols-outlined {
+  font-size: 18px;
+}
+
+/* Icon in Navigation */
+.nav-item .material-symbols-outlined {
+  font-size: 20px;
+  margin-right: 12px;
+}
+
+/* Responsive Icon Sizes */
+@media (max-width: 768px) {
+  .material-symbols-outlined {
+    font-size: 20px;
+  }
+  
+  .icon-button {
+    width: 44px;
+    height: 44px;
+  }
+  
+  .btn .material-symbols-outlined {
+    font-size: 16px;
+  }
+}

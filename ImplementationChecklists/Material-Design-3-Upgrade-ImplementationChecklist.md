@@ -16,21 +16,21 @@ Implementation checklist for Material Design 3 upgrade of WoodHome WebApp, follo
 **Status**: ⏳ Pending
 
 #### 1.1 System Analysis
-- [ ] Audit main dashboard components (`templates/index.html`)
-- [ ] Audit Sonos control dashboard (`templates/sonos/dashboard.html`)
-- [ ] Audit weather widget components
-- [ ] Document current icon usage (Material Icons vs emoji vs custom)
-- [ ] Identify non-Material Design 3 compliant elements
-- [ ] Map component hierarchy and dependencies
+- [x] Audit main dashboard components (`templates/index.html`)
+- [x] Audit Sonos control dashboard (`templates/sonos/dashboard.html`)
+- [x] Audit weather widget components
+- [x] Document current icon usage (Material Icons vs emoji vs custom)
+- [x] Identify non-Material Design 3 compliant elements
+- [x] Map component hierarchy and dependencies
 
 #### 1.2 Foundation Setup
-- [ ] Enhance `static/css/material-design-3.css` with complete Material Design 3 system
-- [ ] Create `static/css/md3-components.css` for component library
-- [ ] Create `static/css/md3-icons.css` for Material Icons integration
-- [ ] Update Google Fonts integration for Material Symbols
-- [ ] Implement Material Design 3 color system variables
-- [ ] Set up typography scale implementation
-- [ ] Configure elevation and shadow system
+- [x] Enhance `static/css/material-design-3.css` with complete Material Design 3 system
+- [x] Create `static/css/md3-components.css` for component library
+- [x] Create `static/css/md3-icons.css` for Material Icons integration
+- [x] Update Google Fonts integration for Material Symbols
+- [x] Implement Material Design 3 color system variables
+- [x] Set up typography scale implementation
+- [x] Configure elevation and shadow system
 
 ### Phase 2: Core Component Library
 **Duration**: 3 days

@@ -364,3 +364,151 @@ body {
 .loading {
   display: none;
 }
+
+/* ===== ENHANCED MATERIAL DESIGN 3 COMPONENTS ===== */
+
+/* Status Indicators */
+.status-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--md-sys-shape-corner-large);
+  font-family: var(--md-sys-typescale-label-large-font);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  transition: all 0.2s ease;
+}
+
+.status-success {
+  background-color: var(--md-sys-color-tertiary-container);
+  color: var(--md-sys-color-on-tertiary-container);
+}
+
+.status-error {
+  background-color: var(--md-sys-color-error-container);
+  color: var(--md-sys-color-on-error-container);
+}
+
+.status-warning {
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.status-info {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+/* Enhanced Button States */
+.btn:disabled {
+  opacity: 0.38;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
+.btn:focus {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+/* Enhanced Card States */
+.card:hover {
+  box-shadow: var(--md-sys-elevation-level2);
+  transform: translateY(-1px);
+  transition: all 0.2s ease;
+}
+
+.card:active {
+  transform: translateY(0);
+  box-shadow: var(--md-sys-elevation-level1);
+}
+
+/* Enhanced Grid System */
+.grid-responsive {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+}
+
+@media (max-width: 768px) {
+  .grid-responsive {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Enhanced Typography */
+.text-primary {
+  color: var(--md-sys-color-primary);
+}
+
+.text-secondary {
+  color: var(--md-sys-color-secondary);
+}
+
+.text-error {
+  color: var(--md-sys-color-error);
+}
+
+.text-surface-variant {
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Enhanced Spacing */
+.spacing-xs { margin: 4px; }
+.spacing-sm { margin: 8px; }
+.spacing-md { margin: 16px; }
+.spacing-lg { margin: 24px; }
+.spacing-xl { margin: 32px; }
+
+.padding-xs { padding: 4px; }
+.padding-sm { padding: 8px; }
+.padding-md { padding: 16px; }
+.padding-lg { padding: 24px; }
+.padding-xl { padding: 32px; }
+
+/* Enhanced Accessibility */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Focus Management */
+.focus-trap {
+  outline: none;
+}
+
+/* Enhanced Animation */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideIn {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.3s ease-out;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.3s ease-out;
+}

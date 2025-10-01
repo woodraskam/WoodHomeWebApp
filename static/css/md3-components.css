@@ -1,0 +1,470 @@
+/* Material Design 3 Component Library */
+
+/* ===== NAVIGATION COMPONENTS ===== */
+
+/* Top App Bar */
+.md3-top-app-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 64px;
+  padding: 0 16px;
+  background-color: var(--md-sys-color-surface-container);
+  color: var(--md-sys-color-on-surface);
+  box-shadow: var(--md-sys-elevation-level1);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.md3-top-app-bar .md3-title {
+  font-family: var(--md-sys-typescale-title-large-font);
+  font-size: var(--md-sys-typescale-title-large-size);
+  font-weight: var(--md-sys-typescale-title-large-weight);
+  line-height: var(--md-sys-typescale-title-large-line-height);
+  color: var(--md-sys-color-primary);
+}
+
+.md3-top-app-bar .md3-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Navigation Drawer */
+.md3-navigation-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  background-color: var(--md-sys-color-surface-container);
+  box-shadow: var(--md-sys-elevation-level3);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: 200;
+}
+
+.md3-navigation-drawer.open {
+  transform: translateX(0);
+}
+
+.md3-navigation-drawer .md3-header {
+  padding: 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.md3-navigation-drawer .md3-content {
+  padding: 8px 0;
+}
+
+.md3-navigation-drawer .md3-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  color: var(--md-sys-color-on-surface);
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.md3-navigation-drawer .md3-item:hover {
+  background-color: var(--md-sys-color-surface-container-high);
+}
+
+.md3-navigation-drawer .md3-item.active {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+/* ===== BUTTON COMPONENTS ===== */
+
+/* Base Button */
+.md3-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 24px;
+  border-radius: var(--md-sys-shape-corner-large);
+  border: none;
+  font-family: var(--md-sys-typescale-label-large-font);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  line-height: var(--md-sys-typescale-label-large-line-height);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  min-height: 40px;
+  gap: 8px;
+}
+
+/* Filled Button */
+.md3-btn-filled {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  box-shadow: var(--md-sys-elevation-level0);
+}
+
+.md3-btn-filled:hover {
+  box-shadow: var(--md-sys-elevation-level1);
+  transform: translateY(-1px);
+}
+
+.md3-btn-filled:active {
+  box-shadow: var(--md-sys-elevation-level0);
+  transform: translateY(0);
+}
+
+/* Outlined Button */
+.md3-btn-outlined {
+  background-color: transparent;
+  color: var(--md-sys-color-primary);
+  border: 1px solid var(--md-sys-color-outline);
+}
+
+.md3-btn-outlined:hover {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+/* Text Button */
+.md3-btn-text {
+  background-color: transparent;
+  color: var(--md-sys-color-primary);
+  padding: 10px 12px;
+}
+
+.md3-btn-text:hover {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+/* Button Sizes */
+.md3-btn.small {
+  padding: 8px 16px;
+  min-height: 32px;
+  font-size: 14px;
+}
+
+.md3-btn.large {
+  padding: 14px 32px;
+  min-height: 48px;
+  font-size: 16px;
+}
+
+/* ===== CARD COMPONENTS ===== */
+
+/* Base Card */
+.md3-card {
+  background-color: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-large);
+  padding: 24px;
+  box-shadow: var(--md-sys-elevation-level1);
+  margin-bottom: 16px;
+}
+
+/* Elevated Card */
+.md3-card-elevated {
+  box-shadow: var(--md-sys-elevation-level2);
+}
+
+.md3-card-elevated:hover {
+  box-shadow: var(--md-sys-elevation-level3);
+}
+
+/* Outlined Card */
+.md3-card-outlined {
+  border: 1px solid var(--md-sys-color-outline-variant);
+  box-shadow: none;
+}
+
+/* Filled Card */
+.md3-card-filled {
+  background-color: var(--md-sys-color-surface-container-high);
+}
+
+/* Card Header */
+.md3-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
+.md3-card-title {
+  font-family: var(--md-sys-typescale-title-large-font);
+  font-size: var(--md-sys-typescale-title-large-size);
+  font-weight: var(--md-sys-typescale-title-large-weight);
+  line-height: var(--md-sys-typescale-title-large-line-height);
+  color: var(--md-sys-color-on-surface);
+}
+
+/* Card Content */
+.md3-card-content {
+  margin-bottom: 16px;
+}
+
+.md3-card-content:last-child {
+  margin-bottom: 0;
+}
+
+/* Card Actions */
+.md3-card-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.md3-card-actions:last-child {
+  margin-top: 0;
+}
+
+/* ===== CHIP COMPONENTS ===== */
+
+/* Base Chip */
+.md3-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 16px;
+  border-radius: var(--md-sys-shape-corner-extra-large);
+  font-family: var(--md-sys-typescale-label-large-font);
+  font-size: var(--md-sys-typescale-label-large-size);
+  font-weight: var(--md-sys-typescale-label-large-weight);
+  line-height: var(--md-sys-typescale-label-large-line-height);
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  gap: 8px;
+}
+
+/* Input Chip */
+.md3-chip-input {
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+  border: 1px solid var(--md-sys-color-outline);
+}
+
+.md3-chip-input:hover {
+  background-color: var(--md-sys-color-surface-container-highest);
+}
+
+/* Filter Chip */
+.md3-chip-filter {
+  background-color: var(--md-sys-color-secondary-container);
+  color: var(--md-sys-color-on-secondary-container);
+}
+
+.md3-chip-filter.selected {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+/* Choice Chip */
+.md3-chip-choice {
+  background-color: var(--md-sys-color-surface-container-high);
+  color: var(--md-sys-color-on-surface);
+}
+
+.md3-chip-choice.selected {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+/* Action Chip */
+.md3-chip-action {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+.md3-chip-action:hover {
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+}
+
+/* ===== DIALOG COMPONENTS ===== */
+
+/* Dialog Overlay */
+.md3-dialog-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.32);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 300;
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.md3-dialog-overlay.open {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Dialog */
+.md3-dialog {
+  background-color: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-extra-large);
+  box-shadow: var(--md-sys-elevation-level5);
+  max-width: 560px;
+  width: 90%;
+  max-height: 80vh;
+  overflow: hidden;
+  transform: scale(0.9);
+  transition: transform 0.3s ease;
+}
+
+.md3-dialog-overlay.open .md3-dialog {
+  transform: scale(1);
+}
+
+/* Dialog Header */
+.md3-dialog-header {
+  padding: 24px 24px 0 24px;
+}
+
+.md3-dialog-title {
+  font-family: var(--md-sys-typescale-headline-large-font);
+  font-size: var(--md-sys-typescale-headline-large-size);
+  font-weight: var(--md-sys-typescale-headline-large-weight);
+  line-height: var(--md-sys-typescale-headline-large-line-height);
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: 16px;
+}
+
+/* Dialog Content */
+.md3-dialog-content {
+  padding: 24px;
+}
+
+.md3-dialog-content:last-child {
+  padding-bottom: 0;
+}
+
+/* Dialog Actions */
+.md3-dialog-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 24px 24px 24px;
+}
+
+/* ===== LIST COMPONENTS ===== */
+
+/* Base List */
+.md3-list {
+  background-color: var(--md-sys-color-surface-container);
+  border-radius: var(--md-sys-shape-corner-large);
+  overflow: hidden;
+  box-shadow: var(--md-sys-elevation-level1);
+}
+
+/* List Item */
+.md3-list-item {
+  display: flex;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+}
+
+.md3-list-item:last-child {
+  border-bottom: none;
+}
+
+.md3-list-item:hover {
+  background-color: var(--md-sys-color-surface-container-high);
+}
+
+.md3-list-item.active {
+  background-color: var(--md-sys-color-primary-container);
+  color: var(--md-sys-color-on-primary-container);
+}
+
+/* List Item Content */
+.md3-list-item-content {
+  flex: 1;
+  margin-left: 16px;
+}
+
+.md3-list-item-title {
+  font-family: var(--md-sys-typescale-title-large-font);
+  font-size: var(--md-sys-typescale-title-large-size);
+  font-weight: var(--md-sys-typescale-title-large-weight);
+  line-height: var(--md-sys-typescale-title-large-line-height);
+  color: var(--md-sys-color-on-surface);
+  margin-bottom: 4px;
+}
+
+.md3-list-item-subtitle {
+  font-family: var(--md-sys-typescale-body-large-font);
+  font-size: var(--md-sys-typescale-body-large-size);
+  font-weight: var(--md-sys-typescale-body-large-weight);
+  line-height: var(--md-sys-typescale-body-large-line-height);
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* ===== PROGRESS COMPONENTS ===== */
+
+/* Linear Progress */
+.md3-linear-progress {
+  width: 100%;
+  height: 4px;
+  background-color: var(--md-sys-color-surface-container-high);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.md3-linear-progress-bar {
+  height: 100%;
+  background-color: var(--md-sys-color-primary);
+  border-radius: 2px;
+  transition: width 0.3s ease;
+}
+
+/* Circular Progress */
+.md3-circular-progress {
+  width: 48px;
+  height: 48px;
+  border: 4px solid var(--md-sys-color-surface-container-high);
+  border-top: 4px solid var(--md-sys-color-primary);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ===== RESPONSIVE DESIGN ===== */
+
+@media (max-width: 768px) {
+  .md3-top-app-bar {
+    height: 56px;
+    padding: 0 12px;
+  }
+  
+  .md3-navigation-drawer {
+    width: 100%;
+  }
+  
+  .md3-dialog {
+    width: 95%;
+    margin: 16px;
+  }
+  
+  .md3-card {
+    padding: 16px;
+  }
+  
+  .md3-list-item {
+    padding: 12px;
+  }
+}
