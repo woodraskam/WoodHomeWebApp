@@ -2,6 +2,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"database/sql"
 	"encoding/json"
 	"fmt"
@@ -14,7 +15,12 @@ import (
 	"strings"
 	"time"
 
+	"woodhome-webapp/internal/handlers"
+	"woodhome-webapp/internal/models"
+	"woodhome-webapp/internal/services"
+
 	"github.com/gorilla/mux"
+	"github.com/gorilla/websocket"
 	"github.com/joho/godotenv"
 	_ "github.com/microsoft/go-mssqldb"
 	"gopkg.in/gomail.v2"
@@ -128,6 +134,8 @@ type GameUpdate struct {
 var config WoodHomeConfig
 var cribbageManager *CribbageGameManager
 var emailService *EmailService
+var sonosService *services.SonosService
+var sonosHandler *handlers.SonosHandler
 
 // Initialize database
 func initDatabase() error {
@@ -474,6 +482,22 @@ func main() {
 	// Initialize cribbage game manager
 	cribbageManager = &CribbageGameManager{db: db}
 
+	// Initialize Sonos service
+	sonosConfig := &models.SonosServiceConfig{
+		JishiURL:     getEnv("SONOS_JISHI_URL", "http://localhost:5005"),
+		Timeout:      30 * time.Second,
+		RetryCount:   3,
+		PollInterval: 5 * time.Second,
+	}
+	sonosService = services.NewSonosService(sonosConfig)
+	sonosHandler = handlers.NewSonosHandler(sonosService)
+
+	// Start Sonos service
+	ctx := context.Background()
+	if err := sonosService.Start(ctx); err != nil {
+		log.Printf("Warning: Failed to start Sonos service: %v", err)
+	}
+
 	// Configuration
 	config.APIBaseURL = getEnv("WOODHOME_API_URL", "http://localhost:8080")
 	config.Port = getEnv("PORT", "3000")
@@ -514,6 +538,15 @@ func main() {
 	http.HandleFunc("/api/cribbage/play", playCardHandler)
 	http.HandleFunc("/api/cribbage/state", gameStateHandler)
 	http.HandleFunc("/api/cribbage/updates", gameUpdatesHandler)
+
+	// Sonos routes
+	http.HandleFunc("/sonos", sonosDashboardHandler)
+	http.HandleFunc("/ws/sonos", sonosWebSocketHandler)
+	
+	// Sonos API routes (using mux for better routing)
+	router := mux.NewRouter()
+	sonosHandler.RegisterRoutes(router)
+	http.Handle("/api/sonos/", router)
 
 	// Existing routes
 	http.HandleFunc("/play/CandyLand", candyLandHandler)
@@ -1341,4 +1374,77 @@ func getColorClass(suit string) string {
 		return "red"
 	}
 	return "black"
+}
+
+// Sonos handler functions
+func sonosDashboardHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Sonos dashboard handler called for path: %s", r.URL.Path)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+
+	// Try to parse the template with error handling
+	tmpl, err := template.ParseFiles("templates/sonos/dashboard.html")
+	if err != nil {
+		log.Printf("Sonos template parsing error: %v", err)
+		http.Error(w, "Template parsing error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	data := map[string]interface{}{
+		"Title": "Sonos Control - WoodHome",
+	}
+
+	if err := tmpl.Execute(w, data); err != nil {
+		log.Printf("Sonos template execution error: %v", err)
+		http.Error(w, "Template execution error: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	log.Printf("Sonos template executed successfully")
+}
+
+func sonosWebSocketHandler(w http.ResponseWriter, r *http.Request) {
+	// Upgrade HTTP connection to WebSocket
+	upgrader := websocket.Upgrader{
+		CheckOrigin: func(r *http.Request) bool {
+			return true // Allow all origins for now
+		},
+	}
+
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Printf("WebSocket upgrade error: %v", err)
+		return
+	}
+	defer conn.Close()
+
+	log.Printf("Sonos WebSocket connection established")
+
+	// Handle WebSocket messages
+	for {
+		var message map[string]interface{}
+		err := conn.ReadJSON(&message)
+		if err != nil {
+			log.Printf("WebSocket read error: %v", err)
+			break
+		}
+
+		// Handle different message types
+		switch message["type"] {
+		case "ping":
+			conn.WriteJSON(map[string]string{"type": "pong"})
+		case "get_devices":
+			devices := sonosService.GetDevices()
+			conn.WriteJSON(map[string]interface{}{
+				"type":    "device_list",
+				"devices": devices,
+			})
+		case "get_groups":
+			groups := sonosService.GetGroups()
+			conn.WriteJSON(map[string]interface{}{
+				"type":   "group_list",
+				"groups": groups,
+			})
+		default:
+			log.Printf("Unknown WebSocket message type: %v", message["type"])
+		}
+	}
 }
