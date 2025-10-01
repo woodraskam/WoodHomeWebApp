@@ -21,6 +21,7 @@ class SonosUnifiedView {
         this.setupDragAndDrop();
         this.loadInitialData();
         this.setupWebSocket();
+        this.setupPeriodicRefresh();
     }
 
     setupDragAndDrop() {
@@ -504,7 +505,7 @@ class SonosUnifiedView {
 
     getTrackInfo(currentTrack) {
         if (!currentTrack) return null;
-        
+
         if (currentTrack.title && currentTrack.artist) {
             return `${currentTrack.title} - ${currentTrack.artist}`;
         } else if (currentTrack.title) {
@@ -512,7 +513,7 @@ class SonosUnifiedView {
         } else if (currentTrack.artist) {
             return currentTrack.artist;
         }
-        
+
         return null;
     }
 
@@ -557,15 +558,22 @@ class SonosUnifiedView {
 
     async loadInitialData() {
         try {
-            // Get data from the main dashboard instead of making our own API calls
-            if (window.sonosDashboard && window.sonosDashboard.devices && window.sonosDashboard.groups) {
-                console.log('Getting data from main dashboard');
-                this.updateView(window.sonosDashboard.devices, window.sonosDashboard.groups);
-            } else {
-                console.log('Main dashboard not ready, waiting...');
-                // Wait a bit for the main dashboard to load
-                setTimeout(() => this.loadInitialData(), 1000);
+            console.log('Fetching real Sonos data from API...');
+            // Fetch fresh data directly from API to get current track information
+            const [devicesResponse, groupsResponse] = await Promise.all([
+                fetch('/api/sonos/devices'),
+                fetch('/api/sonos/groups')
+            ]);
+
+            if (!devicesResponse.ok || !groupsResponse.ok) {
+                throw new Error('Failed to fetch data from API');
             }
+
+            const devices = await devicesResponse.json();
+            const groups = await groupsResponse.json();
+
+            console.log('Fetched real data from API:', { devices, groups });
+            this.updateView(devices, groups);
         } catch (error) {
             console.error('Failed to load initial data:', error);
             this.showError('Failed to load devices and groups');
@@ -588,6 +596,13 @@ class SonosUnifiedView {
     setupWebSocket() {
         // WebSocket integration will be handled by the main dashboard
         // This method is a placeholder for future WebSocket updates
+    }
+
+    setupPeriodicRefresh() {
+        // Refresh data every 5 seconds to get current track information
+        setInterval(() => {
+            this.loadInitialData();
+        }, 5000);
     }
 
     showError(message) {
