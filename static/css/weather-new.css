@@ -1,7 +1,7 @@
 /* New Weather Widget - Material Design 3 */
-.weather-widget {
+.weather-widget-new {
     background: var(--md-sys-color-surface-container);
-    border-radius: 28px;
+    border-radius: var(--md-sys-shape-corner-extra-large);
     padding: 24px;
     box-shadow: var(--md-sys-elevation-level1);
     margin: 16px 0;
@@ -17,8 +17,10 @@
 }
 
 .weather-title {
-    font-size: 22px;
-    font-weight: 400;
+    font-family: var(--md-sys-typescale-title-large-font);
+    font-size: var(--md-sys-typescale-title-large-size);
+    font-weight: var(--md-sys-typescale-title-large-weight);
+    line-height: var(--md-sys-typescale-title-large-line-height);
     color: var(--md-sys-color-on-surface);
     margin: 0;
     display: flex;
@@ -30,7 +32,7 @@
     color: var(--md-sys-color-on-surface-variant);
     cursor: pointer;
     padding: 8px;
-    border-radius: 20px;
+    border-radius: var(--md-sys-shape-corner-extra-large);
     transition: all 0.2s ease;
     display: flex;
     align-items: center;
@@ -47,7 +49,7 @@
 /* Current Weather Section */
 .current-weather {
     background: var(--md-sys-color-surface);
-    border-radius: 16px;
+    border-radius: var(--md-sys-shape-corner-large);
     padding: 20px;
     margin-bottom: 20px;
     border: 1px solid var(--md-sys-color-outline-variant);

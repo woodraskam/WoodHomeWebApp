@@ -40,9 +40,12 @@ class WeatherWidgetNew {
     showLocationPrompt() {
         this.widget.innerHTML = `
             <div class="location-prompt">
-                <div class="location-prompt-icon">📍</div>
+                <div class="location-prompt-icon">
+                    <span class="material-symbols-outlined">location_on</span>
+                </div>
                 <div class="location-prompt-text">Allow location access to show current weather and forecast</div>
-                <button class="location-prompt-button" onclick="weatherWidgetNew.getLocation()">
+                <button class="location-prompt-button md3-btn md3-btn-filled" onclick="weatherWidgetNew.getLocation()">
+                    <span class="material-symbols-outlined">location_on</span>
                     Allow Location
                 </button>
             </div>
@@ -165,16 +168,16 @@ class WeatherWidgetNew {
     getWeatherIcon(description) {
         const desc = (description || '').toLowerCase();
 
-        if (desc.includes('sunny') || desc.includes('clear')) return '☀️';
-        if (desc.includes('partly cloudy') || desc.includes('partly sunny')) return '⛅';
-        if (desc.includes('cloudy') || desc.includes('overcast')) return '☁️';
-        if (desc.includes('rain') || desc.includes('shower')) return '🌧️';
-        if (desc.includes('thunder') || desc.includes('storm')) return '⛈️';
-        if (desc.includes('snow')) return '❄️';
-        if (desc.includes('fog') || desc.includes('haze')) return '🌫️';
-        if (desc.includes('wind')) return '💨';
+        if (desc.includes('sunny') || desc.includes('clear')) return 'wb_sunny';
+        if (desc.includes('partly cloudy') || desc.includes('partly sunny')) return 'partly_cloudy_day';
+        if (desc.includes('cloudy') || desc.includes('overcast')) return 'cloud';
+        if (desc.includes('rain') || desc.includes('shower')) return 'rainy';
+        if (desc.includes('thunder') || desc.includes('storm')) return 'thunderstorm';
+        if (desc.includes('snow')) return 'ac_unit';
+        if (desc.includes('fog') || desc.includes('haze')) return 'foggy';
+        if (desc.includes('wind')) return 'air';
 
-        return '☀️'; // Default
+        return 'wb_sunny'; // Default
     }
 
     showLoading() {
@@ -197,9 +200,11 @@ class WeatherWidgetNew {
         const forecastHtml = this.forecast.map(day => `
             <div class="forecast-day" title="${day.description}">
                 <div class="forecast-day-name">${day.day}</div>
-                <div class="forecast-icon">${day.icon}</div>
+                <div class="forecast-icon">
+                    <span class="material-symbols-outlined">${day.icon}</span>
+                </div>
                 <div class="forecast-precip">
-                    <span class="forecast-precip-icon">☂️</span>
+                    <span class="material-symbols-outlined forecast-precip-icon">umbrella</span>
                     <span>${day.precip}%</span>
                 </div>
                 <div class="forecast-temps">
@@ -218,16 +223,20 @@ class WeatherWidgetNew {
         this.widget.innerHTML = `
             <div class="weather-header">
                 <h3 class="weather-title">Weather - ${this.tempScale}°</h3>
-                <div class="weather-settings" title="Settings">⚙️</div>
+                <div class="weather-settings" title="Settings">
+                    <span class="material-symbols-outlined">settings</span>
+                </div>
             </div>
             <div class="weather-content">
                 <div class="current-weather">
                     <div class="location">
-                        <span class="location-icon">📍</span>
+                        <span class="material-symbols-outlined location-icon">location_on</span>
                         <span>${this.currentWeather.location}</span>
                     </div>
                     <div class="current-main">
-                        <div class="current-icon">${this.currentWeather.icon}</div>
+                        <div class="current-icon">
+                            <span class="material-symbols-outlined">${this.currentWeather.icon}</span>
+                        </div>
                         <div class="current-temp">${this.currentWeather.temperature || '--'}°</div>
                         <div class="current-details">
                             <div class="weather-desc">${this.currentWeather.description}</div>
