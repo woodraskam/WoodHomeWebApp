@@ -479,7 +479,7 @@ class SonosUnifiedView {
             <div class="coordinator">
                 <div class="device-info">
                     <span class="device-name">${group.coordinator.name}</span>
-                    <span class="device-status">${group.status || '[No music selected]'}</span>
+                    <span class="device-status">${this.getTrackInfo(group.currentTrack) || '[No music selected]'}</span>
                 </div>
                 <div class="device-controls">
                     <button class="control-btn play" onclick="sonosUnifiedView.playGroup('${group.id}')">▶️</button>
@@ -502,11 +502,25 @@ class SonosUnifiedView {
         `;
     }
 
+    getTrackInfo(currentTrack) {
+        if (!currentTrack) return null;
+        
+        if (currentTrack.title && currentTrack.artist) {
+            return `${currentTrack.title} - ${currentTrack.artist}`;
+        } else if (currentTrack.title) {
+            return currentTrack.title;
+        } else if (currentTrack.artist) {
+            return currentTrack.artist;
+        }
+        
+        return null;
+    }
+
     createDeviceCardHTML(device) {
         return `
             <div class="device-info">
                 <span class="device-name">${device.name}</span>
-                <span class="device-status">${device.status || '[No music selected]'}</span>
+                <span class="device-status">${this.getTrackInfo(device.currentTrack) || '[No music selected]'}</span>
             </div>
             <div class="device-controls">
         <button class="control-btn play" onclick="sonosUnifiedView.playDevice('${device.id}')">▶️</button>
