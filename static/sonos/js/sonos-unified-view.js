@@ -211,14 +211,14 @@ class SonosUnifiedView {
             // Wait a moment for the backend to process the changes
             console.log('Waiting for backend to process changes...');
             await new Promise(resolve => setTimeout(resolve, 1000));
-            
+
             // Refresh the view
             console.log('Refreshing view...');
             await this.refreshView();
-            
+
             // Show success message
             this.showSuccess('Group updated successfully!');
-            
+
         } catch (error) {
             console.error('Group operation failed:', error);
             this.showError('Failed to update group: ' + error.message);
