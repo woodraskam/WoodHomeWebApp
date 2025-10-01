@@ -445,10 +445,67 @@
 
 /* ===== RESPONSIVE DESIGN ===== */
 
+/* Mobile Navigation Drawer */
+.md3-navigation-drawer {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 280px;
+  height: 100vh;
+  background-color: var(--md-sys-color-surface-container);
+  box-shadow: var(--md-sys-elevation-level3);
+  transform: translateX(-100%);
+  transition: transform 0.3s ease;
+  z-index: 200;
+}
+
+.md3-navigation-drawer.open {
+  transform: translateX(0);
+}
+
+/* Mobile Menu Button */
+.md3-menu-button {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--md-sys-color-on-surface);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: var(--md-sys-shape-corner-large);
+  transition: background-color 0.2s ease;
+}
+
+.md3-menu-button:hover {
+  background-color: var(--md-sys-color-surface-container-high);
+}
+
+/* Tablet Layout */
+@media (max-width: 1024px) {
+  .md3-dialog {
+    width: 90%;
+    max-width: 600px;
+  }
+  
+  .md3-card {
+    padding: 20px;
+  }
+  
+  .grid-responsive {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+}
+
+/* Mobile Layout */
 @media (max-width: 768px) {
   .md3-top-app-bar {
     height: 56px;
     padding: 0 12px;
+  }
+  
+  .md3-menu-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   
   .md3-navigation-drawer {
@@ -458,13 +515,75 @@
   .md3-dialog {
     width: 95%;
     margin: 16px;
+    max-height: 90vh;
   }
   
   .md3-card {
     padding: 16px;
+    margin-bottom: 12px;
   }
   
   .md3-list-item {
     padding: 12px;
+  }
+  
+  .md3-btn {
+    min-height: 44px;
+    padding: 12px 20px;
+  }
+  
+  .md3-chip {
+    padding: 8px 16px;
+    font-size: 14px;
+  }
+  
+  .grid-responsive {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  
+  .md3-card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+  
+  .md3-card-actions {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+/* Small Mobile Layout */
+@media (max-width: 480px) {
+  .md3-top-app-bar {
+    height: 48px;
+    padding: 0 8px;
+  }
+  
+  .md3-title {
+    font-size: 18px;
+  }
+  
+  .md3-card {
+    padding: 12px;
+    margin-bottom: 8px;
+  }
+  
+  .md3-dialog {
+    width: 100%;
+    margin: 8px;
+    max-height: 95vh;
+  }
+  
+  .md3-btn {
+    min-height: 40px;
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+  
+  .md3-chip {
+    padding: 6px 12px;
+    font-size: 12px;
   }
 }

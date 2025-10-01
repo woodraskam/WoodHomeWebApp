@@ -485,7 +485,7 @@ body {
   outline: none;
 }
 
-/* Enhanced Animation */
+/* Enhanced Animation System */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -501,6 +501,29 @@ body {
   to { transform: scale(1); opacity: 1; }
 }
 
+@keyframes slideUp {
+  from { transform: translateY(100%); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.05); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200px 0; }
+  100% { background-position: calc(200px + 100%) 0; }
+}
+
+@keyframes bounce {
+  0%, 20%, 53%, 80%, 100% { transform: translateY(0); }
+  40%, 43% { transform: translateY(-10px); }
+  70% { transform: translateY(-5px); }
+  90% { transform: translateY(-2px); }
+}
+
+/* Animation Classes */
 .animate-fade-in {
   animation: fadeIn 0.3s ease-out;
 }
@@ -511,4 +534,238 @@ body {
 
 .animate-scale-in {
   animation: scaleIn 0.3s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-pulse {
+  animation: pulse 2s infinite;
+}
+
+.animate-bounce {
+  animation: bounce 1s infinite;
+}
+
+/* Loading States */
+.loading-shimmer {
+  background: linear-gradient(90deg, 
+    var(--md-sys-color-surface-container-high) 25%, 
+    var(--md-sys-color-surface-container-highest) 50%, 
+    var(--md-sys-color-surface-container-high) 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* Hover Effects */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--md-sys-elevation-level3);
+}
+
+.hover-scale {
+  transition: transform 0.2s ease;
+}
+
+.hover-scale:hover {
+  transform: scale(1.02);
+}
+
+/* Focus States */
+.focus-ring:focus {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+.focus-ring:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* State Transitions */
+.state-transition {
+  transition: all 0.2s ease;
+}
+
+.state-transition:hover {
+  background-color: var(--md-sys-color-surface-container-high);
+}
+
+.state-transition:active {
+  background-color: var(--md-sys-color-surface-container-highest);
+  transform: scale(0.98);
+}
+
+/* Micro-interactions */
+.micro-bounce:active {
+  animation: bounce 0.3s ease;
+}
+
+.micro-scale:active {
+  transform: scale(0.95);
+  transition: transform 0.1s ease;
+}
+
+/* ===== ACCESSIBILITY ENHANCEMENTS ===== */
+
+/* High Contrast Mode */
+.high-contrast {
+  --md-sys-color-primary: #000000;
+  --md-sys-color-on-primary: #ffffff;
+  --md-sys-color-surface: #ffffff;
+  --md-sys-color-on-surface: #000000;
+  --md-sys-color-outline: #000000;
+  --md-sys-color-outline-variant: #000000;
+}
+
+.high-contrast .md3-btn {
+  border: 2px solid var(--md-sys-color-outline);
+}
+
+.high-contrast .md3-card {
+  border: 1px solid var(--md-sys-color-outline);
+}
+
+/* Reduced Motion */
+.reduced-motion * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+}
+
+.reduced-motion .animate-fade-in,
+.reduced-motion .animate-slide-in,
+.reduced-motion .animate-scale-in,
+.reduced-motion .animate-slide-up,
+.reduced-motion .animate-pulse,
+.reduced-motion .animate-bounce {
+  animation: none;
+}
+
+/* Focus Indicators */
+.focus-visible {
+  outline: 2px solid var(--md-sys-color-primary);
+  outline-offset: 2px;
+}
+
+/* Screen Reader Only */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Skip Links */
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 6px;
+  background: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
+  padding: 8px;
+  text-decoration: none;
+  border-radius: var(--md-sys-shape-corner-small);
+  z-index: 1000;
+}
+
+.skip-link:focus {
+  top: 6px;
+}
+
+/* Required Field Indicators */
+.required-indicator {
+  color: var(--md-sys-color-error);
+  font-weight: bold;
+}
+
+/* Error States */
+.error-message {
+  color: var(--md-sys-color-error);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.field-error {
+  border-color: var(--md-sys-color-error);
+}
+
+.field-error:focus {
+  outline-color: var(--md-sys-color-error);
+}
+
+/* Success States */
+.success-message {
+  color: var(--md-sys-color-tertiary);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.field-success {
+  border-color: var(--md-sys-color-tertiary);
+}
+
+/* Loading States for Accessibility */
+.loading-text {
+  position: relative;
+}
+
+.loading-text::after {
+  content: 'Loading...';
+  position: absolute;
+  top: 0;
+  left: 0;
+  background: var(--md-sys-color-surface);
+  padding: 4px 8px;
+  border-radius: var(--md-sys-shape-corner-small);
+  font-size: 12px;
+  color: var(--md-sys-color-on-surface-variant);
+}
+
+/* Enhanced Touch Targets */
+@media (pointer: coarse) {
+  .md3-btn,
+  .md3-chip,
+  .md3-list-item,
+  .icon-button {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .md3-btn {
+    padding: 12px 24px;
+  }
+  
+  .md3-chip {
+    padding: 8px 16px;
+  }
+}
+
+/* Print Styles */
+@media print {
+  .md3-top-app-bar,
+  .md3-navigation-drawer,
+  .md3-dialog-overlay {
+    display: none;
+  }
+  
+  .md3-card {
+    box-shadow: none;
+    border: 1px solid #000;
+  }
+  
+  .md3-btn {
+    background: none;
+    border: 1px solid #000;
+    color: #000;
+  }
 }
