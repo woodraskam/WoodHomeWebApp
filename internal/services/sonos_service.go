@@ -51,6 +51,14 @@ func NewSonosService(config *models.SonosServiceConfig) *SonosService {
 func (s *SonosService) Start(ctx context.Context) error {
 	logrus.Info("Starting Sonos service...")
 	
+	// Test Jishi API connection
+	if err := s.testJishiConnection(ctx); err != nil {
+		logrus.Warnf("Jishi API connection test failed: %v", err)
+		logrus.Warnf("Make sure Jishi API is running at %s", s.config.JishiURL)
+	} else {
+		logrus.Info("Jishi API connection successful")
+	}
+	
 	// Start device discovery
 	if err := s.discoverDevices(ctx); err != nil {
 		return fmt.Errorf("failed to discover devices: %w", err)
@@ -425,19 +433,22 @@ func (s *SonosService) executeJishiCommand(ctx context.Context, url, action, dev
 		return fmt.Errorf("failed to create request: %w", err)
 	}
 
-	logrus.Debugf("Executing %s command on %s via Jishi API: %s", action, deviceName, url)
+	logrus.Infof("Executing %s command on %s via Jishi API: %s", action, deviceName, url)
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
+		logrus.Errorf("Failed to execute %s command on %s: %v", action, deviceName, err)
 		return fmt.Errorf("failed to execute %s command: %w", action, err)
 	}
 	defer resp.Body.Close()
 
+	body, _ := io.ReadAll(resp.Body)
+	logrus.Infof("Jishi API response for %s on %s: Status %d, Body: %s", action, deviceName, resp.StatusCode, string(body))
+
 	if resp.StatusCode != http.StatusOK {
-		body, _ := io.ReadAll(resp.Body)
 		return fmt.Errorf("Jishi API returned status %d for %s: %s", resp.StatusCode, action, string(body))
 	}
 
-	logrus.Debugf("%s command executed successfully on %s", action, deviceName)
+	logrus.Infof("%s command executed successfully on %s", action, deviceName)
 	return nil
 }
