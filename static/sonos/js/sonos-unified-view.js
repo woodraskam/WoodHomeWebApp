@@ -27,15 +27,15 @@ class SonosUnifiedView {
         this.container.addEventListener('dragstart', (e) => {
             this.handleDragStart(e);
         });
-        
+
         this.container.addEventListener('dragover', (e) => {
             this.handleDragOver(e);
         });
-        
+
         this.container.addEventListener('drop', (e) => {
             this.handleDrop(e);
         });
-        
+
         this.container.addEventListener('dragend', (e) => {
             this.handleDragEnd(e);
         });
@@ -55,19 +55,23 @@ class SonosUnifiedView {
     }
 
     handleDragStart(e) {
+        console.log('handleDragStart called', e);
         const card = e.target.closest('.sonos-card');
+        console.log('Drag card:', card);
         if (!card) return;
-        
+
         this.dragState = {
             element: card,
             type: card.classList.contains('group-card') ? 'group' : 'device',
             id: card.dataset.groupId || card.dataset.deviceId
         };
-        
+
+        console.log('Drag state set:', this.dragState);
+
         card.classList.add('dragging');
         e.dataTransfer.effectAllowed = 'move';
         e.dataTransfer.setData('text/plain', this.dragState.id);
-        
+
         // Create drag preview
         this.createDragPreview(card);
     }
@@ -76,7 +80,7 @@ class SonosUnifiedView {
         e.preventDefault();
         const targetCard = e.target.closest('.sonos-card');
         if (!targetCard || targetCard === this.dragState?.element) return;
-        
+
         // Highlight valid drop targets
         if (this.isValidDropTarget(targetCard)) {
             targetCard.classList.add('drop-highlight');
@@ -84,10 +88,14 @@ class SonosUnifiedView {
     }
 
     handleDrop(e) {
+        console.log('handleDrop called', e);
         e.preventDefault();
         const targetCard = e.target.closest('.sonos-card');
+        console.log('Target card:', targetCard);
+        console.log('Is valid drop target:', this.isValidDropTarget(targetCard));
         if (!targetCard || !this.isValidDropTarget(targetCard)) return;
-        
+
+        console.log('Performing group operation...');
         this.performGroupOperation(targetCard);
     }
 
@@ -96,22 +104,22 @@ class SonosUnifiedView {
         if (card) {
             card.classList.remove('dragging');
         }
-        
+
         // Remove all drop highlights
         document.querySelectorAll('.drop-highlight').forEach(el => {
             el.classList.remove('drop-highlight');
         });
-        
+
         // Remove drag preview
         this.removeDragPreview();
-        
+
         this.dragState = null;
     }
 
     handleTouchStart(e) {
         const card = e.target.closest('.sonos-card');
         if (!card) return;
-        
+
         this.touchState = {
             element: card,
             startX: e.touches[0].clientX,
@@ -123,11 +131,11 @@ class SonosUnifiedView {
 
     handleTouchMove(e) {
         if (!this.touchState) return;
-        
+
         const touch = e.touches[0];
         const deltaX = touch.clientX - this.touchState.startX;
         const deltaY = touch.clientY - this.touchState.startY;
-        
+
         // Start drag if moved more than 10px
         if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
             this.touchState.element.classList.add('dragging');
@@ -137,15 +145,15 @@ class SonosUnifiedView {
 
     handleTouchEnd(e) {
         if (!this.touchState) return;
-        
+
         const touch = e.changedTouches[0];
         const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
         const targetCard = targetElement?.closest('.sonos-card');
-        
+
         if (targetCard && this.isValidDropTarget(targetCard)) {
             this.performGroupOperation(targetCard);
         }
-        
+
         this.touchState.element.classList.remove('dragging');
         this.removeDragPreview();
         this.touchState = null;
@@ -153,49 +161,63 @@ class SonosUnifiedView {
 
     isValidDropTarget(targetCard) {
         if (!this.dragState && !this.touchState) return false;
-        
+
         const dragState = this.dragState || this.touchState;
-        
+
         // Can't drop on self
         if (targetCard === dragState.element) return false;
-        
+
         // Can drop individual devices on groups or other devices
         if (dragState.type === 'device') {
             return true;
         }
-        
+
         // Can drop groups on other groups (merge groups)
         if (dragState.type === 'group') {
             return targetCard.classList.contains('group-card');
         }
-        
+
         return false;
     }
 
     async performGroupOperation(targetCard) {
+        console.log('performGroupOperation called');
         const targetId = targetCard.dataset.groupId || targetCard.dataset.deviceId;
         const targetIsGroup = targetCard.classList.contains('group-card');
-        
+
         const dragState = this.dragState || this.touchState;
-        
+        console.log('Drag state:', dragState);
+        console.log('Target ID:', targetId, 'Target is group:', targetIsGroup);
+
         try {
             if (dragState.type === 'device') {
                 if (targetIsGroup) {
                     // Add device to existing group
+                    console.log('Adding device to group:', dragState.id, '->', targetId);
                     await this.addDeviceToGroup(dragState.id, targetId);
                 } else {
                     // Create new group with both devices
+                    console.log('Creating group with devices:', targetId, dragState.id);
                     await this.createGroupWithDevices(targetId, [dragState.id]);
                 }
             } else if (dragState.type === 'group') {
                 if (targetIsGroup) {
                     // Merge groups
+                    console.log('Merging groups:', dragState.id, '->', targetId);
                     await this.mergeGroups(dragState.id, targetId);
                 }
             }
+
+            // Wait a moment for the backend to process the changes
+            console.log('Waiting for backend to process changes...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
             
             // Refresh the view
+            console.log('Refreshing view...');
             await this.refreshView();
+            
+            // Show success message
+            this.showSuccess('Group updated successfully!');
             
         } catch (error) {
             console.error('Group operation failed:', error);
@@ -207,7 +229,7 @@ class SonosUnifiedView {
         const response = await fetch(`/api/sonos/groups/${groupId}/join/${deviceId}`, {
             method: 'POST'
         });
-        
+
         if (!response.ok) {
             const error = await response.text();
             throw new Error(error);
@@ -225,7 +247,7 @@ class SonosUnifiedView {
                 members: memberIds
             })
         });
-        
+
         if (!response.ok) {
             const error = await response.text();
             throw new Error(error);
@@ -233,15 +255,24 @@ class SonosUnifiedView {
     }
 
     async mergeGroups(sourceGroupId, targetGroupId) {
+        console.log('mergeGroups called:', sourceGroupId, '->', targetGroupId);
         // Get source group members
         const sourceGroup = this.groups.get(sourceGroupId);
-        if (!sourceGroup) return;
-        
-        // Add all source group members to target group
-        for (const memberId of sourceGroup.members) {
-            await this.addDeviceToGroup(memberId, targetGroupId);
+        if (!sourceGroup) {
+            console.log('Source group not found:', sourceGroupId);
+            return;
         }
-        
+
+        console.log('Source group members:', sourceGroup.members);
+
+        // Add all source group members to target group
+        for (const member of sourceGroup.members) {
+            // member is a device object, we need the UUID
+            const deviceId = member.uuid || member.id;
+            console.log('Adding member to target group:', deviceId, '->', targetGroupId);
+            await this.addDeviceToGroup(deviceId, targetGroupId);
+        }
+
         // Source group will be automatically dissolved when empty
     }
 
@@ -258,18 +289,18 @@ class SonosUnifiedView {
                     fetch('/api/sonos/devices'),
                     fetch('/api/sonos/groups')
                 ]);
-                
+
                 if (!devicesResponse.ok || !groupsResponse.ok) {
                     throw new Error('Failed to fetch data from API');
                 }
-                
+
                 const devices = await devicesResponse.json();
                 const groups = await groupsResponse.json();
-                
+
                 // Handle different response formats
                 let devicesArray = [];
                 let groupsArray = [];
-                
+
                 if (Array.isArray(devices)) {
                     devicesArray = devices;
                 } else if (devices && typeof devices === 'object') {
@@ -281,7 +312,7 @@ class SonosUnifiedView {
                         devicesArray = Object.values(devices);
                     }
                 }
-                
+
                 if (Array.isArray(groups)) {
                     groupsArray = groups;
                 } else if (groups && typeof groups === 'object') {
@@ -293,7 +324,7 @@ class SonosUnifiedView {
                         groupsArray = Object.values(groups);
                     }
                 }
-                
+
                 this.updateView(devicesArray, groupsArray);
             }
         } catch (error) {
@@ -351,48 +382,48 @@ class SonosUnifiedView {
     updateView(devices, groups) {
         console.log('updateView called with:', { devices, groups });
         console.log('Devices length:', devices.length, 'Groups length:', groups.length);
-        
+
         // Update internal maps
         this.devices.clear();
         this.groups.clear();
-        
+
         devices.forEach(device => {
             console.log('Adding device:', device);
             this.devices.set(device.uuid, device);
         });
-        
+
         groups.forEach(group => {
             console.log('Adding group:', group);
             this.groups.set(group.id, group);
         });
-        
+
         // Create unified list of items to display
         const items = this.createUnifiedItems(devices, groups);
         console.log('Created unified items:', items);
-        
+
         // Clear container
         this.container.innerHTML = '';
-        
+
         if (items.length === 0) {
             console.log('No items to display, showing empty state');
             this.showEmptyState();
             return;
         }
-        
+
         // Add items to container
         items.forEach((item, index) => {
             console.log(`Creating card ${index}:`, item);
             const card = this.createCard(item);
             this.container.appendChild(card);
         });
-        
+
         console.log('Rendered', items.length, 'items');
     }
 
     createUnifiedItems(devices, groups) {
         console.log('createUnifiedItems called with:', { devices, groups });
         const items = [];
-        
+
         // Add groups first
         groups.forEach((group, index) => {
             console.log(`Processing group ${index}:`, group);
@@ -406,7 +437,7 @@ class SonosUnifiedView {
                 currentTrack: group.current_track
             });
         });
-        
+
         // Add individual devices (not in any group)
         devices.forEach((device, index) => {
             console.log(`Processing device ${index}:`, device);
@@ -423,7 +454,7 @@ class SonosUnifiedView {
                 console.log(`Device ${device.name} is in group ${device.group_id}, skipping individual display`);
             }
         });
-        
+
         console.log('Created unified items:', items);
         return items;
     }
@@ -433,13 +464,13 @@ class SonosUnifiedView {
         card.className = `sonos-card ${item.type}-card`;
         card.draggable = true;
         card.dataset[`${item.type}Id`] = item.id;
-        
+
         if (item.type === 'group') {
             card.innerHTML = this.createGroupCardHTML(item);
         } else {
             card.innerHTML = this.createDeviceCardHTML(item);
         }
-        
+
         return card;
     }
 
@@ -499,7 +530,7 @@ class SonosUnifiedView {
         preview.style.zIndex = '1000';
         preview.style.opacity = '0.8';
         preview.style.transform = 'rotate(5deg)';
-        
+
         document.body.appendChild(preview);
         this.dragPreview = preview;
     }
@@ -525,7 +556,7 @@ class SonosUnifiedView {
         } catch (error) {
             console.error('Failed to load initial data:', error);
             this.showError('Failed to load devices and groups');
-            
+
             // Show empty state if API is not available
             this.showEmptyState();
         }
@@ -561,9 +592,35 @@ class SonosUnifiedView {
             border-radius: 4px;
             z-index: 1000;
         `;
-        
+
         document.body.appendChild(notification);
-        
+
+        // Remove after 3 seconds
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 3000);
+    }
+
+    showSuccess(message) {
+        // Create success notification
+        const notification = document.createElement('div');
+        notification.className = 'success-notification';
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 4px;
+            z-index: 1000;
+        `;
+
+        document.body.appendChild(notification);
+
         // Remove after 3 seconds
         setTimeout(() => {
             if (notification.parentNode) {
@@ -578,7 +635,7 @@ class SonosUnifiedView {
             const response = await fetch(`/api/sonos/group/${groupId}/play`, {
                 method: 'POST'
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to play group');
             }
@@ -593,7 +650,7 @@ class SonosUnifiedView {
             const response = await fetch(`/api/sonos/group/${groupId}/pause`, {
                 method: 'POST'
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to pause group');
             }
@@ -608,7 +665,7 @@ class SonosUnifiedView {
             const response = await fetch(`/api/sonos/group/${groupId}/stop`, {
                 method: 'POST'
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to stop group');
             }
@@ -623,7 +680,7 @@ class SonosUnifiedView {
             const response = await fetch(`/api/sonos/group/${groupId}/volume/${volume}`, {
                 method: 'POST'
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to set group volume');
             }
@@ -638,7 +695,7 @@ class SonosUnifiedView {
             const response = await fetch(`/api/sonos/device/${deviceId}/play`, {
                 method: 'POST'
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to play device');
             }
@@ -653,7 +710,7 @@ class SonosUnifiedView {
             const response = await fetch(`/api/sonos/device/${deviceId}/pause`, {
                 method: 'POST'
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to pause device');
             }
@@ -668,7 +725,7 @@ class SonosUnifiedView {
             const response = await fetch(`/api/sonos/device/${deviceId}/stop`, {
                 method: 'POST'
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to stop device');
             }
@@ -683,7 +740,7 @@ class SonosUnifiedView {
             const response = await fetch(`/api/sonos/device/${deviceId}/volume/${volume}`, {
                 method: 'POST'
             });
-            
+
             if (!response.ok) {
                 throw new Error('Failed to set device volume');
             }

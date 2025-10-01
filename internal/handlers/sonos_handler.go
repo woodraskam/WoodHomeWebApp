@@ -518,30 +518,30 @@ func (h *SonosHandler) JoinGroup(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	deviceUuid := vars["deviceUuid"]
-	
+
 	// Get the device to find its name
 	device, exists := h.sonosService.GetDevice(deviceUuid)
 	if !exists {
 		http.Error(w, "Device not found", http.StatusNotFound)
 		return
 	}
-	
+
 	// Get the group to find the coordinator name
 	group, exists := h.sonosService.GetGroup(id)
 	if !exists {
 		http.Error(w, "Group not found", http.StatusNotFound)
 		return
 	}
-	
+
 	ctx := r.Context()
 	if err := h.sonosService.JoinGroup(ctx, device.Name, group.Coordinator.Name); err != nil {
 		logrus.Errorf("Failed to join device %s to group %s: %v", device.Name, group.ID, err)
 		http.Error(w, "Failed to join group: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	logrus.Infof("Device %s joined group %s", device.Name, group.ID)
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"status": "success",
@@ -556,23 +556,23 @@ func (h *SonosHandler) LeaveGroup(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	deviceUuid := vars["deviceUuid"]
-	
+
 	// Get the device to find its name
 	device, exists := h.sonosService.GetDevice(deviceUuid)
 	if !exists {
 		http.Error(w, "Device not found", http.StatusNotFound)
 		return
 	}
-	
+
 	ctx := r.Context()
 	if err := h.sonosService.LeaveGroup(ctx, device.Name); err != nil {
 		logrus.Errorf("Failed to remove device %s from group %s: %v", device.Name, id, err)
 		http.Error(w, "Failed to leave group: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	logrus.Infof("Device %s left group %s", device.Name, id)
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"status": "success",
