@@ -58,7 +58,7 @@ func (h *SonosHandler) RegisterRoutes(router *mux.Router) {
 	sonosRouter.HandleFunc("/groups/{id}/join/{deviceUuid}", h.JoinGroup).Methods("POST")
 	sonosRouter.HandleFunc("/groups/{id}/leave/{deviceUuid}", h.LeaveGroup).Methods("POST")
 	sonosRouter.HandleFunc("/groups/{id}/dissolve", h.DissolveGroup).Methods("POST")
-	
+
 	// Jishi server management routes
 	sonosRouter.HandleFunc("/jishi/status", h.GetJishiStatus).Methods("GET")
 	sonosRouter.HandleFunc("/jishi/start", h.StartJishiServer).Methods("POST")
@@ -518,10 +518,30 @@ func (h *SonosHandler) JoinGroup(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	deviceUuid := vars["deviceUuid"]
-
-	// TODO: Implement actual join group command via Jishi API
-	logrus.Infof("Adding device %s to group %s", deviceUuid, id)
-
+	
+	// Get the device to find its name
+	device, exists := h.sonosService.GetDevice(deviceUuid)
+	if !exists {
+		http.Error(w, "Device not found", http.StatusNotFound)
+		return
+	}
+	
+	// Get the group to find the coordinator name
+	group, exists := h.sonosService.GetGroup(id)
+	if !exists {
+		http.Error(w, "Group not found", http.StatusNotFound)
+		return
+	}
+	
+	ctx := r.Context()
+	if err := h.sonosService.JoinGroup(ctx, device.Name, group.Coordinator.Name); err != nil {
+		logrus.Errorf("Failed to join device %s to group %s: %v", device.Name, group.ID, err)
+		http.Error(w, "Failed to join group: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
+	logrus.Infof("Device %s joined group %s", device.Name, group.ID)
+	
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"status": "success",
@@ -536,10 +556,23 @@ func (h *SonosHandler) LeaveGroup(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	id := vars["id"]
 	deviceUuid := vars["deviceUuid"]
-
-	// TODO: Implement actual leave group command via Jishi API
-	logrus.Infof("Removing device %s from group %s", deviceUuid, id)
-
+	
+	// Get the device to find its name
+	device, exists := h.sonosService.GetDevice(deviceUuid)
+	if !exists {
+		http.Error(w, "Device not found", http.StatusNotFound)
+		return
+	}
+	
+	ctx := r.Context()
+	if err := h.sonosService.LeaveGroup(ctx, device.Name); err != nil {
+		logrus.Errorf("Failed to remove device %s from group %s: %v", device.Name, id, err)
+		http.Error(w, "Failed to leave group: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	
+	logrus.Infof("Device %s left group %s", device.Name, id)
+	
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
 		"status": "success",
@@ -570,7 +603,7 @@ func (h *SonosHandler) DissolveGroup(w http.ResponseWriter, r *http.Request) {
 // GetJishiStatus returns the status of the Jishi server
 func (h *SonosHandler) GetJishiStatus(w http.ResponseWriter, r *http.Request) {
 	status := h.sonosService.GetJishiStatus()
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(status)
 }
@@ -582,13 +615,13 @@ func (h *SonosHandler) StartJishiServer(w http.ResponseWriter, r *http.Request) 
 		http.Error(w, "Failed to start Jishi server: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	logrus.Info("Jishi server started successfully")
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
-		"status": "success",
-		"action": "start_jishi",
+		"status":  "success",
+		"action":  "start_jishi",
 		"message": "Jishi server started successfully",
 	})
 }
@@ -600,13 +633,13 @@ func (h *SonosHandler) StopJishiServer(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Failed to stop Jishi server: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	logrus.Info("Jishi server stopped successfully")
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
-		"status": "success",
-		"action": "stop_jishi",
+		"status":  "success",
+		"action":  "stop_jishi",
 		"message": "Jishi server stopped successfully",
 	})
 }
@@ -618,13 +651,13 @@ func (h *SonosHandler) RestartJishiServer(w http.ResponseWriter, r *http.Request
 		http.Error(w, "Failed to restart Jishi server: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
-	
+
 	logrus.Info("Jishi server restarted successfully")
-	
+
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(map[string]string{
-		"status": "success",
-		"action": "restart_jishi",
+		"status":  "success",
+		"action":  "restart_jishi",
 		"message": "Jishi server restarted successfully",
 	})
 }

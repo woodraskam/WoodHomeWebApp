@@ -204,7 +204,7 @@ class SonosUnifiedView {
     }
 
     async addDeviceToGroup(deviceId, groupId) {
-        const response = await fetch(`/api/sonos/group/${groupId}/join/${deviceId}`, {
+        const response = await fetch(`/api/sonos/groups/${groupId}/join/${deviceId}`, {
             method: 'POST'
         });
         
@@ -215,7 +215,7 @@ class SonosUnifiedView {
     }
 
     async createGroupWithDevices(coordinatorId, memberIds) {
-        const response = await fetch('/api/sonos/group/create', {
+        const response = await fetch('/api/sonos/groups', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

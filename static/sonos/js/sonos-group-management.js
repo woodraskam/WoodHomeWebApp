@@ -135,7 +135,8 @@ class SonosGroupManagement {
             });
 
             if (!response.ok) {
-                throw new Error('Failed to join group');
+                const errorText = await response.text();
+                throw new Error(`Failed to join group: ${errorText}`);
             }
 
             console.log(`Device ${deviceUuid} joined group ${groupId}`);
@@ -145,7 +146,7 @@ class SonosGroupManagement {
             this.dashboard.loadGroups();
         } catch (error) {
             console.error('Error joining group:', error);
-            this.showError('Failed to join group');
+            this.showError('Failed to join group: ' + error.message);
         }
     }
 
