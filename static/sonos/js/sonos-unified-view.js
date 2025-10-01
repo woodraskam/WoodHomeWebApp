@@ -265,12 +265,43 @@ class SonosUnifiedView {
             const groups = await groupsResponse.json();
             
             console.log('Raw API responses:', { devices, groups });
+            console.log('Devices type:', typeof devices, 'Is array:', Array.isArray(devices));
+            console.log('Groups type:', typeof groups, 'Is array:', Array.isArray(groups));
             
-            // Ensure we have arrays
-            const devicesArray = Array.isArray(devices) ? devices : [];
-            const groupsArray = Array.isArray(groups) ? groups : [];
+            // Handle different response formats
+            let devicesArray = [];
+            let groupsArray = [];
+            
+            if (Array.isArray(devices)) {
+                devicesArray = devices;
+            } else if (devices && typeof devices === 'object') {
+                // If it's an object, try to extract array from common properties
+                if (devices.devices && Array.isArray(devices.devices)) {
+                    devicesArray = devices.devices;
+                } else if (devices.data && Array.isArray(devices.data)) {
+                    devicesArray = devices.data;
+                } else {
+                    // Convert object values to array
+                    devicesArray = Object.values(devices);
+                }
+            }
+            
+            if (Array.isArray(groups)) {
+                groupsArray = groups;
+            } else if (groups && typeof groups === 'object') {
+                // If it's an object, try to extract array from common properties
+                if (groups.groups && Array.isArray(groups.groups)) {
+                    groupsArray = groups.groups;
+                } else if (groups.data && Array.isArray(groups.data)) {
+                    groupsArray = groups.data;
+                } else {
+                    // Convert object values to array
+                    groupsArray = Object.values(groups);
+                }
+            }
             
             console.log('Processed arrays:', { devicesArray, groupsArray });
+            console.log('Devices count:', devicesArray.length, 'Groups count:', groupsArray.length);
             
             this.updateView(devicesArray, groupsArray);
         } catch (error) {
@@ -329,36 +360,53 @@ class SonosUnifiedView {
     }
 
     updateView(devices, groups) {
+        console.log('updateView called with:', { devices, groups });
+        console.log('Devices length:', devices.length, 'Groups length:', groups.length);
+        
         // Update internal maps
         this.devices.clear();
         this.groups.clear();
         
         devices.forEach(device => {
+            console.log('Adding device:', device);
             this.devices.set(device.uuid, device);
         });
         
         groups.forEach(group => {
+            console.log('Adding group:', group);
             this.groups.set(group.id, group);
         });
         
         // Create unified list of items to display
         const items = this.createUnifiedItems(devices, groups);
+        console.log('Created unified items:', items);
         
         // Clear container
         this.container.innerHTML = '';
         
+        if (items.length === 0) {
+            console.log('No items to display, showing empty state');
+            this.showEmptyState();
+            return;
+        }
+        
         // Add items to container
-        items.forEach(item => {
+        items.forEach((item, index) => {
+            console.log(`Creating card ${index}:`, item);
             const card = this.createCard(item);
             this.container.appendChild(card);
         });
+        
+        console.log('Rendered', items.length, 'items');
     }
 
     createUnifiedItems(devices, groups) {
+        console.log('createUnifiedItems called with:', { devices, groups });
         const items = [];
         
         // Add groups first
-        groups.forEach(group => {
+        groups.forEach((group, index) => {
+            console.log(`Processing group ${index}:`, group);
             items.push({
                 type: 'group',
                 id: group.id,
@@ -371,7 +419,8 @@ class SonosUnifiedView {
         });
         
         // Add individual devices (not in any group)
-        devices.forEach(device => {
+        devices.forEach((device, index) => {
+            console.log(`Processing device ${index}:`, device);
             if (!device.group_id) {
                 items.push({
                     type: 'device',
@@ -381,9 +430,12 @@ class SonosUnifiedView {
                     volume: device.volume,
                     currentTrack: device.current_track
                 });
+            } else {
+                console.log(`Device ${device.name} is in group ${device.group_id}, skipping individual display`);
             }
         });
         
+        console.log('Created unified items:', items);
         return items;
     }
 
