@@ -1,14 +1,21 @@
 /**
- * Sonos Audio Section
- * Placeholder for Sonos audio controls
+ * Sonos Audio Section - SPA Compatible
+ * Full Sonos integration with WebSocket support
  */
 class SonosSection {
     constructor() {
+        console.log('SonosSection constructor called');
+        this.name = 'sonos';
+        this.isActive = false;
+        this.devices = [];
+        this.groups = [];
+        this.websocket = null;
+        this.isConnected = false;
         this.isLoaded = false;
-        this.init();
     }
 
     init() {
+        console.log('SonosSection init() called');
         this.setupEventListeners();
         this.createSonosSection();
     }
@@ -20,43 +27,140 @@ class SonosSection {
             }
         });
 
-        document.addEventListener('sectionchange', (e) => {
+        document.addEventListener('sectionload', (e) => {
+            console.log('Section load event:', e.detail.section);
             if (e.detail.section === 'sonos') {
+                console.log('Loading Sonos section');
+                this.load();
+            }
+        });
+
+        document.addEventListener('sectionchange', (e) => {
+            console.log('Section change event:', e.detail.section);
+            if (e.detail.section === 'sonos') {
+                console.log('Switching to Sonos section');
                 this.show();
+                this.connectWebSocket();
             } else {
+                console.log('Leaving Sonos section');
                 this.hide();
+                this.disconnectWebSocket();
             }
         });
     }
 
     createSonosSection() {
+        console.log('Creating Sonos section...');
         const contentArea = document.getElementById('main-content');
-        if (!contentArea) return;
+        if (!contentArea) {
+            console.error('Main content area not found!');
+            return;
+        }
+        console.log('Main content area found');
 
         const sonosSection = document.createElement('div');
         sonosSection.id = 'sonos-section';
         sonosSection.className = 'm3-section';
         sonosSection.innerHTML = `
-      <div class="m3-section-header">
-        <div>
-          <h1 class="m3-section-title">Sonos Audio</h1>
-          <p class="m3-section-subtitle">Control your Sonos speakers</p>
-        </div>
-      </div>
-      <div class="m3-card">
-        <p>Sonos audio controls will be implemented here.</p>
-        <p>This section will integrate with the existing Sonos API.</p>
-      </div>
-    `;
+            <div class="m3-section-header">
+                <div class="sonos-header">
+                    <div class="sonos-title">
+                        <span class="material-symbols-outlined">music_note</span>
+                        <h1 class="m3-section-title">Sonos Control</h1>
+                    </div>
+                    <div class="sonos-status">
+                        <span id="sonos-connection-status" class="status-indicator offline">Offline</span>
+                        <span id="sonos-device-count" class="device-count">0 devices</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="sonos-actions">
+                <button id="sonos-play-all" class="m3-button m3-button-filled">
+                    <span class="material-symbols-outlined">play_arrow</span>
+                    Play All
+                </button>
+                <button id="sonos-pause-all" class="m3-button m3-button-outlined">
+                    <span class="material-symbols-outlined">pause</span>
+                    Pause All
+                </button>
+                <button id="sonos-stop-all" class="m3-button m3-button-outlined">
+                    <span class="material-symbols-outlined">stop</span>
+                    Stop All
+                </button>
+                <button id="sonos-refresh" class="m3-button m3-button-outlined">
+                    <span class="material-symbols-outlined">refresh</span>
+                    Refresh
+                </button>
+            </div>
+
+            <!-- Devices Grid -->
+            <div class="sonos-devices-section">
+                <h3>Devices</h3>
+                <div class="sonos-devices-grid" id="sonos-devices-grid">
+                    <!-- Devices will be populated here -->
+                </div>
+            </div>
+
+            <!-- Groups Section -->
+            <div class="sonos-groups-section">
+                <h3>Groups</h3>
+                <div class="sonos-groups-grid" id="sonos-groups-grid">
+                    <!-- Groups will be populated here -->
+                </div>
+            </div>
+
+            <!-- Group Management Modal -->
+            <div id="sonos-group-modal" class="m3-modal" style="display: none;">
+                <div class="m3-modal-content">
+                    <div class="m3-modal-header">
+                        <h3>Create Group</h3>
+                        <button class="m3-button m3-button-text" onclick="this.closest('.m3-modal').style.display='none'">
+                            <span class="material-symbols-outlined">close</span>
+                        </button>
+                    </div>
+                    <div class="m3-modal-body">
+                        <div id="sonos-group-devices">
+                            <!-- Available devices for grouping -->
+                        </div>
+                    </div>
+                    <div class="m3-modal-footer">
+                        <button id="sonos-create-group" class="m3-button m3-button-filled">Create Group</button>
+                        <button class="m3-button m3-button-outlined" onclick="this.closest('.m3-modal').style.display='none'">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        `;
 
         contentArea.appendChild(sonosSection);
     }
 
     load() {
+        console.log('Sonos section load() called');
         if (!this.isLoaded) {
+            console.log('Sonos section initializing...');
             this.isLoaded = true;
+            this.setupSonosEventListeners();
+            // Load real devices from API like the working version
+            this.loadDevices();
+            this.loadGroups();
         }
         this.show();
+    }
+
+    showLoadingState() {
+        const devicesGrid = document.getElementById('sonos-devices-grid');
+        if (devicesGrid) {
+            devicesGrid.innerHTML = `
+                <div class="m3-card loading-card">
+                    <div class="m3-card-content">
+                        <div class="loading-spinner"></div>
+                        <p>Loading Sonos devices...</p>
+                    </div>
+                </div>
+            `;
+        }
     }
 
     show() {
@@ -72,8 +176,440 @@ class SonosSection {
             section.classList.remove('m3-section--active');
         }
     }
+
+    setupSonosEventListeners() {
+        // Quick action buttons
+        document.getElementById('sonos-play-all')?.addEventListener('click', () => this.playAllDevices());
+        document.getElementById('sonos-pause-all')?.addEventListener('click', () => this.pauseAllDevices());
+        document.getElementById('sonos-stop-all')?.addEventListener('click', () => this.stopAllDevices());
+        document.getElementById('sonos-refresh')?.addEventListener('click', () => this.refreshDevices());
+    }
+
+    connectWebSocket() {
+        if (this.websocket) return; // Already connected
+
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const wsUrl = `${protocol}//${window.location.host}/ws/sonos`;
+
+        try {
+            this.websocket = new WebSocket(wsUrl);
+
+            // Set timeout to prevent hanging
+            const timeout = setTimeout(() => {
+                if (this.websocket && this.websocket.readyState === WebSocket.CONNECTING) {
+                    console.log('Sonos WebSocket connection timeout');
+                    this.websocket.close();
+                    this.updateConnectionStatus('offline');
+                }
+            }, 5000);
+
+            this.websocket.onopen = () => {
+                clearTimeout(timeout);
+                console.log('Sonos WebSocket connected');
+                this.isConnected = true;
+                this.updateConnectionStatus('online');
+            };
+
+            this.websocket.onmessage = (event) => {
+                try {
+                    const data = JSON.parse(event.data);
+                    this.handleWebSocketMessage(data);
+                } catch (error) {
+                    console.error('Failed to parse WebSocket message:', error);
+                }
+            };
+
+            this.websocket.onclose = () => {
+                clearTimeout(timeout);
+                console.log('Sonos WebSocket disconnected');
+                this.isConnected = false;
+                this.updateConnectionStatus('offline');
+            };
+
+            this.websocket.onerror = (error) => {
+                clearTimeout(timeout);
+                console.error('Sonos WebSocket error:', error);
+                this.updateConnectionStatus('error');
+                // Fallback to HTTP API
+                this.loadDevices();
+            };
+        } catch (error) {
+            console.error('Failed to create WebSocket connection:', error);
+            this.updateConnectionStatus('error');
+            // Fallback to HTTP API
+            this.loadDevices();
+        }
+    }
+
+    disconnectWebSocket() {
+        if (this.websocket) {
+            this.websocket.close();
+            this.websocket = null;
+            this.isConnected = false;
+        }
+    }
+
+    handleWebSocketMessage(data) {
+        switch (data.type) {
+            case 'devices':
+                this.devices = data.devices;
+                this.renderDevices();
+                break;
+            case 'groups':
+                this.groups = data.groups;
+                this.renderGroups();
+                break;
+            case 'device_update':
+                this.updateDevice(data.device);
+                break;
+            case 'group_update':
+                this.updateGroup(data.group);
+                break;
+        }
+    }
+
+    updateConnectionStatus(status) {
+        const statusElement = document.getElementById('sonos-connection-status');
+        if (statusElement) {
+            statusElement.className = `status-indicator ${status}`;
+            statusElement.textContent = status === 'online' ? 'Online' :
+                status === 'error' ? 'Error' : 'Offline';
+        }
+
+        const countElement = document.getElementById('sonos-device-count');
+        if (countElement) {
+            countElement.textContent = `${this.devices.length} devices`;
+        }
+    }
+
+    async loadDevices() {
+        try {
+            console.log('[LOAD DEVICES DEBUG] Fetching devices from API...');
+            const response = await fetch('/api/sonos/devices');
+            console.log('[LOAD DEVICES DEBUG] Response status:', response.status);
+
+            const data = await response.json();
+            console.log('[LOAD DEVICES DEBUG] Response data:', data);
+
+            if (response.ok) {
+                this.devices = data.devices || [];
+                console.log('[LOAD DEVICES DEBUG] Devices loaded:', this.devices.length);
+                this.renderDevices();
+                this.updateConnectionStatus('online');
+            } else {
+                console.error('[LOAD DEVICES DEBUG] Failed to load devices:', data);
+                this.updateConnectionStatus('offline');
+            }
+        } catch (error) {
+            console.error('[LOAD DEVICES DEBUG] Error loading devices:', error);
+            this.updateConnectionStatus('offline');
+        }
+    }
+
+    async loadGroups() {
+        try {
+            console.log('[LOAD GROUPS DEBUG] Fetching groups from API...');
+            const response = await fetch('/api/sonos/groups');
+            console.log('[LOAD GROUPS DEBUG] Response status:', response.status);
+
+            const data = await response.json();
+            console.log('[LOAD GROUPS DEBUG] Response data:', data);
+
+            if (response.ok) {
+                this.groups = data.groups || [];
+                console.log('[LOAD GROUPS DEBUG] Groups loaded:', this.groups.length);
+                this.renderGroups();
+            } else {
+                console.error('[LOAD GROUPS DEBUG] Failed to load groups:', data);
+                this.groups = [];
+                this.renderGroups();
+            }
+        } catch (error) {
+            console.error('[LOAD GROUPS DEBUG] Error loading groups:', error);
+            this.groups = [];
+            this.renderGroups();
+        }
+    }
+
+    showDemoContent() {
+        console.log('showDemoContent() called - setting up demo devices'); // Debug
+        // Show demo devices when API is not available
+        this.devices = [
+            {
+                id: 'demo-living-room',
+                name: 'Living Room Speaker',
+                roomName: 'Living Room',
+                playbackState: 'STOPPED',
+                volume: 50
+            },
+            {
+                id: 'demo-kitchen',
+                name: 'Kitchen Speaker',
+                roomName: 'Kitchen',
+                playbackState: 'STOPPED',
+                volume: 30
+            },
+            {
+                id: 'demo-bedroom',
+                name: 'Bedroom Speaker',
+                roomName: 'Bedroom',
+                playbackState: 'STOPPED',
+                volume: 25
+            }
+        ];
+
+        this.groups = [
+            {
+                id: 'demo-group-1',
+                name: 'Downstairs',
+                devices: ['demo-living-room', 'demo-kitchen'],
+                playbackState: 'STOPPED'
+            }
+        ];
+
+        console.log('Demo devices set:', this.devices); // Debug
+        this.renderDevices();
+        this.renderGroups();
+
+        // Show demo message
+        const devicesGrid = document.getElementById('sonos-devices-grid');
+        if (devicesGrid) {
+            const demoMessage = document.createElement('div');
+            demoMessage.className = 'm3-card demo-message';
+            demoMessage.innerHTML = `
+                <div class="m3-card-content">
+                    <h4>Demo Mode</h4>
+                    <p>Sonos API is not available. This is demo content showing how the interface would look with real Sonos devices.</p>
+                    <p>To enable real Sonos control, ensure the Sonos service is running and accessible.</p>
+                </div>
+            `;
+            devicesGrid.insertBefore(demoMessage, devicesGrid.firstChild);
+        }
+    }
+
+    renderDevices() {
+        const grid = document.getElementById('sonos-devices-grid');
+        if (!grid) return;
+
+        console.log('Rendering devices:', this.devices); // Debug: show what devices we're rendering
+
+        grid.innerHTML = this.devices.map(device => `
+            <div class="m3-card sonos-device-card" data-device-id="${device.uuid}">
+                <div class="m3-card-header">
+                    <h4>${device.name}</h4>
+                    <span class="material-symbols-outlined">speaker</span>
+                </div>
+                <div class="m3-card-content">
+                    <div class="device-info">
+                        <p><strong>Room:</strong> ${device.room}</p>
+                        <p><strong>Status:</strong> ${device.state || 'STOPPED'}</p>
+                        <p><strong>Volume:</strong> ${device.volume || 0}%</p>
+                    </div>
+                    <div class="device-controls">
+                        <button class="m3-button m3-button-text" onclick="window.sonosSection.togglePlayPause('${device.uuid}')">
+                            <span class="material-symbols-outlined">${device.state === 'PLAYING' ? 'pause' : 'play_arrow'}</span>
+                        </button>
+                        <button class="m3-button m3-button-text" onclick="window.sonosSection.stopDevice('${device.uuid}')">
+                            <span class="material-symbols-outlined">stop</span>
+                        </button>
+                        <div class="volume-control">
+                            <input type="range" min="0" max="100" value="${device.volume || 0}" 
+                                   onchange="window.sonosSection.setVolume('${device.uuid}', this.value)">
+                            <span class="volume-display">${device.volume || 0}%</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    renderGroups() {
+        const grid = document.getElementById('sonos-groups-grid');
+        if (!grid) return;
+
+        grid.innerHTML = this.groups.map(group => `
+            <div class="m3-card sonos-group-card" data-group-id="${group.id}">
+                <div class="m3-card-header">
+                    <h4>${group.name}</h4>
+                    <span class="material-symbols-outlined">group</span>
+                </div>
+                <div class="m3-card-content">
+                    <div class="group-info">
+                        <p><strong>Devices:</strong> ${group.devices ? group.devices.length : 0}</p>
+                        <p><strong>Status:</strong> ${group.playbackState}</p>
+                    </div>
+                    <div class="group-controls">
+                        <button class="m3-button m3-button-text" onclick="window.sonosSection.toggleGroupPlayPause('${group.id}')">
+                            <span class="material-symbols-outlined">${group.playbackState === 'PLAYING' ? 'pause' : 'play_arrow'}</span>
+                        </button>
+                        <button class="m3-button m3-button-text" onclick="window.sonosSection.stopGroup('${group.id}')">
+                            <span class="material-symbols-outlined">stop</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Device control methods
+    async togglePlayPause(deviceId) {
+        // Handle demo mode
+        if (deviceId && deviceId.startsWith('demo-')) {
+            console.log(`Demo mode: Toggling playback for ${deviceId}`);
+            const device = this.devices.find(d => d.uuid === deviceId);
+            if (device) {
+                device.state = device.state === 'PLAYING' ? 'STOPPED' : 'PLAYING';
+                this.renderDevices();
+            }
+            return;
+        }
+
+        try {
+            // Find the device to check its current state
+            const device = this.devices.find(d => d.uuid === deviceId);
+            if (!device) {
+                console.error('Device not found:', deviceId);
+                return;
+            }
+
+            let endpoint;
+            if (device.state === 'PLAYING') {
+                endpoint = `/api/sonos/devices/${deviceId}/pause`;
+            } else {
+                endpoint = `/api/sonos/devices/${deviceId}/play`;
+            }
+
+            const response = await fetch(endpoint, { method: 'POST' });
+            if (response.ok) {
+                this.loadDevices(); // Refresh device states
+            }
+        } catch (error) {
+            console.error('Failed to toggle play/pause:', error);
+        }
+    }
+
+    async stopDevice(deviceId) {
+        // Handle demo mode
+        if (deviceId && deviceId.startsWith('demo-')) {
+            console.log(`Demo mode: Stopping ${deviceId}`);
+            const device = this.devices.find(d => d.uuid === deviceId);
+            if (device) {
+                device.state = 'STOPPED';
+                this.renderDevices();
+            }
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/sonos/devices/${deviceId}/stop`, { method: 'POST' });
+            if (response.ok) {
+                this.loadDevices();
+            }
+        } catch (error) {
+            console.error('Failed to stop device:', error);
+        }
+    }
+
+    async setVolume(deviceId, volume) {
+        console.log('setVolume called with deviceId:', deviceId, 'volume:', volume); // Debug
+
+        // Handle demo mode
+        if (deviceId && deviceId.startsWith('demo-')) {
+            console.log(`Demo mode: Setting volume for ${deviceId} to ${volume}%`);
+            // Update the device in our local array
+            const device = this.devices.find(d => d.uuid === deviceId);
+            if (device) {
+                device.volume = parseInt(volume);
+                // Update the volume display immediately
+                const volumeDisplay = document.querySelector(`[data-device-id="${deviceId}"] .volume-display`);
+                if (volumeDisplay) {
+                    volumeDisplay.textContent = `${volume}%`;
+                }
+            }
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/sonos/devices/${deviceId}/volume/${volume}`, {
+                method: 'POST'
+            });
+            if (response.ok) {
+                this.loadDevices();
+            }
+        } catch (error) {
+            console.error('Failed to set volume:', error);
+        }
+    }
+
+    // Group control methods
+    async toggleGroupPlayPause(groupId) {
+        try {
+            const response = await fetch(`/api/sonos/group/${groupId}/toggle`, { method: 'POST' });
+            if (response.ok) {
+                this.loadGroups();
+            }
+        } catch (error) {
+            console.error('Failed to toggle group play/pause:', error);
+        }
+    }
+
+    async stopGroup(groupId) {
+        try {
+            const response = await fetch(`/api/sonos/group/${groupId}/stop`, { method: 'POST' });
+            if (response.ok) {
+                this.loadGroups();
+            }
+        } catch (error) {
+            console.error('Failed to stop group:', error);
+        }
+    }
+
+    // Quick actions
+    async playAllDevices() {
+        try {
+            const response = await fetch('/api/sonos/play-all', { method: 'POST' });
+            if (response.ok) {
+                this.loadDevices();
+            }
+        } catch (error) {
+            console.error('Failed to play all devices:', error);
+        }
+    }
+
+    async pauseAllDevices() {
+        try {
+            const response = await fetch('/api/sonos/pause-all', { method: 'POST' });
+            if (response.ok) {
+                this.loadDevices();
+            }
+        } catch (error) {
+            console.error('Failed to pause all devices:', error);
+        }
+    }
+
+    async stopAllDevices() {
+        try {
+            const response = await fetch('/api/sonos/stop-all', { method: 'POST' });
+            if (response.ok) {
+                this.loadDevices();
+            }
+        } catch (error) {
+            console.error('Failed to stop all devices:', error);
+        }
+    }
+
+    async refreshDevices() {
+        this.loadDevices();
+        this.loadGroups();
+    }
+
+    destroy() {
+        this.disconnectWebSocket();
+        console.log('Sonos section destroyed');
+    }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-    window.sonosSection = new SonosSection();
-});
+// Initialize Sonos section immediately
+console.log('Initializing Sonos section...');
+window.sonosSection = new SonosSection();
+window.sonosSection.init();
