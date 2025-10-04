@@ -95,73 +95,73 @@ Implementation checklist for FullCalendar Google Calendar integration, following
 **Status**: ⏳ Pending
 
 #### 3.1 Calendar Service Core
-- [ ] Create `internal/services/calendar.go` file
-- [ ] Define `CalendarEvent` struct for frontend
-- [ ] Implement `GetCalendarEvents()` function
-- [ ] Add automatic token refresh logic
-- [ ] Handle both all-day and timed events
-- [ ] Transform Google events to FullCalendar format
-- [ ] Implement `getEventColor()` function
-- [ ] Add proper error handling and logging
+- [x] Create `internal/services/calendar.go` file
+- [x] Define `CalendarEvent` struct for frontend
+- [x] Implement `GetCalendarEvents()` function
+- [x] Add automatic token refresh logic
+- [x] Handle both all-day and timed events
+- [x] Transform Google events to FullCalendar format
+- [x] Implement `getEventColor()` function
+- [x] Add proper error handling and logging
 - [ ] Test calendar service with sample data
 
 #### 3.2 Calendar API Handler
-- [ ] Create `internal/handlers/calendar.go` file (following Sonos pattern)
-- [ ] Create `CalendarHandler` struct with service dependency
-- [ ] Implement `GetEventsHandler` method
-- [ ] Parse query parameters (start, end dates)
-- [ ] Validate date formats (RFC3339)
-- [ ] Call calendar service to fetch events
-- [ ] Handle token expiration gracefully
-- [ ] Return proper JSON response
-- [ ] Add CORS headers if needed
+- [x] Create `internal/handlers/calendar.go` file (following Sonos pattern)
+- [x] Create `CalendarHandler` struct with service dependency
+- [x] Implement `GetEventsHandler` method
+- [x] Parse query parameters (start, end dates)
+- [x] Validate date formats (RFC3339)
+- [x] Call calendar service to fetch events
+- [x] Handle token expiration gracefully
+- [x] Return proper JSON response
+- [x] Add CORS headers if needed
 - [ ] Test API endpoint manually
 
 #### 3.3 Authentication Middleware
-- [ ] Create authentication middleware function
-- [ ] Check for valid token in session
-- [ ] Redirect to login if not authenticated
-- [ ] Apply middleware to protected routes
+- [x] Create authentication middleware function
+- [x] Check for valid token in session
+- [x] Redirect to login if not authenticated
+- [x] Apply middleware to protected routes
 - [ ] Test middleware functionality
-- [ ] Ensure proper error handling
+- [x] Ensure proper error handling
 
 ### Phase 4: Frontend Implementation
 **Duration**: 2-3 days
 **Status**: ⏳ Pending
 
 #### 4.1 Calendar HTML Template
-- [ ] Create `templates/calendar.html` file
-- [ ] Include FullCalendar CSS from CDN
-- [ ] Include FullCalendar JavaScript from CDN
-- [ ] Add calendar container div with proper styling
-- [ ] Implement responsive design
-- [ ] Add loading and error state indicators
+- [x] Create `templates/calendar.html` file
+- [x] Include FullCalendar CSS from CDN
+- [x] Include FullCalendar JavaScript from CDN
+- [x] Add calendar container div with proper styling
+- [x] Implement responsive design
+- [x] Add loading and error state indicators
 - [ ] Test template rendering
 
 #### 4.2 FullCalendar Configuration
-- [ ] Initialize FullCalendar with proper config
-- [ ] Set `initialView` to 'dayGridMonth'
-- [ ] Configure `headerToolbar` with navigation
-- [ ] Set `timeZone` to 'local' for user timezone
-- [ ] Implement dynamic event loading via `events` function
-- [ ] Add event click handler (Phase 1: basic alert)
-- [ ] Configure loading indicators
+- [x] Initialize FullCalendar with proper config
+- [x] Set `initialView` to 'dayGridMonth'
+- [x] Configure `headerToolbar` with navigation
+- [x] Set `timeZone` to 'local' for user timezone
+- [x] Implement dynamic event loading via `events` function
+- [x] Add event click handler (Phase 1: basic alert)
+- [x] Configure loading indicators
 - [ ] Test calendar initialization
 
 #### 4.3 Event Loading Integration
-- [ ] Implement `events` function for dynamic loading
-- [ ] Fetch events from `/api/calendar/events` endpoint
-- [ ] Handle API responses and errors
-- [ ] Call `successCallback` with event data
-- [ ] Call `failureCallback` on errors
-- [ ] Add loading states during fetch
+- [x] Implement `events` function for dynamic loading
+- [x] Fetch events from `/api/calendar/events` endpoint
+- [x] Handle API responses and errors
+- [x] Call `successCallback` with event data
+- [x] Call `failureCallback` on errors
+- [x] Add loading states during fetch
 - [ ] Test event loading functionality
 
 #### 4.4 Calendar Page Handler
-- [ ] Add `CalendarPageHandler` method to existing `CalendarHandler`
-- [ ] Implement `CalendarPageHandler` method
-- [ ] Use Go's `html/template` package (following existing pattern)
-- [ ] Ensure middleware protects this route
+- [x] Add `CalendarPageHandler` method to existing `CalendarHandler`
+- [x] Implement `CalendarPageHandler` method
+- [x] Use Go's `html/template` package (following existing pattern)
+- [x] Ensure middleware protects this route
 - [ ] Test page loads in browser
 - [ ] Verify authentication requirement
 

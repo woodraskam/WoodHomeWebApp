@@ -492,6 +492,11 @@ func main() {
 	sonosService = services.NewSonosService(sonosConfig)
 	sonosHandler = handlers.NewSonosHandler(sonosService)
 
+	// Initialize Calendar service
+	oauthConfig := services.NewGoogleOAuthConfig()
+	calendarService := services.NewCalendarService(oauthConfig)
+	calendarHandler := handlers.NewCalendarHandler(calendarService)
+
 	// Start Sonos service
 	ctx := context.Background()
 	if err := sonosService.Start(ctx); err != nil {
@@ -547,6 +552,17 @@ func main() {
 	router := mux.NewRouter()
 	sonosHandler.RegisterRoutes(router)
 	http.Handle("/api/sonos/", router)
+
+	// Calendar routes
+	http.HandleFunc("/auth/google/login", handlers.GoogleLoginHandler)
+	http.HandleFunc("/auth/google/callback", handlers.GoogleCallbackHandler)
+	http.HandleFunc("/auth/logout", handlers.LogoutHandler)
+	http.HandleFunc("/calendar", handlers.AuthRequired(calendarHandler.CalendarPageHandler))
+	
+	// Calendar API routes (using mux for better routing)
+	calendarRouter := mux.NewRouter()
+	calendarHandler.RegisterRoutes(calendarRouter)
+	http.Handle("/api/calendar/", calendarRouter)
 
 	// Existing routes
 	http.HandleFunc("/play/CandyLand", candyLandHandler)
