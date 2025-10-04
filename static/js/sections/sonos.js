@@ -65,7 +65,7 @@ class SonosSection {
             <div class="m3-section-header">
                 <div class="sonos-header">
                     <div class="sonos-title">
-                        <span class="material-symbols-outlined">music_note</span>
+                        <span class="material-symbols-outlined large interactive">music_note</span>
                         <h1 class="m3-section-title">Sonos Control</h1>
                     </div>
                     <div class="sonos-status">
@@ -78,36 +78,28 @@ class SonosSection {
             <!-- Quick Actions -->
             <div class="sonos-actions">
                 <button id="sonos-play-all" class="m3-button m3-button-filled">
-                    <span class="material-symbols-outlined">play_arrow</span>
+                    <span class="material-symbols-outlined interactive play-button">play_arrow</span>
                     Play All
                 </button>
                 <button id="sonos-pause-all" class="m3-button m3-button-outlined">
-                    <span class="material-symbols-outlined">pause</span>
+                    <span class="material-symbols-outlined interactive">pause</span>
                     Pause All
                 </button>
                 <button id="sonos-stop-all" class="m3-button m3-button-outlined">
-                    <span class="material-symbols-outlined">stop</span>
+                    <span class="material-symbols-outlined interactive">stop</span>
                     Stop All
                 </button>
                 <button id="sonos-refresh" class="m3-button m3-button-outlined">
-                    <span class="material-symbols-outlined">refresh</span>
+                    <span class="material-symbols-outlined interactive">refresh</span>
                     Refresh
                 </button>
             </div>
 
-            <!-- Devices Grid -->
+            <!-- Unified Devices & Groups Grid -->
             <div class="sonos-devices-section">
-                <h3>Devices</h3>
+                <h3>Sonos Devices & Groups</h3>
                 <div class="sonos-devices-grid" id="sonos-devices-grid">
-                    <!-- Devices will be populated here -->
-                </div>
-            </div>
-
-            <!-- Groups Section -->
-            <div class="sonos-groups-section">
-                <h3>Groups</h3>
-                <div class="sonos-groups-grid" id="sonos-groups-grid">
-                    <!-- Groups will be populated here -->
+                    <!-- Devices and groups will be populated here -->
                 </div>
             </div>
 
@@ -142,11 +134,52 @@ class SonosSection {
             console.log('Sonos section initializing...');
             this.isLoaded = true;
             this.setupSonosEventListeners();
-            // Load real devices from API like the working version
-            this.loadDevices();
-            this.loadGroups();
+            // Load both devices and groups, then render unified view
+            this.loadUnifiedData();
         }
         this.show();
+    }
+
+    async loadUnifiedData() {
+        console.log('Loading unified Sonos data...');
+        this.showLoadingState();
+
+        try {
+            // Load both devices and groups in parallel
+            const [devicesResponse, groupsResponse] = await Promise.all([
+                fetch('/api/sonos/devices'),
+                fetch('/api/sonos/groups')
+            ]);
+
+            // Process devices
+            if (devicesResponse.ok) {
+                const devicesData = await devicesResponse.json();
+                this.devices = devicesData.devices || [];
+                console.log('[UNIFIED LOAD] Devices loaded:', this.devices.length);
+            } else {
+                console.error('[UNIFIED LOAD] Failed to load devices');
+                this.devices = [];
+            }
+
+            // Process groups
+            if (groupsResponse.ok) {
+                const groupsData = await groupsResponse.json();
+                this.groups = groupsData.groups || [];
+                console.log('[UNIFIED LOAD] Groups loaded:', this.groups.length);
+            } else {
+                console.error('[UNIFIED LOAD] Failed to load groups');
+                this.groups = [];
+            }
+
+            // Render unified view with both devices and groups
+            this.renderDevices();
+            this.updateConnectionStatus('online');
+
+        } catch (error) {
+            console.error('[UNIFIED LOAD] Error loading Sonos data:', error);
+            this.updateConnectionStatus('offline');
+            this.showDemoContent();
+        }
     }
 
     showLoadingState() {
@@ -268,6 +301,24 @@ class SonosSection {
         }
     }
 
+    updateDevice(deviceData) {
+        // Update device in local array
+        const deviceIndex = this.devices.findIndex(d => d.uuid === deviceData.uuid);
+        if (deviceIndex !== -1) {
+            this.devices[deviceIndex] = { ...this.devices[deviceIndex], ...deviceData };
+            console.log('Device updated via WebSocket:', deviceData.name, 'volume:', deviceData.volume);
+        }
+    }
+
+    updateGroup(groupData) {
+        // Update group in local array
+        const groupIndex = this.groups.findIndex(g => g.id === groupData.id);
+        if (groupIndex !== -1) {
+            this.groups[groupIndex] = { ...this.groups[groupIndex], ...groupData };
+            console.log('Group updated via WebSocket:', groupData.coordinator?.name, 'volume:', groupData.volume);
+        }
+    }
+
     updateConnectionStatus(status) {
         const statusElement = document.getElementById('sonos-connection-status');
         if (statusElement) {
@@ -294,7 +345,7 @@ class SonosSection {
             if (response.ok) {
                 this.devices = data.devices || [];
                 console.log('[LOAD DEVICES DEBUG] Devices loaded:', this.devices.length);
-                this.renderDevices();
+                this.renderDevices(); // Keep this for refresh operations
                 this.updateConnectionStatus('online');
             } else {
                 console.error('[LOAD DEVICES DEBUG] Failed to load devices:', data);
@@ -318,16 +369,16 @@ class SonosSection {
             if (response.ok) {
                 this.groups = data.groups || [];
                 console.log('[LOAD GROUPS DEBUG] Groups loaded:', this.groups.length);
-                this.renderGroups();
+                this.renderDevices(); // Render unified view
             } else {
                 console.error('[LOAD GROUPS DEBUG] Failed to load groups:', data);
                 this.groups = [];
-                this.renderGroups();
+                this.renderDevices(); // Render unified view
             }
         } catch (error) {
             console.error('[LOAD GROUPS DEBUG] Error loading groups:', error);
             this.groups = [];
-            this.renderGroups();
+            this.renderDevices(); // Render unified view
         }
     }
 
@@ -391,65 +442,207 @@ class SonosSection {
         const grid = document.getElementById('sonos-devices-grid');
         if (!grid) return;
 
-        console.log('Rendering devices:', this.devices); // Debug: show what devices we're rendering
+        console.log('Rendering unified view with devices:', this.devices, 'and groups:', this.groups);
 
-        grid.innerHTML = this.devices.map(device => `
-            <div class="m3-card sonos-device-card" data-device-id="${device.uuid}">
+        // Create unified items (groups first, then individual devices)
+        const unifiedItems = this.createUnifiedItems();
+
+        grid.innerHTML = unifiedItems.map(item => {
+            if (item.type === 'group') {
+                return this.createGroupCardHTML(item);
+            } else {
+                return this.createDeviceCardHTML(item);
+            }
+        }).join('');
+
+        // Initialize M3 sliders after rendering
+        this.initializeM3Sliders();
+    }
+
+    createUnifiedItems() {
+        const items = [];
+        const devicesInGroups = new Set();
+
+        // First, mark all devices that are in groups
+        this.groups.forEach(group => {
+            if (group.members) {
+                group.members.forEach(member => {
+                    devicesInGroups.add(member.uuid);
+                });
+            }
+        });
+
+        // Add groups with coordinator names for sorting
+        this.groups.forEach(group => {
+            items.push({
+                type: 'group',
+                id: group.id,
+                coordinator: group.coordinator,
+                members: group.members || [],
+                status: group.state || group.playback_state,
+                volume: group.volume,
+                currentTrack: group.current_track,
+                sortName: group.coordinator?.name || '' // Use coordinator name for sorting
+            });
+        });
+
+        // Add individual devices (not in any group)
+        this.devices
+            .filter(device => !devicesInGroups.has(device.uuid))
+            .forEach(device => {
+                items.push({
+                    type: 'device',
+                    id: device.uuid,
+                    name: device.name,
+                    room: device.room,
+                    status: device.state || 'STOPPED',
+                    volume: device.volume || 0,
+                    currentTrack: device.current_track,
+                    isOnline: device.is_online,
+                    sortName: device.name // Use device name for sorting
+                });
+            });
+
+        // Sort all items alphabetically by their sort name
+        return items.sort((a, b) => a.sortName.localeCompare(b.sortName));
+    }
+
+    createGroupCardHTML(group) {
+        return `
+            <div class="m3-card sonos-group-card" data-group-id="${group.id}">
                 <div class="m3-card-header">
-                    <h4>${device.name}</h4>
-                    <span class="material-symbols-outlined">speaker</span>
+                    <h4><span class="material-symbols-outlined large interactive">speaker_group</span> ${group.coordinator.name}</h4>
+                </div>
+                <div class="m3-card-content">
+                    <div class="coordinator">
+                        <div class="device-info">
+                            <p><strong>Coordinator:</strong> ${group.coordinator.name}</p>
+                            <p><strong>Status:</strong> ${group.status || 'STOPPED'}</p>
+                            <p><strong>Volume:</strong> ${group.volume || 0}%</p>
+                            <p><strong>Track:</strong> ${this.getTrackInfo(group.currentTrack) || '[No music selected]'}</p>
+                        </div>
+                        <div class="device-controls">
+                            <button class="m3-button m3-button-text" onclick="window.sonosSection.toggleGroupPlayPause('${group.id}')">
+                                <span class="material-symbols-outlined interactive play-button">${group.status === 'PLAYING' ? 'pause' : 'play_arrow'}</span>
+                            </button>
+                            <button class="m3-button m3-button-text" onclick="window.sonosSection.stopGroup('${group.id}')">
+                                <span class="material-symbols-outlined interactive">stop</span>
+                            </button>
+                            <div class="volume-control">
+                                <span class="material-symbols-outlined volume-icon">volume_up</span>
+                                <input type="range" min="0" max="100" value="${group.volume || 0}" 
+                                       class="m3-slider" data-group-id="${group.id}"
+                                       oninput="window.sonosSection.updateSliderProgress(this); window.sonosSection.updateVolumeDisplay('${group.id}', this.value, 'group')"
+                                       onchange="window.sonosSection.setGroupVolume('${group.id}', this.value)"
+                                       onmouseup="window.sonosSection.setGroupVolume('${group.id}', this.value)"
+                                       ontouchend="window.sonosSection.setGroupVolume('${group.id}', this.value)">
+                                <span class="volume-display">${group.volume || 0}%</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="group-members">
+                        <h5>Group Members:</h5>
+                        ${group.members.filter(member => member.uuid !== group.coordinator?.uuid).map(member => `
+                            <div class="member-device" data-device-id="${member.uuid}">
+                                <span class="material-symbols-outlined small">speaker</span>
+                                <span class="member-name">${member.name}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+            </div>
+        `;
+    }
+
+    createDeviceCardHTML(device) {
+        return `
+            <div class="m3-card sonos-device-card" data-device-id="${device.id}">
+                <div class="m3-card-header">
+                    <h4><span class="material-symbols-outlined large interactive">speaker</span> ${device.name}</h4>
                 </div>
                 <div class="m3-card-content">
                     <div class="device-info">
                         <p><strong>Room:</strong> ${device.room}</p>
-                        <p><strong>Status:</strong> ${device.state || 'STOPPED'}</p>
-                        <p><strong>Volume:</strong> ${device.volume || 0}%</p>
+                        <p><strong>Status:</strong> ${device.status}</p>
+                        <p><strong>Volume:</strong> ${device.volume}%</p>
+                        <p><strong>Track:</strong> ${this.getTrackInfo(device.currentTrack) || '[No music selected]'}</p>
                     </div>
                     <div class="device-controls">
-                        <button class="m3-button m3-button-text" onclick="window.sonosSection.togglePlayPause('${device.uuid}')">
-                            <span class="material-symbols-outlined">${device.state === 'PLAYING' ? 'pause' : 'play_arrow'}</span>
+                        <button class="m3-button m3-button-text" onclick="window.sonosSection.togglePlayPause('${device.id}')">
+                            <span class="material-symbols-outlined interactive play-button">${device.status === 'PLAYING' ? 'pause' : 'play_arrow'}</span>
                         </button>
-                        <button class="m3-button m3-button-text" onclick="window.sonosSection.stopDevice('${device.uuid}')">
-                            <span class="material-symbols-outlined">stop</span>
+                        <button class="m3-button m3-button-text" onclick="window.sonosSection.stopDevice('${device.id}')">
+                            <span class="material-symbols-outlined interactive">stop</span>
                         </button>
                         <div class="volume-control">
-                            <input type="range" min="0" max="100" value="${device.volume || 0}" 
-                                   onchange="window.sonosSection.setVolume('${device.uuid}', this.value)">
-                            <span class="volume-display">${device.volume || 0}%</span>
+                            <span class="material-symbols-outlined volume-icon">volume_up</span>
+                            <input type="range" min="0" max="100" value="${device.volume}" 
+                                   class="m3-slider" data-device-id="${device.id}"
+                                   oninput="window.sonosSection.updateSliderProgress(this); window.sonosSection.updateVolumeDisplay('${device.id}', this.value)"
+                                   onchange="window.sonosSection.setVolume('${device.id}', this.value)"
+                                   onmouseup="window.sonosSection.setVolume('${device.id}', this.value)"
+                                   ontouchend="window.sonosSection.setVolume('${device.id}', this.value)">
+                            <span class="volume-display">${device.volume}%</span>
                         </div>
                     </div>
                 </div>
             </div>
-        `).join('');
+        `;
     }
 
-    renderGroups() {
-        const grid = document.getElementById('sonos-groups-grid');
-        if (!grid) return;
-
-        grid.innerHTML = this.groups.map(group => `
-            <div class="m3-card sonos-group-card" data-group-id="${group.id}">
-                <div class="m3-card-header">
-                    <h4>${group.name}</h4>
-                    <span class="material-symbols-outlined">group</span>
-                </div>
-                <div class="m3-card-content">
-                    <div class="group-info">
-                        <p><strong>Devices:</strong> ${group.devices ? group.devices.length : 0}</p>
-                        <p><strong>Status:</strong> ${group.playbackState}</p>
-                    </div>
-                    <div class="group-controls">
-                        <button class="m3-button m3-button-text" onclick="window.sonosSection.toggleGroupPlayPause('${group.id}')">
-                            <span class="material-symbols-outlined">${group.playbackState === 'PLAYING' ? 'pause' : 'play_arrow'}</span>
-                        </button>
-                        <button class="m3-button m3-button-text" onclick="window.sonosSection.stopGroup('${group.id}')">
-                            <span class="material-symbols-outlined">stop</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        `).join('');
+    // M3 Slider Progress Update
+    updateSliderProgress(slider) {
+        const progress = (slider.value / slider.max) * 100;
+        slider.style.setProperty('--slider-progress', `${progress}%`);
     }
+
+    // Update volume display during dragging (no API call)
+    updateVolumeDisplay(id, volume, type = 'device') {
+        const volumeDisplay = document.querySelector(`[data-${type}-id="${id}"] .volume-display`);
+        if (volumeDisplay) {
+            volumeDisplay.textContent = `${volume}%`;
+        }
+    }
+
+    // Initialize M3 Sliders after rendering
+    initializeM3Sliders() {
+        const sliders = document.querySelectorAll('.m3-slider');
+        sliders.forEach(slider => {
+            this.updateSliderProgress(slider);
+        });
+    }
+
+    getTrackInfo(currentTrack) {
+        if (!currentTrack) return null;
+
+        // Check for TV/SPDIF input (HDMI ARC)
+        if (currentTrack.uri && currentTrack.uri.includes('spdif')) {
+            return 'TV Audio (HDMI ARC)';
+        }
+
+        // Check for other line input types
+        if (currentTrack.type === 'line_in' && currentTrack.uri) {
+            if (currentTrack.uri.includes('htastream')) {
+                return 'TV Audio';
+            }
+            return 'Line Input';
+        }
+
+        // Check if we have meaningful track information
+        const hasTitle = currentTrack.title && currentTrack.title.trim() !== '';
+        const hasArtist = currentTrack.artist && currentTrack.artist.trim() !== '';
+
+        if (hasTitle && hasArtist) {
+            return `${currentTrack.artist} - ${currentTrack.title}`;
+        } else if (hasTitle) {
+            return currentTrack.title;
+        } else if (hasArtist) {
+            return currentTrack.artist;
+        }
+
+        return null;
+    }
+
 
     // Device control methods
     async togglePlayPause(deviceId) {
@@ -520,11 +713,6 @@ class SonosSection {
             const device = this.devices.find(d => d.uuid === deviceId);
             if (device) {
                 device.volume = parseInt(volume);
-                // Update the volume display immediately
-                const volumeDisplay = document.querySelector(`[data-device-id="${deviceId}"] .volume-display`);
-                if (volumeDisplay) {
-                    volumeDisplay.textContent = `${volume}%`;
-                }
             }
             return;
         }
@@ -533,19 +721,66 @@ class SonosSection {
             const response = await fetch(`/api/sonos/devices/${deviceId}/volume/${volume}`, {
                 method: 'POST'
             });
-            if (response.ok) {
-                this.loadDevices();
+            if (!response.ok) {
+                // Revert the slider on error
+                const slider = document.querySelector(`[data-device-id="${deviceId}"] .m3-slider`);
+                const volumeDisplay = document.querySelector(`[data-device-id="${deviceId}"] .volume-display`);
+                if (slider && volumeDisplay) {
+                    // Find the original device volume to revert to
+                    const device = this.devices.find(d => d.uuid === deviceId);
+                    if (device) {
+                        slider.value = device.volume;
+                        this.updateSliderProgress(slider);
+                        volumeDisplay.textContent = `${device.volume}%`;
+                    }
+                }
+                console.error('Failed to set volume: API returned error');
+            } else {
+                // Update local data immediately and re-render
+                console.log('Volume updated successfully to:', volume);
+                const device = this.devices.find(d => d.uuid === deviceId);
+                if (device) {
+                    device.volume = parseInt(volume);
+                    this.renderDevices(); // Re-render with updated data
+                }
             }
         } catch (error) {
             console.error('Failed to set volume:', error);
+            // Revert the slider on error
+            const slider = document.querySelector(`[data-device-id="${deviceId}"] .m3-slider`);
+            const volumeDisplay = document.querySelector(`[data-device-id="${deviceId}"] .volume-display`);
+            if (slider && volumeDisplay) {
+                // Find the original device volume to revert to
+                const device = this.devices.find(d => d.uuid === deviceId);
+                if (device) {
+                    slider.value = device.volume;
+                    this.updateSliderProgress(slider);
+                    volumeDisplay.textContent = `${device.volume}%`;
+                }
+            }
         }
     }
 
     // Group control methods
     async toggleGroupPlayPause(groupId) {
         try {
-            const response = await fetch(`/api/sonos/group/${groupId}/toggle`, { method: 'POST' });
+            // Find the group to check its current state
+            const group = this.groups.find(g => g.id === groupId);
+            if (!group) {
+                console.error('Group not found:', groupId);
+                return;
+            }
+
+            let endpoint;
+            if (group.state === 'PLAYING' || group.playback_state === 'PLAYING') {
+                endpoint = `/api/sonos/groups/${groupId}/pause`;
+            } else {
+                endpoint = `/api/sonos/groups/${groupId}/play`;
+            }
+
+            const response = await fetch(endpoint, { method: 'POST' });
             if (response.ok) {
+                this.loadDevices();
                 this.loadGroups();
             }
         } catch (error) {
@@ -555,12 +790,57 @@ class SonosSection {
 
     async stopGroup(groupId) {
         try {
-            const response = await fetch(`/api/sonos/group/${groupId}/stop`, { method: 'POST' });
+            const response = await fetch(`/api/sonos/groups/${groupId}/stop`, { method: 'POST' });
             if (response.ok) {
+                this.loadDevices();
                 this.loadGroups();
             }
         } catch (error) {
             console.error('Failed to stop group:', error);
+        }
+    }
+
+    async setGroupVolume(groupId, volume) {
+
+        try {
+            const response = await fetch(`/api/sonos/groups/${groupId}/volume/${volume}`, { method: 'POST' });
+            if (!response.ok) {
+                // Revert the slider on error
+                const slider = document.querySelector(`[data-group-id="${groupId}"] .m3-slider`);
+                const volumeDisplay = document.querySelector(`[data-group-id="${groupId}"] .volume-display`);
+                if (slider && volumeDisplay) {
+                    // Find the original group volume to revert to
+                    const group = this.groups.find(g => g.id === groupId);
+                    if (group) {
+                        slider.value = group.volume || 0;
+                        this.updateSliderProgress(slider);
+                        volumeDisplay.textContent = `${group.volume || 0}%`;
+                    }
+                }
+                console.error('Failed to set group volume: API returned error');
+            } else {
+                // Update local data immediately and re-render
+                console.log('Group volume updated successfully to:', volume);
+                const group = this.groups.find(g => g.id === groupId);
+                if (group) {
+                    group.volume = parseInt(volume);
+                    this.renderDevices(); // Re-render with updated data
+                }
+            }
+        } catch (error) {
+            console.error('Failed to set group volume:', error);
+            // Revert the slider on error
+            const slider = document.querySelector(`[data-group-id="${groupId}"] .m3-slider`);
+            const volumeDisplay = document.querySelector(`[data-group-id="${groupId}"] .volume-display`);
+            if (slider && volumeDisplay) {
+                // Find the original group volume to revert to
+                const group = this.groups.find(g => g.id === groupId);
+                if (group) {
+                    slider.value = group.volume || 0;
+                    this.updateSliderProgress(slider);
+                    volumeDisplay.textContent = `${group.volume || 0}%`;
+                }
+            }
         }
     }
 
