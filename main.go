@@ -547,7 +547,7 @@ func main() {
 	// Sonos routes
 	http.HandleFunc("/sonos", sonosDashboardHandler)
 	http.HandleFunc("/ws/sonos", sonosWebSocketHandler)
-	
+
 	// Sonos API routes (using mux for better routing)
 	router := mux.NewRouter()
 	sonosHandler.RegisterRoutes(router)
@@ -558,7 +558,7 @@ func main() {
 	http.HandleFunc("/auth/google/callback", handlers.GoogleCallbackHandler)
 	http.HandleFunc("/auth/logout", handlers.LogoutHandler)
 	http.HandleFunc("/calendar", handlers.AuthRequired(calendarHandler.CalendarPageHandler))
-	
+
 	// Calendar API routes (using mux for better routing)
 	calendarRouter := mux.NewRouter()
 	calendarHandler.RegisterRoutes(calendarRouter)
@@ -613,7 +613,13 @@ func getEnv(key, defaultValue string) string {
 func homeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	tmpl := template.Must(template.ParseFiles("templates/index.html"))
+	log.Printf("Loading SPA dashboard template...")
+	tmpl, err := template.ParseFiles("templates/spa-dashboard.html")
+	if err != nil {
+		log.Printf("Error parsing template: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
 
 	data := map[string]interface{}{
 		"Title":       "WoodHome Dashboard",
@@ -621,10 +627,13 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 		"CurrentTime": time.Now().Format("2006-01-02 15:04:05"),
 	}
 
+	log.Printf("Executing SPA template...")
 	if err := tmpl.Execute(w, data); err != nil {
+		log.Printf("Error executing template: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+	log.Printf("SPA template executed successfully")
 }
 
 func candyLandHandler(w http.ResponseWriter, r *http.Request) {

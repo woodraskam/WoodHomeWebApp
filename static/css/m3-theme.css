@@ -1,0 +1,167 @@
+/* Material Design 3 Theme System */
+:root {
+    /* Light Theme - Primary Colors */
+    --m3-primary: #6750A4;
+    --m3-on-primary: #FFFFFF;
+    --m3-primary-container: #EADDFF;
+    --m3-on-primary-container: #21005D;
+
+    /* Secondary Colors */
+    --m3-secondary: #625B71;
+    --m3-on-secondary: #FFFFFF;
+    --m3-secondary-container: #E8DEF8;
+    --m3-on-secondary-container: #1D192B;
+
+    /* Surface Colors */
+    --m3-surface: #FFFBFE;
+    --m3-on-surface: #1C1B1F;
+    --m3-surface-container: #F3EDF7;
+    --m3-on-surface-variant: #49454F;
+    --m3-surface-variant: #E7E0EC;
+    --m3-on-surface-variant: #49454F;
+
+    /* Outline Colors */
+    --m3-outline: #79747E;
+    --m3-outline-variant: #CAC4D0;
+
+    /* State Colors */
+    --m3-state-hover: rgba(103, 80, 164, 0.08);
+    --m3-state-focus: rgba(103, 80, 164, 0.12);
+    --m3-state-pressed: rgba(103, 80, 164, 0.16);
+    --m3-state-drag: rgba(103, 80, 164, 0.16);
+
+    /* Error Colors */
+    --m3-error: #BA1A1A;
+    --m3-on-error: #FFFFFF;
+    --m3-error-container: #FFDAD6;
+    --m3-on-error-container: #410002;
+
+    /* Typography */
+    --m3-font-family: 'Roboto', sans-serif;
+    --m3-font-size-display-large: 57px;
+    --m3-font-size-display-medium: 45px;
+    --m3-font-size-display-small: 36px;
+    --m3-font-size-headline-large: 32px;
+    --m3-font-size-headline-medium: 28px;
+    --m3-font-size-headline-small: 24px;
+    --m3-font-size-title-large: 22px;
+    --m3-font-size-title-medium: 16px;
+    --m3-font-size-title-small: 14px;
+    --m3-font-size-body-large: 16px;
+    --m3-font-size-body-medium: 14px;
+    --m3-font-size-body-small: 12px;
+    --m3-font-size-label-large: 14px;
+    --m3-font-size-label-medium: 12px;
+    --m3-font-size-label-small: 11px;
+
+    /* Spacing */
+    --m3-spacing-xs: 4px;
+    --m3-spacing-sm: 8px;
+    --m3-spacing-md: 12px;
+    --m3-spacing-lg: 16px;
+    --m3-spacing-xl: 24px;
+    --m3-spacing-2xl: 32px;
+    --m3-spacing-3xl: 48px;
+
+    /* Elevation */
+    --m3-elevation-0: none;
+    --m3-elevation-1: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 1px 3px 1px rgba(0, 0, 0, 0.15);
+    --m3-elevation-2: 0px 1px 2px 0px rgba(0, 0, 0, 0.3), 0px 2px 6px 2px rgba(0, 0, 0, 0.15);
+    --m3-elevation-3: 0px 1px 3px 0px rgba(0, 0, 0, 0.3), 0px 4px 8px 3px rgba(0, 0, 0, 0.15);
+    --m3-elevation-4: 0px 2px 3px 0px rgba(0, 0, 0, 0.3), 0px 6px 10px 4px rgba(0, 0, 0, 0.15);
+    --m3-elevation-5: 0px 4px 4px 0px rgba(0, 0, 0, 0.3), 0px 8px 12px 6px rgba(0, 0, 0, 0.15);
+
+    /* Shape */
+    --m3-shape-corner-none: 0px;
+    --m3-shape-corner-extra-small: 4px;
+    --m3-shape-corner-small: 8px;
+    --m3-shape-corner-medium: 12px;
+    --m3-shape-corner-large: 16px;
+    --m3-shape-corner-extra-large: 28px;
+
+    /* Motion */
+    --m3-motion-duration-short1: 50ms;
+    --m3-motion-duration-short2: 100ms;
+    --m3-motion-duration-short3: 150ms;
+    --m3-motion-duration-short4: 200ms;
+    --m3-motion-duration-medium1: 250ms;
+    --m3-motion-duration-medium2: 300ms;
+    --m3-motion-duration-medium3: 350ms;
+    --m3-motion-duration-medium4: 400ms;
+    --m3-motion-duration-long1: 450ms;
+    --m3-motion-duration-long2: 500ms;
+    --m3-motion-duration-long3: 550ms;
+    --m3-motion-duration-long4: 600ms;
+
+    --m3-motion-easing-linear: linear;
+    --m3-motion-easing-standard: cubic-bezier(0.2, 0, 0, 1);
+    --m3-motion-easing-standard-accelerate: cubic-bezier(0.3, 0, 1, 1);
+    --m3-motion-easing-standard-decelerate: cubic-bezier(0, 0, 0, 1);
+    --m3-motion-easing-emphasized: cubic-bezier(0.2, 0, 0, 1);
+    --m3-motion-easing-emphasized-accelerate: cubic-bezier(0.3, 0, 0.8, 0.15);
+    --m3-motion-easing-emphasized-decelerate: cubic-bezier(0.05, 0.7, 0.1, 1);
+}
+
+/* Dark Theme */
+[data-theme="dark"] {
+    --m3-primary: #D0BCFF;
+    --m3-on-primary: #381E72;
+    --m3-primary-container: #4F378B;
+    --m3-on-primary-container: #EADDFF;
+
+    --m3-secondary: #CCC2DC;
+    --m3-on-secondary: #332D41;
+    --m3-secondary-container: #4A4458;
+    --m3-on-secondary-container: #E8DEF8;
+
+    --m3-surface: #141218;
+    --m3-on-surface: #E6E1E5;
+    --m3-surface-container: #1D1B20;
+    --m3-on-surface-variant: #CAC4D0;
+    --m3-surface-variant: #49454F;
+    --m3-on-surface-variant: #CAC4D0;
+
+    --m3-outline: #938F99;
+    --m3-outline-variant: #49454F;
+
+    --m3-state-hover: rgba(208, 188, 255, 0.08);
+    --m3-state-focus: rgba(208, 188, 255, 0.12);
+    --m3-state-pressed: rgba(208, 188, 255, 0.16);
+    --m3-state-drag: rgba(208, 188, 255, 0.16);
+
+    --m3-error: #F2B8B5;
+    --m3-on-error: #601410;
+    --m3-error-container: #8C1D18;
+    --m3-on-error-container: #FFDAD6;
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+    :root {
+        --m3-outline: #000000;
+        --m3-outline-variant: #000000;
+    }
+
+    [data-theme="dark"] {
+        --m3-outline: #FFFFFF;
+        --m3-outline-variant: #FFFFFF;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    :root {
+        --m3-motion-duration-short1: 0ms;
+        --m3-motion-duration-short2: 0ms;
+        --m3-motion-duration-short3: 0ms;
+        --m3-motion-duration-short4: 0ms;
+        --m3-motion-duration-medium1: 0ms;
+        --m3-motion-duration-medium2: 0ms;
+        --m3-motion-duration-medium3: 0ms;
+        --m3-motion-duration-medium4: 0ms;
+        --m3-motion-duration-long1: 0ms;
+        --m3-motion-duration-long2: 0ms;
+        --m3-motion-duration-long3: 0ms;
+        --m3-motion-duration-long4: 0ms;
+    }
+}

@@ -117,9 +117,9 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	log.Printf("OAuth token stored in memory for user %d", userID)
 
-	log.Printf("OAuth token stored successfully, redirecting to calendar")
-	// Redirect to calendar page
-	http.Redirect(w, r, "/calendar", http.StatusSeeOther)
+	log.Printf("OAuth token stored successfully, redirecting to SPA dashboard")
+	// Redirect to SPA dashboard with success parameter
+	http.Redirect(w, r, "/?auth=success", http.StatusSeeOther)
 }
 
 // LogoutHandler clears the session and logs out the user
