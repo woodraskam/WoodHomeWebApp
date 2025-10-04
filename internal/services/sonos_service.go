@@ -159,7 +159,23 @@ func (s *SonosService) DiscoverDevices(ctx context.Context) error {
 
 	// Test Jishi connection
 	if err := s.testJishiConnection(ctx); err != nil {
-		return fmt.Errorf("Jishi API not available: %w", err)
+		logrus.Warnf("Jishi API not available: %v", err)
+		logrus.Info("Attempting to start Jishi server automatically...")
+		
+		// Try to start Jishi server automatically
+		if startErr := s.StartJishiServer(); startErr != nil {
+			return fmt.Errorf("Jishi API not available and failed to start server: %w (original error: %v)", startErr, err)
+		}
+		
+		// Wait a moment for the server to start up
+		time.Sleep(2 * time.Second)
+		
+		// Test connection again after starting
+		if err := s.testJishiConnection(ctx); err != nil {
+			return fmt.Errorf("Jishi API still not available after auto-start: %w", err)
+		}
+		
+		logrus.Info("Jishi server started successfully, continuing with device discovery...")
 	}
 
 	// Get zones from Jishi API
@@ -219,7 +235,32 @@ func (s *SonosService) getZones(ctx context.Context) ([]map[string]interface{}, 
 
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
-		return nil, err
+		// Check if this is a connection error that might indicate Jishi server is not running
+		if strings.Contains(err.Error(), "connection refused") || strings.Contains(err.Error(), "no such host") {
+			logrus.Warnf("Connection error detected in getZones, attempting to start Jishi server automatically...")
+			
+			// Try to start Jishi server automatically
+			if startErr := s.StartJishiServer(); startErr != nil {
+				return nil, fmt.Errorf("failed to get zones and failed to start server: %w (original error: %v)", startErr, err)
+			}
+			
+			// Wait a moment for the server to start up
+			time.Sleep(2 * time.Second)
+			
+			// Retry the request
+			logrus.Info("Retrying getZones after starting Jishi server...")
+			req, err = http.NewRequestWithContext(ctx, "GET", url, nil)
+			if err != nil {
+				return nil, err
+			}
+			
+			resp, err = s.httpClient.Do(req)
+			if err != nil {
+				return nil, fmt.Errorf("failed to get zones even after starting server: %w", err)
+			}
+		} else {
+			return nil, err
+		}
 	}
 	defer resp.Body.Close()
 
@@ -712,7 +753,33 @@ func (s *SonosService) executeJishiCommand(ctx context.Context, url, action, dev
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
 		logrus.Errorf("Failed to execute %s command on %s: %v", action, deviceName, err)
-		return fmt.Errorf("failed to execute %s command: %w", action, err)
+		
+		// Check if this is a connection error that might indicate Jishi server is not running
+		if strings.Contains(err.Error(), "connection refused") || strings.Contains(err.Error(), "no such host") {
+			logrus.Warnf("Connection error detected, attempting to start Jishi server automatically...")
+			
+			// Try to start Jishi server automatically
+			if startErr := s.StartJishiServer(); startErr != nil {
+				return fmt.Errorf("failed to execute %s command and failed to start server: %w (original error: %v)", action, startErr, err)
+			}
+			
+			// Wait a moment for the server to start up
+			time.Sleep(2 * time.Second)
+			
+			// Retry the command
+			logrus.Info("Retrying command after starting Jishi server...")
+			req, err = http.NewRequestWithContext(ctx, "GET", url, nil)
+			if err != nil {
+				return fmt.Errorf("failed to create retry request: %w", err)
+			}
+			
+			resp, err = s.httpClient.Do(req)
+			if err != nil {
+				return fmt.Errorf("failed to execute %s command even after starting server: %w", action, err)
+			}
+		} else {
+			return fmt.Errorf("failed to execute %s command: %w", action, err)
+		}
 	}
 	defer resp.Body.Close()
 

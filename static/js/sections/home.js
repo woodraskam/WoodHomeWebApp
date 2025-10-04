@@ -3,58 +3,58 @@
  * Main dashboard with system status overview and quick access widgets
  */
 class HomeSection {
-    constructor() {
-        this.isLoaded = false;
-        this.widgets = new Map();
-        this.init();
-    }
+  constructor() {
+    this.isLoaded = false;
+    this.widgets = new Map();
+    this.init();
+  }
 
-    init() {
-        this.setupEventListeners();
-        this.createHomeSection();
-    }
+  init() {
+    this.setupEventListeners();
+    this.createHomeSection();
+  }
 
-    /**
-     * Setup event listeners
-     */
-    setupEventListeners() {
-        // Listen for section load events
-        document.addEventListener('sectionload', (e) => {
-            if (e.detail.section === 'home') {
-                this.load();
-            }
-        });
+  /**
+   * Setup event listeners
+   */
+  setupEventListeners() {
+    // Listen for section load events
+    document.addEventListener('sectionload', (e) => {
+      if (e.detail.section === 'home') {
+        this.load();
+      }
+    });
 
-        // Listen for section change events
-        document.addEventListener('sectionchange', (e) => {
-            if (e.detail.section === 'home') {
-                this.show();
-            } else {
-                this.hide();
-            }
-        });
-    }
+    // Listen for section change events
+    document.addEventListener('sectionchange', (e) => {
+      if (e.detail.section === 'home') {
+        this.show();
+      } else {
+        this.hide();
+      }
+    });
+  }
 
-    /**
-     * Create home section HTML
-     */
-    createHomeSection() {
-        const contentArea = document.getElementById('main-content');
-        if (!contentArea) return;
+  /**
+   * Create home section HTML
+   */
+  createHomeSection() {
+    const contentArea = document.getElementById('main-content');
+    if (!contentArea) return;
 
-        const homeSection = document.createElement('div');
-        homeSection.id = 'home-section';
-        homeSection.className = 'm3-section';
-        homeSection.innerHTML = this.getHomeSectionHTML();
+    const homeSection = document.createElement('div');
+    homeSection.id = 'home-section';
+    homeSection.className = 'm3-section';
+    homeSection.innerHTML = this.getHomeSectionHTML();
 
-        contentArea.appendChild(homeSection);
-    }
+    contentArea.appendChild(homeSection);
+  }
 
-    /**
-     * Get home section HTML
-     */
-    getHomeSectionHTML() {
-        return `
+  /**
+   * Get home section HTML
+   */
+  getHomeSectionHTML() {
+    return `
       <div class="m3-section-header">
         <div>
           <h1 class="m3-section-title">Home Dashboard</h1>
@@ -194,78 +194,78 @@ class HomeSection {
         </div>
       </div>
     `;
-    }
+  }
 
-    /**
-     * Load home section
-     */
-    load() {
-        if (!this.isLoaded) {
-            this.loadWidgetData();
-            this.isLoaded = true;
-        }
-        this.show();
+  /**
+   * Load home section
+   */
+  load() {
+    if (!this.isLoaded) {
+      this.loadWidgetData();
+      this.isLoaded = true;
     }
+    this.show();
+  }
 
-    /**
-     * Show home section
-     */
-    show() {
-        const section = document.getElementById('home-section');
-        if (section) {
-            section.classList.add('m3-section--active');
-        }
+  /**
+   * Show home section
+   */
+  show() {
+    const section = document.getElementById('home-section');
+    if (section) {
+      section.classList.add('m3-section--active');
     }
+  }
 
-    /**
-     * Hide home section
-     */
-    hide() {
-        const section = document.getElementById('home-section');
-        if (section) {
-            section.classList.remove('m3-section--active');
-        }
+  /**
+   * Hide home section
+   */
+  hide() {
+    const section = document.getElementById('home-section');
+    if (section) {
+      section.classList.remove('m3-section--active');
     }
+  }
 
-    /**
-     * Load widget data
-     */
-    loadWidgetData() {
-        this.loadSystemStatus();
-        this.loadSonosStatus();
-        this.loadCalendarEvents();
-        this.loadHueStatus();
-    }
+  /**
+   * Load widget data
+   */
+  loadWidgetData() {
+    this.loadSystemStatus();
+    this.loadSonosStatus();
+    this.loadCalendarEvents();
+    this.loadHueStatus();
+  }
 
-    /**
-     * Load system status
-     */
-    loadSystemStatus() {
-        // Simulate system status check
-        setTimeout(() => {
-            const statusWidget = document.getElementById('system-status-widget');
-            if (statusWidget) {
-                // Update status indicator
-                const statusIndicator = statusWidget.querySelector('.m3-status-indicator');
-                if (statusIndicator) {
-                    statusIndicator.className = 'm3-status-indicator m3-status-indicator--online';
-                    statusIndicator.innerHTML = `
+  /**
+   * Load system status
+   */
+  loadSystemStatus() {
+    // Simulate system status check
+    setTimeout(() => {
+      const statusWidget = document.getElementById('system-status-widget');
+      if (statusWidget) {
+        // Update status indicator
+        const statusIndicator = statusWidget.querySelector('.m3-status-indicator');
+        if (statusIndicator) {
+          statusIndicator.className = 'm3-status-indicator m3-status-indicator--online';
+          statusIndicator.innerHTML = `
             <div class="m3-status-indicator__dot"></div>
             <span>All systems operational</span>
           `;
-                }
-            }
-        }, 500);
-    }
+        }
+      }
+    }, 500);
+  }
 
-    /**
-     * Load Sonos status
-     */
-    loadSonosStatus() {
-        // This would connect to Sonos API in real implementation
-        const sonosContent = document.getElementById('sonos-status-content');
-        if (sonosContent) {
-            sonosContent.innerHTML = `
+  /**
+   * Load Sonos status
+   */
+  loadSonosStatus() {
+    // This would connect to Sonos API in real implementation
+    const sonosContent = document.getElementById('sonos-status-content');
+    if (sonosContent) {
+      sonosContent.innerHTML = `
         <p>No audio playing</p>
         <div class="m3-quick-actions">
           <button class="m3-quick-action" onclick="homeSection.navigateToSection('sonos')">
@@ -276,17 +276,17 @@ class HomeSection {
           </button>
         </div>
       `;
-        }
     }
+  }
 
-    /**
-     * Load calendar events
-     */
-    loadCalendarEvents() {
-        // This would connect to Google Calendar API in real implementation
-        const calendarContent = document.getElementById('calendar-events-content');
-        if (calendarContent) {
-            calendarContent.innerHTML = `
+  /**
+   * Load calendar events
+   */
+  loadCalendarEvents() {
+    // This would connect to Google Calendar API in real implementation
+    const calendarContent = document.getElementById('calendar-events-content');
+    if (calendarContent) {
+      calendarContent.innerHTML = `
         <p>No upcoming events</p>
         <div class="m3-quick-actions">
           <button class="m3-quick-action" onclick="homeSection.navigateToSection('calendar')">
@@ -297,53 +297,80 @@ class HomeSection {
           </button>
         </div>
       `;
-        }
     }
+  }
 
-    /**
-     * Load Hue status
-     */
-    loadHueStatus() {
-        // This would connect to Hue API in real implementation
-        const hueContent = document.getElementById('hue-status-content');
-        if (hueContent) {
-            hueContent.innerHTML = `
-        <p>Lighting status unavailable</p>
-        <div class="m3-quick-actions">
-          <button class="m3-quick-action" onclick="homeSection.navigateToSection('hue')">
-            <svg class="m3-icon" viewBox="0 0 24 24">
-              <path d="M12,2A7,7 0 0,0 5,9C5,11.38 6.19,13.47 8,14.74V17A1,1 0 0,0 9,18H15A1,1 0 0,0 16,17V14.74C17.81,13.47 19,11.38 19,9A7,7 0 0,0 12,2M9,21A1,1 0 0,0 10,22H14A1,1 0 0,0 15,21V20H9V21Z"/>
-            </svg>
-            Control Lights
-          </button>
-        </div>
-      `;
-        }
-    }
+  /**
+   * Load Hue status
+   */
+  async loadHueStatus() {
+    const hueContent = document.getElementById('hue-status-content');
+    if (hueContent) {
+      try {
+        const response = await fetch('/api/hue/status');
+        if (response.ok) {
+          const status = await response.json();
+          const bridge = status.bridge;
+          const lightsInfo = status.lights;
 
-    /**
-     * Refresh system status
-     */
-    refreshSystemStatus() {
-        this.loadSystemStatus();
-    }
-
-    /**
-     * Navigate to section
-     */
-    navigateToSection(section) {
-        if (window.spaRouter) {
-            window.spaRouter.navigateToSection(section);
+          hueContent.innerHTML = `
+                        <div class="m3-hue-status">
+                            <div class="m3-hue-status-item">
+                                <span class="material-symbols-outlined ${bridge?.is_online ? 'm3-status-online' : 'm3-status-offline'}">router</span>
+                                <div>
+                                    <p><strong>Bridge:</strong> ${bridge?.name || 'Unknown'} ${bridge?.is_online ? '(Online)' : '(Offline)'}</p>
+                                    <p><strong>Lights:</strong> ${lightsInfo?.online || 0} online, ${lightsInfo?.offline || 0} offline</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="m3-quick-actions">
+                            <button class="m3-quick-action" onclick="homeSection.navigateToSection('hue')">
+                                <span class="material-symbols-outlined">lightbulb</span>
+                                Control Lights
+                            </button>
+                        </div>
+                    `;
+        } else {
+          throw new Error('Failed to load Hue status');
         }
+      } catch (error) {
+        console.error('Failed to load Hue status:', error);
+        hueContent.innerHTML = `
+                    <p>Lighting status unavailable</p>
+                    <div class="m3-quick-actions">
+                        <button class="m3-quick-action" onclick="homeSection.navigateToSection('hue')">
+                            <span class="material-symbols-outlined">lightbulb</span>
+                            Control Lights
+                        </button>
+                    </div>
+                `;
+      }
     }
+  }
+
+  /**
+   * Refresh system status
+   */
+  refreshSystemStatus() {
+    this.loadSystemStatus();
+  }
+
+  /**
+   * Navigate to section
+   */
+  navigateToSection(section) {
+    if (window.spaRouter) {
+      window.spaRouter.navigateToSection(section);
+    }
+  }
 }
 
 // Initialize home section when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    window.homeSection = new HomeSection();
+  window.homeSection = new HomeSection();
 });
 
 // Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = HomeSection;
+  module.exports = HomeSection;
 }

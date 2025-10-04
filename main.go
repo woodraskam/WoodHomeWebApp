@@ -137,6 +137,8 @@ var cribbageManager *CribbageGameManager
 var emailService *EmailService
 var sonosService *services.SonosService
 var sonosHandler *handlers.SonosHandler
+var hueService *services.HueService
+var hueHandler *handlers.HueHandler
 
 // Initialize database
 func initDatabase() error {
@@ -497,15 +499,30 @@ func main() {
 	sonosService = services.NewSonosService(sonosConfig)
 	sonosHandler = handlers.NewSonosHandler(sonosService)
 
+	// Initialize Hue service
+	hueConfig := &models.HueServiceConfig{
+		BridgeIP:     getEnv("HUE_BRIDGE_IP", ""),
+		Username:     getEnv("HUE_USERNAME", ""),
+		Timeout:      30 * time.Second,
+		RetryCount:   3,
+		PollInterval: 5 * time.Second,
+		AutoDiscover: true,
+	}
+	hueService = services.NewHueService(hueConfig)
+	hueHandler = handlers.NewHueHandler(hueService)
+
 	// Initialize Calendar service
 	oauthConfig := services.NewGoogleOAuthConfig()
 	calendarService := services.NewCalendarService(oauthConfig)
 	calendarHandler := handlers.NewCalendarHandler(calendarService)
 
-	// Start Sonos service
+	// Start services
 	ctx := context.Background()
 	if err := sonosService.Start(ctx); err != nil {
 		log.Printf("Warning: Failed to start Sonos service: %v", err)
+	}
+	if err := hueService.Start(ctx); err != nil {
+		log.Printf("Warning: Failed to start Hue service: %v", err)
 	}
 
 	// Configuration
@@ -557,6 +574,26 @@ func main() {
 	router := mux.NewRouter()
 	sonosHandler.RegisterRoutes(router)
 	http.Handle("/api/sonos/", router)
+
+	// Hue API routes (using mux for better routing)
+	hueRouter := mux.NewRouter()
+	hueRouter.HandleFunc("/api/hue/lights", hueHandler.GetLights).Methods("GET")
+	hueRouter.HandleFunc("/api/hue/rooms", hueHandler.GetRooms).Methods("GET")
+	hueRouter.HandleFunc("/api/hue/scenes", hueHandler.GetScenes).Methods("GET")
+	hueRouter.HandleFunc("/api/hue/bridge", hueHandler.GetBridgeInfo).Methods("GET")
+	hueRouter.HandleFunc("/api/hue/lights/{id}/state", hueHandler.SetLightState).Methods("PUT")
+	hueRouter.HandleFunc("/api/hue/lights/{id}/toggle", hueHandler.ToggleLight).Methods("POST")
+	hueRouter.HandleFunc("/api/hue/lights/{id}/brightness", hueHandler.SetLightBrightness).Methods("PUT")
+	hueRouter.HandleFunc("/api/hue/lights/{id}/color", hueHandler.SetLightColor).Methods("PUT")
+	hueRouter.HandleFunc("/api/hue/groups/{id}/state", hueHandler.SetGroupState).Methods("PUT")
+	hueRouter.HandleFunc("/api/hue/groups/{id}/toggle", hueHandler.ToggleGroup).Methods("POST")
+	hueRouter.HandleFunc("/api/hue/groups/{id}/brightness", hueHandler.SetGroupBrightness).Methods("PUT")
+	hueRouter.HandleFunc("/api/hue/groups/{id}/color", hueHandler.SetGroupColor).Methods("PUT")
+	hueRouter.HandleFunc("/api/hue/scenes/{id}/activate", hueHandler.ActivateScene).Methods("POST")
+	hueRouter.HandleFunc("/api/hue/status", hueHandler.GetSystemStatus).Methods("GET")
+	// Note: Hue authentication is handled offline for security
+	// Use environment variables HUE_BRIDGE_IP and HUE_USERNAME to configure
+	http.Handle("/api/hue/", hueRouter)
 
 	// Calendar routes
 	http.HandleFunc("/auth/google/login", handlers.GoogleLoginHandler)

@@ -118,8 +118,8 @@ Implementation checklist for SPA Dashboard with Material Design 3 (M3) integrati
 - [x] Add system connectivity status widget
 
 #### 4.2 Existing Feature Integration
-- [ ] Create Hue API integration (no existing Hue functionality found)
-- [ ] Implement Hue lighting controls
+- [x] Create Hue API integration (no existing Hue functionality found)
+- [x] Implement Hue lighting controls
 - [x] Add SPA navigation integration for Hue (placeholder section exists)
 - [x] Embed existing Sonos dashboard
 - [x] Maintain WebSocket connections for Sonos
