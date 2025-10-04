@@ -550,7 +550,6 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 1rem;
 }
 
 .m3-card-header h4 {
@@ -601,6 +600,7 @@
     align-items: center;
     gap: 0.5rem;
     margin-bottom: 0.5rem;
+    place-self: flex-start;
 }
 
 .member-volume-control {
@@ -608,6 +608,7 @@
     align-items: center;
     gap: 0.5rem;
     width: 100%;
+    padding-left: 26px;
 }
 
 .member-volume-control input[type="range"] {
@@ -919,15 +920,11 @@
     border-left: 4px solid var(--m3-primary);
 }
 
-.coordinator {
-    margin-bottom: 1rem;
-}
+
 
 .group-members {
     background: var(--m3-surface-container-low);
     border-radius: var(--m3-shape-corner-medium);
-    padding: 1rem;
-    margin-top: 1rem;
 }
 
 .group-members h5 {

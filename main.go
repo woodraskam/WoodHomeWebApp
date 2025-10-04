@@ -23,6 +23,7 @@ import (
 	"github.com/gorilla/websocket"
 	"github.com/joho/godotenv"
 	_ "github.com/microsoft/go-mssqldb"
+	"github.com/sirupsen/logrus"
 	"gopkg.in/gomail.v2"
 )
 
@@ -472,6 +473,10 @@ func main() {
 	// Create multi-writer to log to both file and console
 	multiWriter := io.MultiWriter(os.Stdout, logFile)
 	log.SetOutput(multiWriter)
+
+	// Configure logrus for debug logging
+	logrus.SetLevel(logrus.DebugLevel)
+	logrus.SetOutput(multiWriter)
 
 	// Initialize database
 	err = initDatabase()

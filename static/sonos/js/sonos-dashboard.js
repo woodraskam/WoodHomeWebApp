@@ -219,6 +219,9 @@ class SonosDashboard {
             trackInfo = '[No music selected]';
         }
 
+        // Get album art HTML
+        const albumArt = this.getAlbumArtHTML(device.current_track);
+
         return `
             <div class="device-card ${statusClass}" data-device-id="${device.uuid}">
                 <div class="device-header">
@@ -230,6 +233,7 @@ class SonosDashboard {
                     <div class="device-model">${device.model || 'Sonos'}</div>
                     <div class="current-track">${trackInfo}</div>
                 </div>
+                ${albumArt}
                 <div class="device-controls">
                     <button class="control-btn play" onclick="sonosDashboard.deviceControl.playDevice('${device.uuid}')" ${!device.is_online ? 'disabled' : ''}>▶️</button>
                     <button class="control-btn pause" onclick="sonosDashboard.deviceControl.pauseDevice('${device.uuid}')" ${!device.is_online ? 'disabled' : ''}>⏸️</button>
@@ -293,6 +297,9 @@ class SonosDashboard {
             trackInfo = '[No music selected]';
         }
 
+        // Get album art HTML
+        const albumArt = this.getAlbumArtHTML(group.current_track);
+
         return `
             <div class="group-card" data-group-id="${group.id}">
                 <div class="group-header">
@@ -302,6 +309,7 @@ class SonosDashboard {
                 <div class="group-info">
                     <div class="current-track">${trackInfo}</div>
                 </div>
+                ${albumArt}
                 <div class="group-members">
                     ${memberTags}
                 </div>
@@ -530,6 +538,32 @@ class SonosDashboard {
                 refreshBtn.disabled = false;
             }
         }
+    }
+
+    getAlbumArtHTML(currentTrack) {
+        if (!currentTrack || !currentTrack.art) {
+            return '';
+        }
+
+        // Handle different album art URI formats
+        let albumArtUrl = currentTrack.art;
+
+        // If it's a relative URL, make it absolute to the Jishi API
+        if (albumArtUrl.startsWith('/')) {
+            // Get the base URL for the Jishi API (typically running on port 5005)
+            const jishiBaseUrl = window.location.protocol + '//' + window.location.hostname + ':5005';
+            albumArtUrl = jishiBaseUrl + albumArtUrl;
+        }
+
+        return `
+            <div class="album-art-container">
+                <img src="${albumArtUrl}" 
+                     alt="Album Art" 
+                     class="album-art"
+                     onerror="this.style.display='none'"
+                     loading="lazy">
+            </div>
+        `;
     }
 
     openDeviceModal(device) {

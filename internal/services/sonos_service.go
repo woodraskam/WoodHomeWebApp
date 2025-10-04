@@ -266,14 +266,38 @@ func (s *SonosService) processZone(zone map[string]interface{}) {
 
 	if hasOtherMembers {
 		// This is a real group with multiple devices
-		group := models.NewSonosGroup(zoneID, coordDevice)
+		var group *models.SonosGroup
 
-		// Set group current track from coordinator
-		if coordDevice.CurrentTrack != nil {
+		// Check if group already exists
+		if existingGroup, exists := s.groups[zoneID]; exists {
+			group = existingGroup
+			// Update coordinator and group state from current coordinator device
+			group.Coordinator = coordDevice
+			group.Volume = coordDevice.Volume
+			group.Mute = coordDevice.Mute
+			group.State = coordDevice.State
 			group.CurrentTrack = coordDevice.CurrentTrack
+
+			// Debug logging for group updates
+			logrus.Debugf("Updated group %s: State=%s, Track=%s",
+				zoneID, group.State,
+				func() string {
+					if group.CurrentTrack != nil {
+						return fmt.Sprintf("%s - %s", group.CurrentTrack.Artist, group.CurrentTrack.Title)
+					}
+					return "No track"
+				}())
+		} else {
+			// Create new group
+			group = models.NewSonosGroup(zoneID, coordDevice)
+			// Set group current track from coordinator
+			if coordDevice.CurrentTrack != nil {
+				group.CurrentTrack = coordDevice.CurrentTrack
+			}
 		}
 
 		// Process members and add to group
+		group.Members = []*models.SonosDevice{coordDevice} // Reset members list
 		for _, memberData := range members {
 			if member, ok := memberData.(map[string]interface{}); ok {
 				memberDevice := s.createDeviceFromZoneData(member, zoneID)
@@ -284,7 +308,7 @@ func (s *SonosService) processZone(zone map[string]interface{}) {
 			}
 		}
 
-		// Only add the group if it has valid members and isn't a zombie
+		// Only add/update the group if it has valid members and isn't a zombie
 		if len(group.Members) > 1 && s.isValidGroup(group) {
 			s.groups[zoneID] = group
 		} else {
@@ -322,14 +346,21 @@ func (s *SonosService) createDeviceFromZoneData(data map[string]interface{}, gro
 
 	// Extract state information
 	if state, ok := data["state"].(map[string]interface{}); ok {
+		// Debug logging for state information
+		logrus.Debugf("Device %s state data: %+v", roomName, state)
 		if volume, ok := state["volume"].(float64); ok {
 			device.Volume = int(volume)
 		}
 		if mute, ok := state["mute"].(bool); ok {
 			device.Mute = mute
 		}
+		// Try different state field names
 		if playbackState, ok := state["playbackState"].(string); ok {
 			device.State = playbackState
+		} else if playerState, ok := state["playerState"].(string); ok {
+			device.State = playerState
+		} else if zoneState, ok := state["zoneState"].(string); ok {
+			device.State = zoneState
 		}
 
 		// Extract current track information
@@ -344,9 +375,21 @@ func (s *SonosService) createDeviceFromZoneData(data map[string]interface{}, gro
 			if album, ok := currentTrack["album"].(string); ok {
 				device.CurrentTrack.Album = album
 			}
+			// Try different album art field names
 			if art, ok := currentTrack["albumArtURI"].(string); ok {
 				device.CurrentTrack.Art = art
+			} else if art, ok := currentTrack["albumArtUri"].(string); ok {
+				device.CurrentTrack.Art = art
+			} else if art, ok := currentTrack["absoluteAlbumArtUri"].(string); ok {
+				device.CurrentTrack.Art = art
 			}
+
+			// Debug logging for track information
+			logrus.Debugf("Device %s current track: Artist=%s, Title=%s, Album=%s, Art=%s",
+				device.Name, device.CurrentTrack.Artist, device.CurrentTrack.Title,
+				device.CurrentTrack.Album, device.CurrentTrack.Art)
+		} else {
+			logrus.Debugf("Device %s has no current track information", device.Name)
 		}
 	}
 

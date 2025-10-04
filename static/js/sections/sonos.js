@@ -495,6 +495,7 @@ class SonosSection {
         this.devices
             .filter(device => !devicesInGroups.has(device.uuid))
             .forEach(device => {
+                console.log('Processing device for unified items:', device.name, 'current_track:', device.current_track);
                 items.push({
                     type: 'device',
                     id: device.uuid,
@@ -535,7 +536,6 @@ class SonosSection {
                         </div>
                     </div>
                     <div class="group-members">
-                        <h5>Group Members:</h5>
                         ${group.members.filter(member => member.uuid !== group.coordinator?.uuid).map(member => `
                             <div class="member-device" data-device-id="${member.uuid}">
                                 <div class="member-info">
@@ -596,6 +596,7 @@ class SonosSection {
                             <span class="material-symbols-outlined interactive">stop</span>
                         </button>
                     </div>
+                    ${this.getCurrentTrackDisplay(device.currentTrack)}
                 </div>
             </div>
         `;
@@ -700,6 +701,8 @@ class SonosSection {
 
     // Get tooltip content for devices
     getDeviceTooltipContent(device) {
+        // Handle both currentTrack and current_track field names
+        const currentTrack = device.currentTrack || device.current_track;
         return `
             <div class="m3-tooltip-content">
                 <h6>Device Details</h6>
@@ -707,7 +710,7 @@ class SonosSection {
                 <p><strong>Room:</strong> ${device.room}</p>
                 <p><strong>Status:</strong> ${device.status}</p>
                 <p><strong>Volume:</strong> ${device.volume}%</p>
-                <p><strong>Track:</strong> ${this.getTrackInfo(device.currentTrack) || 'No music selected'}</p>
+                <p><strong>Track:</strong> ${this.getTrackInfo(currentTrack) || 'No music selected'}</p>
                 <p><strong>Device ID:</strong> ${device.uuid}</p>
                 <p><strong>Online:</strong> ${device.is_online ? 'Yes' : 'No'}</p>
             </div>
@@ -742,7 +745,15 @@ class SonosSection {
                     tooltipContent = this.getGroupTooltipContent(group);
                 }
             } else if (deviceId) {
-                const device = this.devices.find(d => d.uuid === deviceId);
+                // Look in both the original devices array and the unified items
+                let device = this.devices.find(d => d.uuid === deviceId);
+                if (!device) {
+                    // Try to find in unified items (which have id instead of uuid)
+                    const unifiedItem = this.createUnifiedItems().find(item => item.type === 'device' && item.id === deviceId);
+                    if (unifiedItem) {
+                        device = unifiedItem;
+                    }
+                }
                 if (device) {
                     tooltipContent = this.getDeviceTooltipContent(device);
                 }
@@ -844,6 +855,84 @@ class SonosSection {
         }
 
         return null;
+    }
+
+    getCurrentTrackDisplay(currentTrack) {
+        console.log('getCurrentTrackDisplay called with:', currentTrack);
+        if (!currentTrack) return '';
+
+        // Check for TV/SPDIF input (HDMI ARC)
+        if (currentTrack.uri && currentTrack.uri.includes('spdif')) {
+            return `
+                <div class="current-track-display">
+                    <div class="track-info">
+                        <span class="material-symbols-outlined">tv</span>
+                        <span class="track-text">TV Audio (HDMI ARC)</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Check for other line input types
+        if (currentTrack.type === 'line_in' && currentTrack.uri) {
+            let inputType = 'Line Input';
+            if (currentTrack.uri.includes('htastream')) {
+                inputType = 'TV Audio';
+            }
+            return `
+                <div class="current-track-display">
+                    <div class="track-info">
+                        <span class="material-symbols-outlined">input</span>
+                        <span class="track-text">${inputType}</span>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Check if we have meaningful track information
+        const hasTitle = currentTrack.title && currentTrack.title.trim() !== '';
+        const hasArtist = currentTrack.artist && currentTrack.artist.trim() !== '';
+        const hasAlbum = currentTrack.album && currentTrack.album.trim() !== '';
+        const hasArt = currentTrack.art && currentTrack.art.trim() !== '';
+
+        if (!hasTitle && !hasArtist) {
+            return '';
+        }
+
+        let trackDisplay = '';
+        if (hasTitle && hasArtist) {
+            trackDisplay = `${currentTrack.artist} - ${currentTrack.title}`;
+        } else if (hasTitle) {
+            trackDisplay = currentTrack.title;
+        } else if (hasArtist) {
+            trackDisplay = currentTrack.artist;
+        }
+
+        let albumArtHTML = '';
+        if (hasArt) {
+            albumArtHTML = `
+                <div class="album-art-container">
+                    <img src="${currentTrack.art}" 
+                         alt="Album Art" 
+                         class="album-art"
+                         onerror="this.style.display='none'"
+                         loading="lazy">
+                </div>
+            `;
+        }
+
+        return `
+            <div class="current-track-display">
+                ${albumArtHTML}
+                <div class="track-info">
+                    <span class="material-symbols-outlined">music_note</span>
+                    <div class="track-details">
+                        <div class="track-text">${trackDisplay}</div>
+                        ${hasAlbum ? `<div class="album-text">${currentTrack.album}</div>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
     }
 
 

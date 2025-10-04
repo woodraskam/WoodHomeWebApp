@@ -535,6 +535,7 @@ class SonosUnifiedView {
     }
 
     createGroupCardHTML(group) {
+        const albumArt = this.getAlbumArtHTML(group.currentTrack);
         return `
             <div class="coordinator">
                 <div class="device-info">
@@ -552,6 +553,7 @@ class SonosUnifiedView {
                     </div>
                 </div>
             </div>
+            ${albumArt}
             <div class="group-members">
                 ${group.members.filter(member => member.uuid !== group.coordinator?.uuid).map(member => `
                     <div class="member-device" data-device-id="${member.uuid}">
@@ -593,12 +595,40 @@ class SonosUnifiedView {
         return null;
     }
 
+    getAlbumArtHTML(currentTrack) {
+        if (!currentTrack || !currentTrack.art) {
+            return '';
+        }
+
+        // Handle different album art URI formats
+        let albumArtUrl = currentTrack.art;
+
+        // If it's a relative URL, make it absolute to the Jishi API
+        if (albumArtUrl.startsWith('/')) {
+            // Get the base URL for the Jishi API (typically running on port 5005)
+            const jishiBaseUrl = window.location.protocol + '//' + window.location.hostname + ':5005';
+            albumArtUrl = jishiBaseUrl + albumArtUrl;
+        }
+
+        return `
+            <div class="album-art-container">
+                <img src="${albumArtUrl}" 
+                     alt="Album Art" 
+                     class="album-art"
+                     onerror="this.style.display='none'"
+                     loading="lazy">
+            </div>
+        `;
+    }
+
     createDeviceCardHTML(device) {
+        const albumArt = this.getAlbumArtHTML(device.currentTrack);
         return `
             <div class="device-info">
                 <span class="device-name">${device.name}</span>
                 <span class="device-status">${this.getTrackInfo(device.currentTrack, device.status) || '[No music selected]'}</span>
             </div>
+            ${albumArt}
             <div class="device-controls">
         <button class="control-btn play" onclick="sonosUnifiedView.playDevice('${device.id}')">▶️</button>
         <button class="control-btn pause" onclick="sonosUnifiedView.pauseDevice('${device.id}')">⏸️</button>
