@@ -14,7 +14,7 @@ class CalendarSection extends AuthenticatedSection {
     init() {
         this.setupEventListeners();
         this.createCalendarSection();
-        this.checkAuthentication();
+        // Don't check authentication on init - wait for user to navigate to section
     }
 
     setupEventListeners() {
@@ -605,5 +605,8 @@ class CalendarSection extends AuthenticatedSection {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    window.calendarSection = new CalendarSection();
+    // Create instance only if it doesn't exist
+    if (!window.calendarSection) {
+        window.calendarSection = new CalendarSection();
+    }
 });

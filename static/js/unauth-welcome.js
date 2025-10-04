@@ -11,6 +11,7 @@ class UnauthenticatedWelcome {
     init() {
         this.setupEventListeners();
         this.createWelcomeScreen();
+        this.setupButtonHandlers();
 
         // Check initial authentication state
         this.checkInitialAuthState();
@@ -156,7 +157,7 @@ class UnauthenticatedWelcome {
                 </div>
 
                 <div class="welcome-actions">
-                    <button class="m3-button m3-button--primary welcome-signin" onclick="window.location.href='/auth/google/login'">
+                    <button id="welcome-signin-btn" class="m3-button m3-button--primary welcome-signin">
                         <span class="material-symbols-outlined">login</span>
                         Sign in with Google
                     </button>
@@ -171,6 +172,18 @@ class UnauthenticatedWelcome {
     }
 
     show() {
+        if (this.isVisible) {
+            console.log('UnauthenticatedWelcome: Welcome screen already visible');
+            return;
+        }
+
+        // Hide any loading overlays that might be blocking the button
+        const loadingOverlays = document.querySelectorAll('.m3-loading');
+        loadingOverlays.forEach(overlay => {
+            overlay.classList.add('hidden');
+            console.log('UnauthenticatedWelcome: Hidden loading overlay');
+        });
+
         const welcomeSection = document.getElementById('welcome-section');
         if (welcomeSection) {
             welcomeSection.classList.add('welcome-section--visible');
@@ -186,6 +199,62 @@ class UnauthenticatedWelcome {
             this.isVisible = false;
             console.log('UnauthenticatedWelcome: Welcome screen hidden');
         }
+    }
+
+    setupButtonHandlers() {
+        // Wait for DOM to be ready
+        setTimeout(() => {
+            // Hide any loading overlays that might be blocking the button
+            const loadingOverlays = document.querySelectorAll('.m3-loading');
+            loadingOverlays.forEach(overlay => {
+                overlay.classList.add('hidden');
+                overlay.style.display = 'none';
+                overlay.style.display = 'none';
+                console.log('UnauthenticatedWelcome: Force hidden loading overlay');
+            });
+
+            const signinBtn = document.getElementById('welcome-signin-btn');
+            if (signinBtn) {
+                console.log('UnauthenticatedWelcome: Setting up signin button handler');
+
+                // Ensure button is clickable and properly styled
+                signinBtn.style.pointerEvents = 'auto';
+                signinBtn.style.cursor = 'pointer';
+                signinBtn.style.userSelect = 'none';
+                signinBtn.style.display = 'inline-flex';
+                signinBtn.style.alignItems = 'center';
+                signinBtn.style.justifyContent = 'center';
+                signinBtn.style.textDecoration = 'none';
+                signinBtn.style.border = 'none';
+                signinBtn.style.outline = 'none';
+                signinBtn.style.position = 'relative';
+                signinBtn.style.zIndex = '9999';
+
+                // Remove any existing event listeners
+                signinBtn.replaceWith(signinBtn.cloneNode(true));
+                const newSigninBtn = document.getElementById('welcome-signin-btn');
+
+                newSigninBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('UnauthenticatedWelcome: Signin button clicked');
+                    this.authenticate();
+                });
+
+                // Also add mouse events for debugging
+                newSigninBtn.addEventListener('mouseenter', () => {
+                    console.log('UnauthenticatedWelcome: Button hover detected');
+                });
+
+                newSigninBtn.addEventListener('mousedown', () => {
+                    console.log('UnauthenticatedWelcome: Button mousedown detected');
+                });
+
+                console.log('UnauthenticatedWelcome: Button handler setup complete');
+            } else {
+                console.warn('UnauthenticatedWelcome: Signin button not found');
+            }
+        }, 100);
     }
 
     authenticate() {

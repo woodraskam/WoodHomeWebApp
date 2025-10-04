@@ -1276,8 +1276,10 @@ class SonosSection extends AuthenticatedSection {
 
 // Initialize Sonos section with authentication awareness
 document.addEventListener('DOMContentLoaded', () => {
-    // Create instance - it will register with AuthenticationManager
-    window.sonosSection = new SonosSection();
+    // Create instance only if it doesn't exist
+    if (!window.sonosSection) {
+        window.sonosSection = new SonosSection();
+    }
 });
 
 // Fallback initialization for when the page is already loaded

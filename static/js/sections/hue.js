@@ -950,9 +950,11 @@ class HueSection extends AuthenticatedSection {
 // Initialize Hue section with authentication awareness
 document.addEventListener('DOMContentLoaded', () => {
     console.log('HueSection: DOMContentLoaded event fired');
-    // Create instance - it will register with AuthenticationManager
-    window.hueSection = new HueSection();
-    console.log('HueSection: Global hueSection created:', window.hueSection);
+    // Create instance only if it doesn't exist
+    if (!window.hueSection) {
+        window.hueSection = new HueSection();
+        console.log('HueSection: Global hueSection created:', window.hueSection);
+    }
 });
 
 // Fallback initialization for when the page is already loaded
