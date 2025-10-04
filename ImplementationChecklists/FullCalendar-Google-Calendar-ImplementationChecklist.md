@@ -26,57 +26,57 @@ Implementation checklist for FullCalendar Google Calendar integration, following
 - [ ] Download credentials JSON or copy Client ID and Secret
 
 #### 1.2 Environment Configuration
-- [ ] Create/update `.env` file with Google OAuth credentials
-- [ ] Add `GOOGLE_CLIENT_ID` to environment
-- [ ] Add `GOOGLE_CLIENT_SECRET` to environment
-- [ ] Add `GOOGLE_REDIRECT_URL` to environment
-- [ ] Generate and add secure `SESSION_KEY` (32+ bytes)
-- [ ] Test environment variable loading
+- [x] Create/update `.env` file with Google OAuth credentials
+- [x] Add `GOOGLE_CLIENT_ID` to environment
+- [x] Add `GOOGLE_CLIENT_SECRET` to environment
+- [x] Add `GOOGLE_REDIRECT_URL` to environment
+- [x] Generate and add secure `SESSION_KEY` (32+ bytes)
+- [x] Test environment variable loading
 
 #### 1.3 Go Dependencies Installation
-- [ ] Install OAuth2 packages: `golang.org/x/oauth2`
-- [ ] Install Google OAuth: `golang.org/x/oauth2/google`
-- [ ] Install Calendar API: `google.golang.org/api/calendar/v3`
-- [ ] Install API options: `google.golang.org/api/option`
-- [ ] Install session management: `github.com/gorilla/sessions`
-- [ ] Note: `github.com/google/uuid` already installed
-- [ ] Note: `github.com/gorilla/mux` already installed
-- [ ] Update `go.mod` and `go.sum` files
-- [ ] Verify all dependencies resolve correctly
+- [x] Install OAuth2 packages: `golang.org/x/oauth2`
+- [x] Install Google OAuth: `golang.org/x/oauth2/google`
+- [x] Install Calendar API: `google.golang.org/api/calendar/v3`
+- [x] Install API options: `google.golang.org/api/option`
+- [x] Install session management: `github.com/gorilla/sessions`
+- [x] Note: `github.com/google/uuid` already installed
+- [x] Note: `github.com/gorilla/mux` already installed
+- [x] Update `go.mod` and `go.sum` files
+- [x] Verify all dependencies resolve correctly
 
 ### Phase 2: OAuth Authentication Implementation
 **Duration**: 2-3 days
 **Status**: ⏳ Pending
 
 #### 2.1 OAuth Configuration Service
-- [ ] Create `internal/services/oauth.go` file
-- [ ] Implement `NewGoogleOAuthConfig()` function
-- [ ] Implement `GenerateStateToken()` function with crypto/rand
-- [ ] Load configuration from environment variables
-- [ ] Use `oauth2.AccessTypeOffline` for refresh tokens
-- [ ] Add proper error handling
-- [ ] Test OAuth configuration creation
+- [x] Create `internal/services/oauth.go` file
+- [x] Implement `NewGoogleOAuthConfig()` function
+- [x] Implement `GenerateStateToken()` function with crypto/rand
+- [x] Load configuration from environment variables
+- [x] Use `oauth2.AccessTypeOffline` for refresh tokens
+- [x] Add proper error handling
+- [x] Test OAuth configuration creation
 
 #### 2.2 OAuth Token Model
-- [ ] Create `internal/models/oauth_token.go` file
-- [ ] Define `OAuthToken` struct with proper JSON tags
-- [ ] Implement `ToOAuth2Token()` conversion method
-- [ ] Implement `FromOAuth2Token()` creation method
+- [x] Create `internal/models/oauth_token.go` file
+- [x] Define `OAuthToken` struct with proper JSON tags
+- [x] Implement `ToOAuth2Token()` conversion method
+- [x] Implement `FromOAuth2Token()` creation method
 - [ ] Add database schema for token storage (if using DB approach)
 - [ ] Implement `SaveToken()` and `GetToken()` functions
 - [ ] Add token encryption for database storage
-- [ ] Never expose tokens in JSON responses
+- [x] Never expose tokens in JSON responses
 
 #### 2.3 OAuth Handlers Implementation
-- [ ] Create `internal/handlers/auth.go` file
-- [ ] Initialize session store with secure random key
-- [ ] Implement `GoogleLoginHandler` with state generation
-- [ ] Implement `GoogleCallbackHandler` with state validation
-- [ ] Add CSRF protection with state tokens
-- [ ] Store tokens securely (session or database)
-- [ ] Add comprehensive error handling
-- [ ] Clear sensitive data from sessions after use
-- [ ] Implement `LogoutHandler` for cleanup
+- [x] Create `internal/handlers/auth.go` file
+- [x] Initialize session store with secure random key
+- [x] Implement `GoogleLoginHandler` with state generation
+- [x] Implement `GoogleCallbackHandler` with state validation
+- [x] Add CSRF protection with state tokens
+- [x] Store tokens securely (session or database)
+- [x] Add comprehensive error handling
+- [x] Clear sensitive data from sessions after use
+- [x] Implement `LogoutHandler` for cleanup
 - [ ] Test OAuth flow manually
 
 #### 2.4 Route Registration
