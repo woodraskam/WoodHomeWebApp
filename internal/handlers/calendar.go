@@ -3,13 +3,13 @@ package handlers
 import (
 	"encoding/json"
 	"html/template"
+	"log"
 	"net/http"
 	"time"
 
 	"woodhome-webapp/internal/services"
 
 	"github.com/gorilla/mux"
-	"golang.org/x/oauth2"
 )
 
 // CalendarHandler handles HTTP requests for calendar operations
@@ -47,14 +47,29 @@ func (h *CalendarHandler) CalendarPageHandler(w http.ResponseWriter, r *http.Req
 // GetEventsHandler fetches events from Google Calendar
 func (h *CalendarHandler) GetEventsHandler(w http.ResponseWriter, r *http.Request) {
 	// 1. Check authentication
-	session, _ := sessionStore.Get(r, "auth-session")
-	token, ok := session.Values["oauth_token"].(*oauth2.Token)
-	if !ok {
+	session, _ := GetSessionStore().Get(r, "auth-session")
+	authenticated, ok := session.Values["oauth_authenticated"].(bool)
+	if !ok || !authenticated {
 		http.Error(w, "Unauthorized", http.StatusUnauthorized)
 		return
 	}
 
-	// 2. Parse date range from query parameters
+	// Get user ID from session
+	userID, ok := session.Values["user_id"].(int)
+	if !ok {
+		http.Error(w, "Invalid user session", http.StatusUnauthorized)
+		return
+	}
+
+	// Get token from SQLite
+	token, err := getOAuthTokenFromSQLite(userID)
+	if err != nil {
+		log.Printf("Failed to get token from SQLite: %v", err)
+		http.Error(w, "Token not found", http.StatusUnauthorized)
+		return
+	}
+
+	// Parse date range from query parameters
 	startStr := r.URL.Query().Get("start")
 	endStr := r.URL.Query().Get("end")
 
@@ -70,20 +85,22 @@ func (h *CalendarHandler) GetEventsHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// 3. Fetch events from Google Calendar
+	// Fetch events from Google Calendar
 	events, err := h.calendarService.GetCalendarEvents(r.Context(), token, start, end)
 	if err != nil {
-		// Check if token is invalid/revoked
-		if err.Error() == "oauth2: token expired and refresh token is not set" {
-			// User needs to re-authenticate
-			http.Error(w, "Token expired, please login again", http.StatusUnauthorized)
-			return
-		}
+		log.Printf("Failed to fetch calendar events: %v", err)
 		http.Error(w, "Failed to fetch events", http.StatusInternalServerError)
 		return
 	}
 
-	// 4. Return JSON response
+	// Save refreshed token back to SQLite if it was updated
+	err = saveOAuthTokenToSQLite(userID, token)
+	if err != nil {
+		log.Printf("Failed to save refreshed token: %v", err)
+		// Don't fail the request, just log the error
+	}
+
+	// Return JSON response
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(events)
 }
@@ -91,16 +108,16 @@ func (h *CalendarHandler) GetEventsHandler(w http.ResponseWriter, r *http.Reques
 // AuthRequired middleware protects calendar routes
 func AuthRequired(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		session, _ := sessionStore.Get(r, "auth-session")
-		token, ok := session.Values["oauth_token"].(*oauth2.Token)
+		session, _ := GetSessionStore().Get(r, "auth-session")
+		authenticated, ok := session.Values["oauth_authenticated"].(bool)
 
-		if !ok || token == nil {
+		if !ok || !authenticated {
 			// Not authenticated, redirect to login
 			http.Redirect(w, r, "/auth/google/login", http.StatusSeeOther)
 			return
 		}
 
-		// Token exists, proceed
+		// User is authenticated, proceed
 		next(w, r)
 	}
 }

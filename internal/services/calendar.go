@@ -42,7 +42,7 @@ func (s *CalendarService) GetCalendarEvents(ctx context.Context, token *oauth2.T
 			return nil, err
 		}
 		*token = *newToken // Update token in-place
-		// TODO: Save updated token to session/database
+		// Note: Token refresh is handled by the handler layer
 	}
 
 	// Create authenticated HTTP client
@@ -99,9 +99,9 @@ func getEventColor(item *calendar.Event) string {
 	// Google Calendar color IDs map to specific colors
 	// You can map these to hex colors for FullCalendar
 	colorMap := map[string]string{
-		"1":  "#a4bdfc", "2": "#7ae7bf", "3": "#dbadff",
-		"4":  "#ff887c", "5": "#fbd75b", "6": "#ffb878",
-		"7":  "#46d6db", "8": "#e1e1e1", "9": "#5484ed",
+		"1": "#a4bdfc", "2": "#7ae7bf", "3": "#dbadff",
+		"4": "#ff887c", "5": "#fbd75b", "6": "#ffb878",
+		"7": "#46d6db", "8": "#e1e1e1", "9": "#5484ed",
 		"10": "#51b749", "11": "#dc2127",
 	}
 	if item.ColorId != "" {
