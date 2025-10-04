@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"sync"
 	"time"
 
@@ -16,14 +17,14 @@ import (
 
 // SonosService handles Sonos device operations
 type SonosService struct {
-	config        *models.SonosServiceConfig
-	devices       map[string]*models.SonosDevice
-	groups        map[string]*models.SonosGroup
-	httpClient    *http.Client
-	mu            sync.RWMutex
-	lastUpdate    time.Time
-	jishiURL      string
-	jishiManager  *JishiServerManager
+	config       *models.SonosServiceConfig
+	devices      map[string]*models.SonosDevice
+	groups       map[string]*models.SonosGroup
+	httpClient   *http.Client
+	mu           sync.RWMutex
+	lastUpdate   time.Time
+	jishiURL     string
+	jishiManager *JishiServerManager
 }
 
 // NewSonosService creates a new SonosService instance
@@ -55,7 +56,7 @@ func NewSonosService(config *models.SonosServiceConfig) *SonosService {
 // Start initializes the Sonos service
 func (s *SonosService) Start(ctx context.Context) error {
 	logrus.Info("Starting Sonos service...")
-	
+
 	// Start Jishi server if not running
 	if !s.jishiManager.IsJishiRunning() {
 		logrus.Info("Starting internal Jishi server...")
@@ -70,7 +71,7 @@ func (s *SonosService) Start(ctx context.Context) error {
 	} else {
 		logrus.Info("Jishi server is already running")
 	}
-	
+
 	// Test Jishi API connection
 	if err := s.testJishiConnection(ctx); err != nil {
 		logrus.Warnf("Jishi API connection test failed: %v", err)
@@ -78,9 +79,9 @@ func (s *SonosService) Start(ctx context.Context) error {
 	} else {
 		logrus.Info("Jishi API connection successful")
 	}
-	
+
 	// Start device discovery
-	if err := s.discoverDevices(ctx); err != nil {
+	if err := s.DiscoverDevices(ctx); err != nil {
 		return fmt.Errorf("failed to discover devices: %w", err)
 	}
 
@@ -153,7 +154,7 @@ func (s *SonosService) GetGroup(id string) (*models.SonosGroup, bool) {
 }
 
 // discoverDevices discovers Sonos devices using Jishi API
-func (s *SonosService) discoverDevices(ctx context.Context) error {
+func (s *SonosService) DiscoverDevices(ctx context.Context) error {
 	logrus.Info("Discovering Sonos devices...")
 
 	// Test Jishi connection
@@ -170,10 +171,18 @@ func (s *SonosService) discoverDevices(ctx context.Context) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 
+	// Clear existing groups and devices to prevent stale data
+	// This ensures we only show current groups, not old destroyed ones
+	s.groups = make(map[string]*models.SonosGroup)
+	s.devices = make(map[string]*models.SonosDevice)
+
 	// Process discovered zones
 	for _, zone := range zones {
 		s.processZone(zone)
 	}
+
+	// Clean up zombie groups - groups that appear to be dissolved but still in the API
+	s.cleanupZombieGroups()
 
 	logrus.Infof("Discovered %d devices in %d groups", len(s.devices), len(s.groups))
 	return nil
@@ -243,18 +252,55 @@ func (s *SonosService) processZone(zone map[string]interface{}) {
 		s.devices[coordDevice.UUID] = coordDevice
 	}
 
-	// Create group if there are members
-	if len(members) > 0 {
-		group := models.NewSonosGroup(zoneID, coordDevice)
-		s.groups[zoneID] = group
+	// Check if this is a real group (multiple different devices) or just a single device
+	// A real group should have members with different UUIDs than the coordinator
+	hasOtherMembers := false
+	for _, memberData := range members {
+		if member, ok := memberData.(map[string]interface{}); ok {
+			if memberUUID, ok := member["uuid"].(string); ok && memberUUID != coordDevice.UUID {
+				hasOtherMembers = true
+				break
+			}
+		}
+	}
 
-		// Process members
+	if hasOtherMembers {
+		// This is a real group with multiple devices
+		group := models.NewSonosGroup(zoneID, coordDevice)
+
+		// Set group current track from coordinator
+		if coordDevice.CurrentTrack != nil {
+			group.CurrentTrack = coordDevice.CurrentTrack
+		}
+
+		// Process members and add to group
 		for _, memberData := range members {
 			if member, ok := memberData.(map[string]interface{}); ok {
 				memberDevice := s.createDeviceFromZoneData(member, zoneID)
 				if memberDevice != nil {
 					s.devices[memberDevice.UUID] = memberDevice
 					group.AddMember(memberDevice)
+				}
+			}
+		}
+
+		// Only add the group if it has valid members and isn't a zombie
+		if len(group.Members) > 1 && s.isValidGroup(group) {
+			s.groups[zoneID] = group
+		} else {
+			logrus.Debugf("Skipping zombie group %s with %d members", zoneID, len(group.Members))
+		}
+	} else {
+		// Single device - create without group_id
+		coordDevice.GroupID = ""
+		coordDevice.Coordinator = ""
+
+		// Process members as individual devices
+		for _, memberData := range members {
+			if member, ok := memberData.(map[string]interface{}); ok {
+				memberDevice := s.createDeviceFromZoneData(member, "")
+				if memberDevice != nil {
+					s.devices[memberDevice.UUID] = memberDevice
 				}
 			}
 		}
@@ -265,7 +311,7 @@ func (s *SonosService) processZone(zone map[string]interface{}) {
 func (s *SonosService) createDeviceFromZoneData(data map[string]interface{}, groupID string) *models.SonosDevice {
 	uuid, _ := data["uuid"].(string)
 	roomName, _ := data["roomName"].(string)
-	
+
 	if uuid == "" || roomName == "" {
 		return nil
 	}
@@ -285,10 +331,102 @@ func (s *SonosService) createDeviceFromZoneData(data map[string]interface{}, gro
 		if playbackState, ok := state["playbackState"].(string); ok {
 			device.State = playbackState
 		}
+
+		// Extract current track information
+		if currentTrack, ok := state["currentTrack"].(map[string]interface{}); ok {
+			device.CurrentTrack = &models.TrackInfo{}
+			if artist, ok := currentTrack["artist"].(string); ok {
+				device.CurrentTrack.Artist = artist
+			}
+			if title, ok := currentTrack["title"].(string); ok {
+				device.CurrentTrack.Title = title
+			}
+			if album, ok := currentTrack["album"].(string); ok {
+				device.CurrentTrack.Album = album
+			}
+			if art, ok := currentTrack["albumArtURI"].(string); ok {
+				device.CurrentTrack.Art = art
+			}
+		}
 	}
 
 	device.SetOnline(true)
 	return device
+}
+
+// cleanupZombieGroups removes groups that appear to be dissolved or invalid
+func (s *SonosService) cleanupZombieGroups() {
+	groupsToRemove := make([]string, 0)
+
+	for groupID, group := range s.groups {
+		// Check if group is valid
+		if !s.isValidGroup(group) {
+			logrus.Debugf("Removing zombie group %s", groupID)
+			groupsToRemove = append(groupsToRemove, groupID)
+		}
+	}
+
+	// Remove zombie groups
+	for _, groupID := range groupsToRemove {
+		delete(s.groups, groupID)
+	}
+
+	if len(groupsToRemove) > 0 {
+		logrus.Infof("Cleaned up %d zombie groups", len(groupsToRemove))
+	}
+}
+
+// isValidGroup checks if a group is valid and not a zombie
+func (s *SonosService) isValidGroup(group *models.SonosGroup) bool {
+	// A valid group should have:
+	// 1. At least 2 members (coordinator + at least one other)
+	// 2. All members should be online
+	// 3. Coordinator should be valid
+	// 4. Members should have different UUIDs than coordinator
+
+	if group == nil || len(group.Members) < 2 {
+		return false
+	}
+
+	// Check if coordinator is valid
+	if group.Coordinator == nil || group.Coordinator.UUID == "" {
+		return false
+	}
+
+	// Check if all members are online and have valid UUIDs
+	coordinatorUUID := group.Coordinator.UUID
+	hasOtherMembers := false
+
+	for _, member := range group.Members {
+		if member == nil || member.UUID == "" {
+			return false
+		}
+
+		// Check if member is online
+		if !member.IsOnline {
+			logrus.Debugf("Group %s has offline member %s", group.ID, member.Name)
+			return false
+		}
+
+		// Check if this is a different device than coordinator
+		if member.UUID != coordinatorUUID {
+			hasOtherMembers = true
+		}
+	}
+
+	// Must have at least one member that's different from coordinator
+	if !hasOtherMembers {
+		logrus.Debugf("Group %s has no other members besides coordinator", group.ID)
+		return false
+	}
+
+	return true
+}
+
+// RefreshDevices forces a refresh of all devices and groups
+func (s *SonosService) RefreshDevices() error {
+	ctx := context.Background()
+	return s.DiscoverDevices(ctx)
 }
 
 // monitorDevices monitors device status in the background
@@ -383,6 +521,27 @@ func (s *SonosService) CreateGroup(ctx context.Context, coordinatorName string, 
 
 	logrus.Debugf("Creating group with coordinator %s and members: %v", coordinatorName, memberNames)
 
+	// Check if coordinator is currently playing TV audio (SPDIF/HDMI ARC)
+	coordinatorState, err := s.getDeviceState(ctx, coordinatorName)
+	if err != nil {
+		logrus.Debugf("Could not get coordinator state: %v", err)
+	}
+
+	var wasPlayingTVAudio bool
+	var currentVolume int
+	if coordinatorState != nil {
+		// Check if playing TV audio via SPDIF
+		if currentTrack, ok := coordinatorState["currentTrack"].(map[string]interface{}); ok {
+			if uri, ok := currentTrack["uri"].(string); ok && uri != "" {
+				wasPlayingTVAudio = strings.Contains(uri, "spdif") || strings.Contains(uri, "htastream")
+			}
+		}
+		// Get current volume
+		if volume, ok := coordinatorState["volume"].(float64); ok {
+			currentVolume = int(volume)
+		}
+	}
+
 	// First, ensure the coordinator is not in any group
 	if err := s.LeaveGroup(ctx, coordinatorName); err != nil {
 		logrus.Debugf("Coordinator %s was not in a group or error occurred: %v", coordinatorName, err)
@@ -401,6 +560,24 @@ func (s *SonosService) CreateGroup(ctx context.Context, coordinatorName string, 
 				time.Sleep(2 * time.Second)
 			}
 		}
+	}
+
+	// If coordinator was playing TV audio, try to restore it
+	if wasPlayingTVAudio {
+		logrus.Debugf("Coordinator was playing TV audio, attempting to restore...")
+		// Wait a moment for the group to stabilize
+		time.Sleep(3 * time.Second)
+
+		// Try to restore TV audio by setting the same volume (this can help trigger the input)
+		if currentVolume > 0 {
+			if err := s.SetGroupVolume(ctx, coordinatorName, currentVolume); err != nil {
+				logrus.Debugf("Could not restore volume after group creation: %v", err)
+			}
+		}
+
+		// Note: The TV audio should automatically resume if the TV is still outputting
+		// The SPDIF connection should be maintained through the group change
+		logrus.Debugf("TV audio restoration attempted for coordinator %s", coordinatorName)
 	}
 
 	logrus.Debugf("Group created successfully with coordinator %s", coordinatorName)
@@ -453,6 +630,33 @@ func (s *SonosService) SetGroupMute(ctx context.Context, coordinatorName string,
 	return s.executeJishiCommand(ctx, url, action, coordinatorName)
 }
 
+// getDeviceState gets the current state of a device via Jishi API
+func (s *SonosService) getDeviceState(ctx context.Context, deviceName string) (map[string]interface{}, error) {
+	url := fmt.Sprintf("%s/%s/state", s.jishiURL, deviceName)
+
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create request: %w", err)
+	}
+
+	resp, err := s.httpClient.Do(req)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get device state: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("Jishi API returned status %d for device state", resp.StatusCode)
+	}
+
+	var state map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&state); err != nil {
+		return nil, fmt.Errorf("failed to decode device state: %w", err)
+	}
+
+	return state, nil
+}
+
 // executeJishiCommand executes a command via Jishi API
 func (s *SonosService) executeJishiCommand(ctx context.Context, url, action, deviceName string) error {
 	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
@@ -498,11 +702,11 @@ func (s *SonosService) StartJishiServer() error {
 	if s.jishiManager == nil {
 		return fmt.Errorf("Jishi manager not initialized")
 	}
-	
+
 	if err := s.jishiManager.StartJishi(); err != nil {
 		return err
 	}
-	
+
 	// Update Jishi URL to use internal server
 	s.jishiURL = s.jishiManager.GetJishiURL()
 	logrus.Infof("Jishi server started at %s", s.jishiURL)
@@ -514,7 +718,7 @@ func (s *SonosService) StopJishiServer() error {
 	if s.jishiManager == nil {
 		return fmt.Errorf("Jishi manager not initialized")
 	}
-	
+
 	return s.jishiManager.StopJishi()
 }
 
@@ -523,11 +727,11 @@ func (s *SonosService) RestartJishiServer() error {
 	if s.jishiManager == nil {
 		return fmt.Errorf("Jishi manager not initialized")
 	}
-	
+
 	if err := s.jishiManager.RestartJishi(); err != nil {
 		return err
 	}
-	
+
 	// Update Jishi URL to use internal server
 	s.jishiURL = s.jishiManager.GetJishiURL()
 	logrus.Infof("Jishi server restarted at %s", s.jishiURL)

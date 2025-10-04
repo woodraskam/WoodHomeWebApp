@@ -53,6 +53,9 @@ func (h *SonosHandler) RegisterRoutes(router *mux.Router) {
 	sonosRouter.HandleFunc("/groups/{id}/volume/{volume}", h.SetGroupVolume).Methods("POST")
 	sonosRouter.HandleFunc("/groups/{id}/mute", h.SetGroupMute).Methods("POST")
 
+	// Cleanup routes
+	sonosRouter.HandleFunc("/cleanup", h.CleanupZombieGroups).Methods("POST")
+
 	// Group management routes
 	sonosRouter.HandleFunc("/groups", h.CreateGroup).Methods("POST")
 	sonosRouter.HandleFunc("/groups/{id}/join/{deviceUuid}", h.JoinGroup).Methods("POST")
@@ -659,5 +662,32 @@ func (h *SonosHandler) RestartJishiServer(w http.ResponseWriter, r *http.Request
 		"status":  "success",
 		"action":  "restart_jishi",
 		"message": "Jishi server restarted successfully",
+	})
+}
+
+// CleanupZombieGroups manually cleans up zombie groups
+func (h *SonosHandler) CleanupZombieGroups(w http.ResponseWriter, r *http.Request) {
+	logrus.Info("Manual zombie group cleanup requested")
+
+	// Force a device discovery to refresh the data
+	ctx := r.Context()
+	if err := h.sonosService.DiscoverDevices(ctx); err != nil {
+		logrus.Errorf("Failed to refresh devices during cleanup: %v", err)
+		http.Error(w, "Failed to refresh devices: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Get current group count
+	groups := h.sonosService.GetGroups()
+	groupCount := len(groups)
+
+	logrus.Infof("Zombie group cleanup completed. Found %d active groups", groupCount)
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"status":      "success",
+		"action":      "cleanup_zombie_groups",
+		"message":     "Zombie group cleanup completed",
+		"group_count": groupCount,
 	})
 }

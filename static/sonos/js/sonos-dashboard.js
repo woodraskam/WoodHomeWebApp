@@ -7,7 +7,7 @@ class SonosDashboard {
         this.isConnected = false;
         this.deviceControl = null;
         this.groupManagement = null;
-        
+
         this.init();
     }
 
@@ -16,12 +16,12 @@ class SonosDashboard {
         this.connectWebSocket();
         this.loadDevices();
         this.loadGroups();
-        
+
         // Initialize sub-modules
         this.deviceControl = new SonosDeviceControl(this);
         this.groupManagement = new SonosGroupManagement(this);
         this.unifiedView = new SonosUnifiedView();
-        
+
         this.deviceControl.init();
         this.groupManagement.init();
     }
@@ -32,14 +32,14 @@ class SonosDashboard {
         document.getElementById('pause-all')?.addEventListener('click', () => this.pauseAllDevices());
         document.getElementById('stop-all')?.addEventListener('click', () => this.stopAllDevices());
         document.getElementById('refresh-devices')?.addEventListener('click', () => this.refreshDevices());
-        
+
         // Group management button
         const createGroupBtn = document.createElement('button');
         createGroupBtn.id = 'create-group';
         createGroupBtn.className = 'action-btn create-btn';
         createGroupBtn.textContent = 'Create Group';
         createGroupBtn.addEventListener('click', () => this.groupManagement.openGroupModal());
-        
+
         // Add to quick actions if it doesn't exist
         const quickActions = document.querySelector('.quick-actions');
         if (quickActions && !document.getElementById('create-group')) {
@@ -67,29 +67,29 @@ class SonosDashboard {
     connectWebSocket() {
         const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
         const wsUrl = `${protocol}//${window.location.host}/ws/sonos`;
-        
+
         this.websocket = new WebSocket(wsUrl);
-        
+
         this.websocket.onopen = () => {
             console.log('WebSocket connected');
             this.isConnected = true;
             this.updateConnectionStatus(true);
         };
-        
+
         this.websocket.onmessage = (event) => {
             const data = JSON.parse(event.data);
             this.handleWebSocketMessage(data);
         };
-        
+
         this.websocket.onclose = () => {
             console.log('WebSocket disconnected');
             this.isConnected = false;
             this.updateConnectionStatus(false);
-            
+
             // Attempt to reconnect after 5 seconds
             setTimeout(() => this.connectWebSocket(), 5000);
         };
-        
+
         this.websocket.onerror = (error) => {
             console.error('WebSocket error:', error);
             this.isConnected = false;
@@ -118,34 +118,44 @@ class SonosDashboard {
 
     async loadDevices() {
         try {
+            console.log('[LOAD DEVICES DEBUG] Fetching devices from API...');
             const response = await fetch('/api/sonos/devices');
+            console.log('[LOAD DEVICES DEBUG] Response status:', response.status);
+
             const data = await response.json();
-            
+            console.log('[LOAD DEVICES DEBUG] Response data:', data);
+
             if (response.ok) {
-                this.devices = data.devices;
+                this.devices = data.devices || [];
+                console.log('[LOAD DEVICES DEBUG] Devices loaded:', this.devices.length);
                 this.renderDevices();
                 this.updateDeviceCount();
             } else {
-                console.error('Failed to load devices:', data);
+                console.error('[LOAD DEVICES DEBUG] Failed to load devices:', data);
             }
         } catch (error) {
-            console.error('Error loading devices:', error);
+            console.error('[LOAD DEVICES DEBUG] Error loading devices:', error);
         }
     }
 
     async loadGroups() {
         try {
+            console.log('[LOAD GROUPS DEBUG] Fetching groups from API...');
             const response = await fetch('/api/sonos/groups');
+            console.log('[LOAD GROUPS DEBUG] Response status:', response.status);
+
             const data = await response.json();
-            
+            console.log('[LOAD GROUPS DEBUG] Response data:', data);
+
             if (response.ok) {
-                this.groups = data.groups;
+                this.groups = data.groups || [];
+                console.log('[LOAD GROUPS DEBUG] Groups loaded:', this.groups.length);
                 this.renderGroups();
             } else {
-                console.error('Failed to load groups:', data);
+                console.error('[LOAD GROUPS DEBUG] Failed to load groups:', data);
             }
         } catch (error) {
-            console.error('Error loading groups:', error);
+            console.error('[LOAD GROUPS DEBUG] Error loading groups:', error);
         }
     }
 
@@ -164,7 +174,7 @@ class SonosDashboard {
         }
 
         deviceGrid.innerHTML = this.devices.map(device => this.createDeviceCard(device)).join('');
-        
+
         // Add event listeners to device cards
         deviceGrid.querySelectorAll('.device-card').forEach(card => {
             card.addEventListener('click', (e) => {
@@ -183,7 +193,32 @@ class SonosDashboard {
         const statusClass = device.is_online ? 'online' : 'offline';
         const statusText = device.is_online ? 'Online' : 'Offline';
         const playbackStatus = device.state || 'STOPPED';
-        
+
+        // Get current track information
+        let trackInfo = '';
+        if (device.current_track) {
+            const track = device.current_track;
+
+            // Check for TV/SPDIF input (HDMI ARC)
+            if (track.uri && track.uri.includes('spdif')) {
+                trackInfo = 'TV Audio (HDMI ARC)';
+            } else if (track.type === 'line_in' && track.uri && track.uri.includes('htastream')) {
+                trackInfo = 'TV Audio';
+            } else if (track.title && track.artist) {
+                trackInfo = `${track.artist} - ${track.title}`;
+            } else if (track.title) {
+                trackInfo = track.title;
+            } else if (track.artist) {
+                trackInfo = track.artist;
+            }
+        }
+
+        if (!trackInfo && playbackStatus === 'PLAYING') {
+            trackInfo = 'Playing (no track info)';
+        } else if (!trackInfo) {
+            trackInfo = '[No music selected]';
+        }
+
         return `
             <div class="device-card ${statusClass}" data-device-id="${device.uuid}">
                 <div class="device-header">
@@ -193,6 +228,7 @@ class SonosDashboard {
                 <div class="device-info">
                     <div class="device-room">${device.room}</div>
                     <div class="device-model">${device.model || 'Sonos'}</div>
+                    <div class="current-track">${trackInfo}</div>
                 </div>
                 <div class="device-controls">
                     <button class="control-btn play" onclick="sonosDashboard.deviceControl.playDevice('${device.uuid}')" ${!device.is_online ? 'disabled' : ''}>▶️</button>
@@ -232,11 +268,39 @@ class SonosDashboard {
             return `<span class="${tagClass}">${member.name}</span>`;
         }).join('');
 
+        // Get current track information for the group
+        let trackInfo = '';
+        if (group.current_track) {
+            const track = group.current_track;
+
+            // Check for TV/SPDIF input (HDMI ARC)
+            if (track.uri && track.uri.includes('spdif')) {
+                trackInfo = 'TV Audio (HDMI ARC)';
+            } else if (track.type === 'line_in' && track.uri && track.uri.includes('htastream')) {
+                trackInfo = 'TV Audio';
+            } else if (track.title && track.artist) {
+                trackInfo = `${track.artist} - ${track.title}`;
+            } else if (track.title) {
+                trackInfo = track.title;
+            } else if (track.artist) {
+                trackInfo = track.artist;
+            }
+        }
+
+        if (!trackInfo && (group.state === 'PLAYING' || group.state === 'PAUSED_PLAYBACK')) {
+            trackInfo = 'Playing (no track info)';
+        } else if (!trackInfo) {
+            trackInfo = '[No music selected]';
+        }
+
         return `
             <div class="group-card" data-group-id="${group.id}">
                 <div class="group-header">
                     <h3 class="group-name">Group ${group.id}</h3>
                     <span class="group-status">${group.state || 'STOPPED'}</span>
+                </div>
+                <div class="group-info">
+                    <div class="current-track">${trackInfo}</div>
                 </div>
                 <div class="group-members">
                     ${memberTags}
@@ -275,12 +339,12 @@ class SonosDashboard {
             if (index !== -1) {
                 this.devices[index] = device;
             }
-            
+
             // Re-render the specific device card
             deviceCard.outerHTML = this.createDeviceCard(device);
-            
+
             // Update device control modal if it's open for this device
-            if (this.deviceControl && this.deviceControl.currentDevice && 
+            if (this.deviceControl && this.deviceControl.currentDevice &&
                 this.deviceControl.currentDevice.uuid === device.uuid) {
                 this.deviceControl.updateDevice(device);
             }
@@ -295,7 +359,7 @@ class SonosDashboard {
             if (index !== -1) {
                 this.groups[index] = group;
             }
-            
+
             // Re-render the specific group card
             groupCard.outerHTML = this.createGroupCard(group);
         }
@@ -422,8 +486,50 @@ class SonosDashboard {
     }
 
     async refreshDevices() {
-        await this.loadDevices();
-        await this.loadGroups();
+        console.log('[REFRESH DEBUG] Starting refresh process...');
+
+        // Show loading state on refresh button
+        const refreshBtn = document.getElementById('refresh-devices');
+        let originalText = 'Refresh'; // Default fallback text
+
+        if (refreshBtn) {
+            console.log('[REFRESH DEBUG] Found refresh button, setting loading state');
+            originalText = refreshBtn.textContent;
+            refreshBtn.textContent = '🔄 Refreshing...';
+            refreshBtn.disabled = true;
+        } else {
+            console.error('[REFRESH DEBUG] Refresh button not found!');
+        }
+
+        try {
+            console.log('[REFRESH DEBUG] Loading devices...');
+            await this.loadDevices();
+            console.log('[REFRESH DEBUG] Devices loaded, count:', this.devices.length);
+
+            console.log('[REFRESH DEBUG] Loading groups...');
+            await this.loadGroups();
+            console.log('[REFRESH DEBUG] Groups loaded, count:', this.groups.length);
+
+            // Also refresh the unified view if it exists
+            if (this.unifiedView && this.unifiedView.refreshView) {
+                console.log('[REFRESH DEBUG] Refreshing unified view...');
+                await this.unifiedView.refreshView();
+                console.log('[REFRESH DEBUG] Unified view refreshed');
+            } else {
+                console.log('[REFRESH DEBUG] No unified view found or refreshView method missing');
+            }
+
+            console.log('[REFRESH DEBUG] Refresh process completed successfully');
+        } catch (error) {
+            console.error('[REFRESH DEBUG] Error during refresh:', error);
+        } finally {
+            // Restore button state
+            if (refreshBtn) {
+                console.log('[REFRESH DEBUG] Restoring button state');
+                refreshBtn.textContent = originalText;
+                refreshBtn.disabled = false;
+            }
+        }
     }
 
     openDeviceModal(device) {
