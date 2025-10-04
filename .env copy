@@ -1,0 +1,32 @@
+﻿# WoodHome WebApp Environment Variables
+
+# Database Configuration
+DB_SERVER=
+DB_PORT=1433
+DB_NAME=WoodHome
+DB_TRUSTED_CONNECTION=true
+
+# Email Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+FROM_EMAIL=woodraskacribbage@gmail.com
+FROM_PASSWORD=your-app-password
+
+# Sonos Configuration
+SONOS_JISHI_URL=http://localhost:5005
+
+# Hue Bridge Configuration
+HUE_BRIDGE_IP=192.168.86.236
+HUE_USERNAME=VPEueUoO2YHTXb-o1133RQKLHty4DnhLV-j1YpfB
+
+# Application Configuration
+PORT=3000
+WOODHOME_API_URL=http://localhost:8080
+
+
+
+# Google Calendar OAuth Configuration
+GOOGLE_CLIENT_ID=664293919353-eov023r4jsg3ima4jgqqmvf4cvnj8upc.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
+GOOGLE_REDIRECT_URL=http://localhost:3000/auth/google/callback
+SESSION_KEY=K8vJ2mN9pQ4rS7tU1wX5yZ8aB3cD6eF9gH2jK5lM8nP1qR4sT7uV0wX3yZ6aB9cD2eF5gH8jK1lM4nP7qR0sT3uV6wX9yZ2aB5cD8eF1gH4jK7lM0nP3qR6sT9uV2wX5yZ8aB1cD4eF7gH0jK3lM6nP9qR2sT5uV8wX1yZ4aB7cD0eF3gH6jK9lM2nP5qR8sT1uV4wX7yZ0aB3cD6eF9gH2jK5lM8nP1qR4sT7uV0wX3yZ6aB9cD2eF5gH8jK1lM4nP7qR0sT3uV6wX9yZ2aB5cD8eF1gH4jK7lM0nP3qR6sT9uV2wX5yZ8aB1cD4eF7gH0jK3lM6nP9qR2sT5uV8wX1yZ4aB7cD0eF3gH6jK9lM2nP5qR8sT1uV4wX7yZ0aB3cD6eF9gH2jK5lM8nP1qR4sT7uV0wX3yZ6aB9cD2eF5gH8jK1lM4nP7qR0sT3uV6wX9yZ2aB5cD8eF1gH4jK7lM0nP3qR6sT9uV2wX5yZ8n8D2D4eF7gH0jKN6D9nP9qR2sT5uV8wX1yZ4aB7cD0eF3gH6jK9lM2nP5qR8sT1uV4wX7yZ0aB3cD6eF9g

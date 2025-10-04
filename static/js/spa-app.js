@@ -15,11 +15,22 @@ class SPAApp {
     }
 
     /**
-     * Setup authentication
+     * Setup authentication using AuthenticationManager
      */
     setupAuthentication() {
-        // Check if user is already authenticated
-        this.checkAuthenticationStatus();
+        // Wait for AuthenticationManager to be available
+        if (window.authenticationManager) {
+            this.setupAuthenticationListeners();
+            this.checkInitialAuthState();
+        } else {
+            // Wait for AuthenticationManager to load
+            document.addEventListener('DOMContentLoaded', () => {
+                if (window.authenticationManager) {
+                    this.setupAuthenticationListeners();
+                    this.checkInitialAuthState();
+                }
+            });
+        }
 
         // Setup auth button
         const authButton = document.getElementById('auth-google-btn');
@@ -31,39 +42,36 @@ class SPAApp {
     }
 
     /**
-     * Check authentication status
+     * Setup authentication event listeners
      */
-    checkAuthenticationStatus() {
-        // Check for existing authentication
-        const authToken = localStorage.getItem('auth-token');
-        if (authToken) {
-            this.isAuthenticated = true;
-            this.showApp();
-        } else {
-            // Check if we're coming back from OAuth callback
-            this.checkOAuthCallback();
+    setupAuthenticationListeners() {
+        if (window.authenticationManager) {
+            window.authenticationManager.addEventListener('authentication:changed', (e) => {
+                console.log('SPAApp: Authentication state changed to:', e.detail.authenticated);
+                this.isAuthenticated = e.detail.authenticated;
+
+                if (e.detail.authenticated) {
+                    this.showApp();
+                } else {
+                    this.showAuthOverlay();
+                }
+            });
         }
     }
 
     /**
-     * Check if we're returning from OAuth callback
+     * Check initial authentication state
      */
-    checkOAuthCallback() {
-        // Check URL parameters for OAuth success
-        const urlParams = new URLSearchParams(window.location.search);
-        const authSuccess = urlParams.get('auth') === 'success';
+    checkInitialAuthState() {
+        if (window.authenticationManager) {
+            const authState = window.authenticationManager.getAuthenticationState();
+            this.isAuthenticated = authState.isAuthenticated;
 
-        if (authSuccess) {
-            // OAuth was successful, hide overlay and show app
-            this.isAuthenticated = true;
-            localStorage.setItem('auth-token', 'authenticated');
-            this.showApp();
-
-            // Clean up URL
-            const newUrl = window.location.pathname;
-            window.history.replaceState({}, document.title, newUrl);
-        } else {
-            this.showAuthOverlay();
+            if (this.isAuthenticated) {
+                this.showApp();
+            } else {
+                this.showAuthOverlay();
+            }
         }
     }
 

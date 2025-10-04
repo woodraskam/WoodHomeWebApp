@@ -39,7 +39,7 @@ func NewHueService(config *models.HueServiceConfig) *HueService {
 			Username:     "",
 			Timeout:      30 * time.Second,
 			RetryCount:   3,
-			PollInterval: 5 * time.Second,
+			PollInterval: 20 * time.Second,
 			AutoDiscover: true,
 			AuthRequired: true,
 		}

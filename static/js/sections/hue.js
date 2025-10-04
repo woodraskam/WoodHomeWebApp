@@ -2,10 +2,10 @@
  * Hue Lighting Section
  * Material Design 3 compliant Hue lighting controls
  */
-class HueSection {
+class HueSection extends AuthenticatedSection {
     constructor() {
+        super();
         console.log('HueSection: Constructor called');
-        this.isLoaded = false;
         this.lights = [];
         this.rooms = [];
         this.scenes = [];
@@ -201,6 +201,87 @@ class HueSection {
             refreshBtn.addEventListener('click', () => {
                 this.refreshData();
             });
+        }
+    }
+
+    /**
+     * Override base class initialize method
+     */
+    initialize() {
+        console.log('HueSection: Initialize called (authentication required)');
+        // Only initialize if authenticated
+        if (this.isAuthenticated()) {
+            this.setupHueEventListeners();
+            this.loadData();
+        } else {
+            this.showAuthenticationRequired();
+        }
+    }
+
+    /**
+     * Override base class show method
+     */
+    show() {
+        console.log('HueSection: Show called');
+        const section = document.getElementById('hue-section');
+        if (section) {
+            section.classList.add('m3-section--active');
+        }
+    }
+
+    /**
+     * Override base class hide method
+     */
+    hide() {
+        console.log('HueSection: Hide called');
+        const section = document.getElementById('hue-section');
+        if (section) {
+            section.classList.remove('m3-section--active');
+        }
+    }
+
+    /**
+     * Override base class cleanup method
+     */
+    cleanup() {
+        console.log('HueSection: Cleanup called');
+        // Stop any ongoing operations
+        this.isLoading = false;
+        // Clear data if needed
+        this.lights = [];
+        this.rooms = [];
+        this.scenes = [];
+    }
+
+    /**
+     * Override base class showAuthenticationRequired method
+     */
+    showAuthenticationRequired() {
+        console.log('HueSection: Authentication required');
+        // Show authentication prompt or redirect to login
+        const section = document.getElementById('hue-section');
+        if (section) {
+            section.innerHTML = `
+                <div class="m3-card">
+                    <div class="m3-card__content">
+                        <div class="m3-calendar-auth">
+                            <div class="m3-calendar-auth__icon">
+                                <span class="material-symbols-outlined">lightbulb</span>
+                            </div>
+                            <div class="m3-calendar-auth__content">
+                                <h3 class="m3-calendar-auth__title">Connect to Hue Lighting</h3>
+                                <p class="m3-calendar-auth__description">
+                                    Please authenticate to access your Hue lighting controls.
+                                </p>
+                                <button class="m3-button m3-button--primary" onclick="window.location.href='/auth/google/login'">
+                                    <span class="material-symbols-outlined">login</span>
+                                    Sign in with Google
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
         }
     }
 
@@ -866,8 +947,10 @@ class HueSection {
     }
 }
 
+// Initialize Hue section with authentication awareness
 document.addEventListener('DOMContentLoaded', () => {
     console.log('HueSection: DOMContentLoaded event fired');
+    // Create instance - it will register with AuthenticationManager
     window.hueSection = new HueSection();
     console.log('HueSection: Global hueSection created:', window.hueSection);
 });

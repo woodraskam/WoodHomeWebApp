@@ -19,6 +19,7 @@ func NewGoogleOAuthConfig() *oauth2.Config {
 		RedirectURL:  os.Getenv("GOOGLE_REDIRECT_URL"),
 		Scopes: []string{
 			calendar.CalendarReadonlyScope,
+			"https://www.googleapis.com/auth/calendar.readonly",
 		},
 		Endpoint: google.Endpoint,
 	}
@@ -51,6 +52,7 @@ func NewGoogleOAuthConfigWithRequest(r *http.Request) *oauth2.Config {
 		RedirectURL:  redirectURL,
 		Scopes: []string{
 			calendar.CalendarReadonlyScope,
+			"https://www.googleapis.com/auth/calendar.readonly",
 		},
 		Endpoint: google.Endpoint,
 	}

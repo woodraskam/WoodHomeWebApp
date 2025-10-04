@@ -7,10 +7,7 @@
             "request": "launch",
             "mode": "auto",
             "program": "${workspaceFolder}/main.go",
-            "env": {
-                "WOODHOME_API_URL": "http://localhost:8080",
-                "PORT": "3000"
-            },
+            "envFile": "${workspaceFolder}/.env",
             "args": [],
             "showLog": true,
             "console": "integratedTerminal",
@@ -25,10 +22,7 @@
             "mode": "debug",
             "program": "${workspaceFolder}/main.go",
             "output": "${workspaceFolder}/bin/woodhome-webapp-debug.exe",
-            "env": {
-                "WOODHOME_API_URL": "http://localhost:8080",
-                "PORT": "3000"
-            },
+            "envFile": "${workspaceFolder}/.env",
             "args": [],
             "showLog": true,
             "console": "integratedTerminal",
@@ -44,10 +38,7 @@
             "request": "launch",
             "mode": "exec",
             "program": "${workspaceFolder}/bin/woodhome-webapp-debug.exe",
-            "env": {
-                "WOODHOME_API_URL": "http://localhost:8080",
-                "PORT": "3000"
-            },
+            "envFile": "${workspaceFolder}/.env",
             "args": [],
             "showLog": true,
             "console": "integratedTerminal",

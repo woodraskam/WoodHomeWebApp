@@ -599,6 +599,7 @@ func main() {
 	http.HandleFunc("/auth/google/login", handlers.GoogleLoginHandler)
 	http.HandleFunc("/auth/google/callback", handlers.GoogleCallbackHandler)
 	http.HandleFunc("/auth/logout", handlers.LogoutHandler)
+	http.HandleFunc("/api/auth/status", handlers.AuthStatusHandler)
 	http.HandleFunc("/calendar", handlers.AuthRequired(calendarHandler.CalendarPageHandler))
 
 	// Calendar API routes (using mux for better routing)

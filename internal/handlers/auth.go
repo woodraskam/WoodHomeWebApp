@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"database/sql"
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -122,6 +123,53 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/?auth=success", http.StatusSeeOther)
 }
 
+// AuthStatusHandler checks if the user is authenticated
+func AuthStatusHandler(w http.ResponseWriter, r *http.Request) {
+	session, _ := GetSessionStore().Get(r, "auth-session")
+	authenticated, ok := session.Values["oauth_authenticated"].(bool)
+	userID, userIDOk := session.Values["user_id"].(int)
+
+	// Set JSON content type
+	w.Header().Set("Content-Type", "application/json")
+
+	if !ok || !authenticated || !userIDOk {
+		// Not authenticated
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"authenticated": false}`))
+		return
+	}
+
+	// Get user info from database
+	userInfo, err := getUserInfoFromDB(userID)
+	if err != nil {
+		log.Printf("Error getting user info: %v", err)
+		w.WriteHeader(http.StatusOK)
+		w.Write([]byte(`{"authenticated": false}`))
+		return
+	}
+
+	// Authenticated
+	response := map[string]interface{}{
+		"authenticated": true,
+		"user": map[string]interface{}{
+			"id":    userID,
+			"name":  userInfo["name"],
+			"email": userInfo["email"],
+		},
+	}
+
+	jsonResponse, err := json.Marshal(response)
+	if err != nil {
+		log.Printf("Error marshaling response: %v", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(`{"authenticated": false}`))
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonResponse)
+}
+
 // LogoutHandler clears the session and logs out the user
 func LogoutHandler(w http.ResponseWriter, r *http.Request) {
 	session, _ := GetSessionStore().Get(r, "auth-session")
@@ -195,5 +243,14 @@ func getOAuthTokenFromSQLite(userID int) (*oauth2.Token, error) {
 		RefreshToken: refreshToken,
 		TokenType:    tokenType,
 		Expiry:       expiry,
+	}, nil
+}
+
+func getUserInfoFromDB(userID int) (map[string]string, error) {
+	// For now, return basic user info
+	// In a real application, you would fetch this from a user database
+	return map[string]string{
+		"name":  "WoodHome User",
+		"email": "user@woodhome.local",
 	}, nil
 }

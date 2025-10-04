@@ -54,27 +54,63 @@ func (s *CalendarService) GetCalendarEvents(ctx context.Context, token *oauth2.T
 		return nil, err
 	}
 
-	// Fetch events from primary calendar
-	events, err := srv.Events.List("primary").
-		TimeMin(start.Format(time.RFC3339)).
-		TimeMax(end.Format(time.RFC3339)).
-		SingleEvents(true).
-		OrderBy("startTime").
-		MaxResults(2500). // FullCalendar can handle this
-		Do()
-
+	// First, get list of all calendars
+	calendarList, err := srv.CalendarList.List().Do()
 	if err != nil {
 		return nil, err
 	}
 
+	// Fetch events from all calendars
+	var allEvents []*calendar.Event
+	for _, cal := range calendarList.Items {
+		// Skip calendars that are not selected or are hidden
+		if cal.Selected == false || cal.Hidden == true {
+			continue
+		}
+
+		events, err := srv.Events.List(cal.Id).
+			TimeMin(start.Format(time.RFC3339)).
+			TimeMax(end.Format(time.RFC3339)).
+			SingleEvents(true).
+			OrderBy("startTime").
+			MaxResults(250). // Limit per calendar to avoid hitting API limits
+			Do()
+
+		if err != nil {
+			// Log error but continue with other calendars
+			continue
+		}
+
+		// Add calendar info to each event
+		for _, event := range events.Items {
+			// Add calendar name and color to event
+			if event.ExtendedProperties == nil {
+				event.ExtendedProperties = &calendar.EventExtendedProperties{}
+			}
+			if event.ExtendedProperties.Private == nil {
+				event.ExtendedProperties.Private = make(map[string]string)
+			}
+			event.ExtendedProperties.Private["calendarName"] = cal.Summary
+			event.ExtendedProperties.Private["calendarColor"] = cal.BackgroundColor
+			allEvents = append(allEvents, event)
+		}
+	}
+
 	// Transform to simplified format
 	var calEvents []CalendarEvent
-	for _, item := range events.Items {
+	for _, item := range allEvents {
 		event := CalendarEvent{
 			ID:          item.Id,
 			Title:       item.Summary,
 			Description: item.Description,
 			Color:       getEventColor(item), // Custom function
+		}
+
+		// Add calendar name to title if available
+		if item.ExtendedProperties != nil && item.ExtendedProperties.Private != nil {
+			if calendarName, exists := item.ExtendedProperties.Private["calendarName"]; exists && calendarName != "" {
+				event.Title = "[" + calendarName + "] " + event.Title
+			}
 		}
 
 		// Handle all-day vs timed events
