@@ -480,6 +480,249 @@
     align-items: center;
 }
 
+/* Material Design 3 Tooltip Implementation */
+.m3-tooltip-trigger {
+    position: relative;
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    color: var(--m3-on-surface-variant);
+}
+
+.m3-tooltip-trigger:hover {
+    background: var(--m3-state-hover);
+    color: var(--m3-on-surface);
+}
+
+.m3-tooltip-trigger:focus {
+    outline: 2px solid var(--m3-primary);
+    outline-offset: 2px;
+}
+
+.m3-tooltip {
+    position: fixed;
+    z-index: 1000;
+    background: rgba(28, 28, 30, 0.95);
+    color: #ffffff;
+    border-radius: var(--m3-shape-corner-small);
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    line-height: 1.4;
+    max-width: 300px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3), 0 2px 4px rgba(0, 0, 0, 0.2);
+    opacity: 0;
+    transform: translateY(4px);
+    transition: all 0.2s ease;
+    pointer-events: none;
+    visibility: hidden;
+    backdrop-filter: blur(8px);
+}
+
+.m3-tooltip--visible {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
+}
+
+.m3-tooltip-content h6 {
+    margin: 0 0 0.5rem 0;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #ffffff;
+}
+
+.m3-tooltip-content p {
+    margin: 0.25rem 0;
+    font-size: 0.8rem;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.m3-tooltip-content strong {
+    font-weight: 500;
+    color: #ffffff;
+}
+
+/* Card header with tooltip trigger */
+.m3-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.m3-card-header h4 {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+/* Sonos card layout with buttons at bottom */
+.sonos-group-card,
+.sonos-device-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+}
+
+/* Volume controls positioned at top */
+.coordinator-volume-control,
+.device-volume-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+    margin-bottom: 1rem;
+    padding: 0.5rem;
+    background: var(--m3-surface-container-low);
+    border-radius: var(--m3-shape-corner-medium);
+}
+
+.coordinator-volume-control input[type="range"],
+.device-volume-control input[type="range"] {
+    flex: 1;
+}
+
+/* Member volume controls */
+.member-device {
+    display: flex;
+    flex-direction: column;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    background: var(--m3-surface-container-low);
+    border-radius: var(--m3-shape-corner-small);
+}
+
+.member-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.member-volume-control {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    width: 100%;
+}
+
+.member-volume-control input[type="range"] {
+    flex: 1;
+}
+
+.member-volume-control .volume-display {
+    min-width: 2rem;
+    font-size: 0.75rem;
+}
+
+/* Playback controls at bottom */
+.sonos-playback-controls {
+    display: flex;
+    gap: 0.5rem;
+    width: 100%;
+    margin-top: auto;
+    padding-top: 1rem;
+}
+
+.sonos-playback-controls .m3-button {
+    flex: 1;
+    width: 50%;
+    justify-content: center;
+    padding: 0.75rem;
+    border-radius: var(--m3-shape-corner-medium);
+}
+
+.volume-display {
+    min-width: 3rem;
+    text-align: center;
+    font-size: 0.875rem;
+    color: var(--m3-on-surface-variant);
+}
+
+/* M3 Slider Styling */
+.m3-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    height: 4px;
+    background: var(--m3-outline-variant);
+    border-radius: 2px;
+    outline: none;
+    cursor: pointer;
+    position: relative;
+    --slider-progress: 0%;
+}
+
+.m3-slider::-webkit-slider-track {
+    background: var(--m3-outline-variant);
+    height: 4px;
+    border-radius: 2px;
+}
+
+.m3-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    background: var(--m3-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.m3-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.m3-slider::-webkit-slider-thumb:active {
+    transform: scale(1.2);
+}
+
+.m3-slider::-moz-range-track {
+    background: var(--m3-outline-variant);
+    height: 4px;
+    border-radius: 2px;
+    border: none;
+}
+
+.m3-slider::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    background: var(--m3-primary);
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    transition: all 0.2s ease;
+}
+
+.m3-slider::-moz-range-thumb:hover {
+    transform: scale(1.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.m3-slider::-moz-range-thumb:active {
+    transform: scale(1.2);
+}
+
+/* Active track styling */
+.m3-slider::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 4px;
+    width: var(--slider-progress);
+    background: var(--m3-primary);
+    border-radius: 2px;
+    pointer-events: none;
+}
+
 /* Material Design 3 Slider Implementation */
 .volume-control {
     margin-left: auto;

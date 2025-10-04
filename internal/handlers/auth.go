@@ -33,7 +33,7 @@ func getOAuthConfig() *oauth2.Config {
 
 // GoogleLoginHandler initiates the OAuth login flow
 func GoogleLoginHandler(w http.ResponseWriter, r *http.Request) {
-	oauthConfig := getOAuthConfig()
+	oauthConfig := services.NewGoogleOAuthConfigWithRequest(r)
 
 	// Debug: Log OAuth configuration
 	log.Printf("OAuth Config - ClientID: %s", oauthConfig.ClientID)
@@ -88,7 +88,7 @@ func GoogleCallbackHandler(w http.ResponseWriter, r *http.Request) {
 
 	// Exchange authorization code for access token
 	code := r.URL.Query().Get("code")
-	oauthConfig := getOAuthConfig()
+	oauthConfig := services.NewGoogleOAuthConfigWithRequest(r)
 	token, err := oauthConfig.Exchange(r.Context(), code)
 	if err != nil {
 		http.Error(w, "Failed to exchange token", http.StatusInternalServerError)
