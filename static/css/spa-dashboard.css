@@ -11,7 +11,12 @@
 .m3-content-area {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     transition: all var(--m3-motion-duration-medium2) var(--m3-motion-easing-standard);
+}
+
+.m3-card__content {
+    height: calc(100% - 100px);
 }
 
 /* Section Content */
@@ -1713,6 +1718,11 @@
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    flex: 1;
+    min-height: 0;
 }
 
 .m3-calendar-month__header {
@@ -1747,6 +1757,9 @@
     overflow: hidden;
     width: 100%;
     box-sizing: border-box;
+    flex: 1;
+    grid-template-rows: repeat(6, minmax(0, 1fr));
+    min-height: 0;
 }
 
 .m3-calendar-day {
@@ -1759,6 +1772,10 @@
     min-width: 0;
     overflow: hidden;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
 }
 
 .m3-calendar-day:hover {
@@ -1785,6 +1802,9 @@
     display: flex;
     flex-direction: column;
     gap: 2px;
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 .m3-calendar-day__event {
@@ -2720,12 +2740,14 @@
 
 /* Calendar Grid Full Height */
 .m3-calendar-grid {
-    height: calc(100% - 120px);
-    /* Full height minus header */
+    height: 100%;
+    /* Full height of container */
     overflow-y: auto;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
 .m3-calendar-left-pane {
@@ -2772,6 +2794,7 @@
     background: var(--m3-on-surface-variant);
     border-radius: 1px;
 }
+
 
 /* Calendar Split-Pane Responsive Design */
 @media (max-width: 1024px) {
