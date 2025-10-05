@@ -95,13 +95,24 @@ func (ccs *CalendarCacheService) GetCalendarEvents(ctx context.Context, token *o
 		return ccs.calendarService.GetCalendarEvents(ctx, token, start, end)
 	}
 
-	// Create cache key based on user token and time range
+	// First, try to get from cache with the specific key
 	cacheKey := ccs.createEventsCacheKey(token, start, end)
-
-	// Try to get from cache
 	if cached, found := ccs.cacheService.Get(cacheKey); found {
 		if events, ok := cached.([]CalendarEvent); ok {
-			return events, nil
+			// Filter events to the requested time range
+			filteredEvents := ccs.filterEventsByTimeRange(events, start, end)
+			return filteredEvents, nil
+		}
+	}
+
+	// Try to find overlapping cached data
+	if overlappingEvents := ccs.findOverlappingCachedEvents(token, start, end); len(overlappingEvents) > 0 {
+		// We have some cached data, filter it and return
+		filteredEvents := ccs.filterEventsByTimeRange(overlappingEvents, start, end)
+		if len(filteredEvents) > 0 {
+			// Store the filtered results in cache for future use
+			ccs.cacheService.Set(cacheKey, filteredEvents, ccs.config.EventsTTL)
+			return filteredEvents, nil
 		}
 	}
 
@@ -175,9 +186,108 @@ func (ccs *CalendarCacheService) createCalendarsCacheKey(token *oauth2.Token) mo
 func (ccs *CalendarCacheService) createEventsCacheKey(token *oauth2.Token, start, end time.Time) models.CacheKey {
 	// Create a hash of the token and time range for the cache key
 	tokenHash := ccs.hashToken(token)
-	timeRange := fmt.Sprintf("%s_%s", start.Format("2006-01-02"), end.Format("2006-01-02"))
-	key := fmt.Sprintf("%s:events:%s:%s", ccs.config.CacheKeyPrefix, tokenHash, timeRange)
-	return models.NewCacheKey("", key)
+	
+	// Create a broader time range for better cache hit rates
+	// Round to the nearest month for monthly views
+	startMonth := start.Format("2006-01")
+	endMonth := end.Format("2006-01")
+	
+	// If the range spans multiple months, use a broader key
+	if startMonth == endMonth {
+		// Same month - use month-based key
+		timeRange := startMonth
+		key := fmt.Sprintf("%s:events:%s:%s", ccs.config.CacheKeyPrefix, tokenHash, timeRange)
+		return models.NewCacheKey("", key)
+	} else {
+		// Multiple months - use a broader range
+		timeRange := fmt.Sprintf("%s_to_%s", startMonth, endMonth)
+		key := fmt.Sprintf("%s:events:%s:%s", ccs.config.CacheKeyPrefix, tokenHash, timeRange)
+		return models.NewCacheKey("", key)
+	}
+}
+
+// filterEventsByTimeRange filters events to the requested time range
+func (ccs *CalendarCacheService) filterEventsByTimeRange(events []CalendarEvent, start, end time.Time) []CalendarEvent {
+	var filteredEvents []CalendarEvent
+	
+	for _, event := range events {
+		// Parse event start time
+		eventStart, err := time.Parse(time.RFC3339, event.Start)
+		if err != nil {
+			// Try parsing as date only (all-day events)
+			eventStart, err = time.Parse("2006-01-02", event.Start)
+			if err != nil {
+				continue // Skip events with invalid dates
+			}
+		}
+		
+		// Check if event is within the requested time range
+		if eventStart.After(start) && eventStart.Before(end) {
+			filteredEvents = append(filteredEvents, event)
+		}
+	}
+	
+	return filteredEvents
+}
+
+// findOverlappingCachedEvents looks for cached events that might overlap with the requested time range
+func (ccs *CalendarCacheService) findOverlappingCachedEvents(token *oauth2.Token, start, end time.Time) []CalendarEvent {
+	tokenHash := ccs.hashToken(token)
+	
+	// Try to get events from adjacent months
+	// This is a simplified approach - check a few common cache keys
+	possibleKeys := []string{
+		fmt.Sprintf("%s:events:%s:%s", ccs.config.CacheKeyPrefix, tokenHash, start.AddDate(0, -1, 0).Format("2006-01")),
+		fmt.Sprintf("%s:events:%s:%s", ccs.config.CacheKeyPrefix, tokenHash, start.AddDate(0, 1, 0).Format("2006-01")),
+		fmt.Sprintf("%s:events:%s:%s", ccs.config.CacheKeyPrefix, tokenHash, start.AddDate(0, 2, 0).Format("2006-01")),
+	}
+	
+	for _, key := range possibleKeys {
+		if cached, found := ccs.cacheService.Get(models.NewCacheKey("", key)); found {
+			if events, ok := cached.([]CalendarEvent); ok {
+				// Check if any events overlap with the requested time range
+				overlappingEvents := ccs.findOverlappingEvents(events, start, end)
+				if len(overlappingEvents) > 0 {
+					return overlappingEvents
+				}
+			}
+		}
+	}
+	
+	return nil
+}
+
+// isEventsCacheKey checks if a cache key is for events
+func (ccs *CalendarCacheService) isEventsCacheKey(key, tokenHash string) bool {
+	expectedPrefix := fmt.Sprintf("%s:events:%s:", ccs.config.CacheKeyPrefix, tokenHash)
+	return len(key) > len(expectedPrefix) && key[:len(expectedPrefix)] == expectedPrefix
+}
+
+// findOverlappingEvents finds events that overlap with the requested time range
+func (ccs *CalendarCacheService) findOverlappingEvents(events []CalendarEvent, start, end time.Time) []CalendarEvent {
+	var overlappingEvents []CalendarEvent
+	
+	for _, event := range events {
+		// Parse event start time
+		eventStart, err := time.Parse(time.RFC3339, event.Start)
+		if err != nil {
+			// Try parsing as date only (all-day events)
+			eventStart, err = time.Parse("2006-01-02", event.Start)
+			if err != nil {
+				continue // Skip events with invalid dates
+			}
+		}
+		
+		// Check if event overlaps with the requested time range
+		// Event overlaps if it starts before the end and ends after the start
+		if eventStart.Before(end) {
+			// For simplicity, we'll consider events that start before the end time
+			// In a more sophisticated implementation, you'd also check the event end time
+			overlappingEvents = append(overlappingEvents, event)
+		}
+	}
+	
+	return overlappingEvents
 }
 
 // hashToken creates a simple hash of the token for cache key generation
