@@ -177,12 +177,7 @@ class UnauthenticatedWelcome {
             return;
         }
 
-        // Hide any loading overlays that might be blocking the button
-        const loadingOverlays = document.querySelectorAll('.m3-loading');
-        loadingOverlays.forEach(overlay => {
-            overlay.classList.add('hidden');
-            console.log('UnauthenticatedWelcome: Hidden loading overlay');
-        });
+        // Loading overlays removed - no longer needed
 
         const welcomeSection = document.getElementById('welcome-section');
         if (welcomeSection) {
@@ -204,14 +199,7 @@ class UnauthenticatedWelcome {
     setupButtonHandlers() {
         // Wait for DOM to be ready
         setTimeout(() => {
-            // Hide any loading overlays that might be blocking the button
-            const loadingOverlays = document.querySelectorAll('.m3-loading');
-            loadingOverlays.forEach(overlay => {
-                overlay.classList.add('hidden');
-                overlay.style.display = 'none';
-                overlay.style.display = 'none';
-                console.log('UnauthenticatedWelcome: Force hidden loading overlay');
-            });
+            // Loading overlays removed - no longer needed
 
             const signinBtn = document.getElementById('welcome-signin-btn');
             if (signinBtn) {

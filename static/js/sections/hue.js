@@ -87,7 +87,7 @@ class HueSection extends AuthenticatedSection {
           <h3 class="m3-card-title">Configuration</h3>
         </div>
         <div class="m3-card-content" id="hue-config-content">
-          <div class="m3-loading">
+          <div class="hue-loading">
             <div class="m3-circular-progress"></div>
             <p>Checking Hue configuration...</p>
           </div>
@@ -101,7 +101,7 @@ class HueSection extends AuthenticatedSection {
           <h3 class="m3-card-title">Rooms</h3>
         </div>
         <div class="m3-card-content" id="hue-rooms-content">
-          <div class="m3-loading">
+          <div class="hue-loading">
             <div class="m3-circular-progress"></div>
             <p>Loading rooms...</p>
           </div>
@@ -114,7 +114,7 @@ class HueSection extends AuthenticatedSection {
           <h3 class="m3-card-title">Scenes</h3>
         </div>
         <div class="m3-card-content" id="hue-scenes-content">
-          <div class="m3-loading">
+          <div class="hue-loading">
             <div class="m3-circular-progress"></div>
             <p>Loading scenes...</p>
           </div>
@@ -127,7 +127,7 @@ class HueSection extends AuthenticatedSection {
           <h3 class="m3-card-title">Individual Lights</h3>
         </div>
         <div class="m3-card-content" id="hue-lights-content">
-          <div class="m3-loading">
+          <div class="hue-loading">
             <div class="m3-circular-progress"></div>
             <p>Loading lights...</p>
           </div>
@@ -158,7 +158,7 @@ class HueSection extends AuthenticatedSection {
                         </button>
                     </div>
                     <div class="m3-dialog-content" id="hue-popup-content">
-                        <div class="m3-loading">
+                        <div class="hue-loading">
                             <div class="m3-circular-progress"></div>
                             <p>Loading system status...</p>
                         </div>

@@ -425,13 +425,15 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 2000;
+    z-index: 99999;
 }
 
 .m3-auth-overlay__content {
     text-align: center;
     max-width: 400px;
     padding: var(--m3-spacing-3xl);
+    z-index: 100000;
+    position: relative;
 }
 
 .m3-auth-overlay__title {

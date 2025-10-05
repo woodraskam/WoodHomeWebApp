@@ -3,55 +3,55 @@
  * Reusable Material Design 3 components for the SPA
  */
 class SPAComponents {
-    constructor() {
-        this.components = new Map();
-        this.init();
-    }
+  constructor() {
+    this.components = new Map();
+    this.init();
+  }
 
-    init() {
-        this.setupComponents();
-    }
+  init() {
+    this.setupComponents();
+  }
 
-    /**
-     * Setup all components
-     */
-    setupComponents() {
-        this.setupButtons();
-        this.setupCards();
-        this.setupLoadingStates();
-        this.setupErrorStates();
-    }
+  /**
+   * Setup all components
+   */
+  setupComponents() {
+    this.setupButtons();
+    this.setupCards();
+    this.setupLoadingStates();
+    this.setupErrorStates();
+  }
 
-    /**
-     * Setup button components
-     */
-    setupButtons() {
-        // Add ripple effect to buttons
-        document.addEventListener('click', (e) => {
-            if (e.target && e.target.classList && e.target.classList.contains('m3-button')) {
-                this.addRippleEffect(e.target, e);
-            } else if (e.target && e.target.closest) {
-                const button = e.target.closest('.m3-button');
-                if (button) {
-                    this.addRippleEffect(button, e);
-                }
-            }
-        });
-    }
+  /**
+   * Setup button components
+   */
+  setupButtons() {
+    // Add ripple effect to buttons
+    document.addEventListener('click', (e) => {
+      if (e.target && e.target.classList && e.target.classList.contains('m3-button')) {
+        this.addRippleEffect(e.target, e);
+      } else if (e.target && e.target.closest) {
+        const button = e.target.closest('.m3-button');
+        if (button) {
+          this.addRippleEffect(button, e);
+        }
+      }
+    });
+  }
 
-    /**
-     * Add ripple effect to button
-     */
-    addRippleEffect(button, event) {
-        if (!button || !event) return;
+  /**
+   * Add ripple effect to button
+   */
+  addRippleEffect(button, event) {
+    if (!button || !event) return;
 
-        const ripple = document.createElement('span');
-        const rect = button.getBoundingClientRect();
-        const size = Math.max(rect.width, rect.height);
-        const x = event.clientX - rect.left - size / 2;
-        const y = event.clientY - rect.top - size / 2;
+    const ripple = document.createElement('span');
+    const rect = button.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    const x = event.clientX - rect.left - size / 2;
+    const y = event.clientY - rect.top - size / 2;
 
-        ripple.style.cssText = `
+    ripple.style.cssText = `
       position: absolute;
       width: ${size}px;
       height: ${size}px;
@@ -64,116 +64,80 @@ class SPAComponents {
       pointer-events: none;
     `;
 
-        button.style.position = 'relative';
-        button.style.overflow = 'hidden';
-        button.appendChild(ripple);
+    button.style.position = 'relative';
+    button.style.overflow = 'hidden';
+    button.appendChild(ripple);
 
-        setTimeout(() => {
-            ripple.remove();
-        }, 600);
-    }
+    setTimeout(() => {
+      ripple.remove();
+    }, 600);
+  }
 
-    /**
-     * Setup card components
-     */
-    setupCards() {
-        // Add hover effects to cards
-        document.addEventListener('mouseenter', (e) => {
-            if (e.target && e.target.classList && e.target.classList.contains('m3-card')) {
-                this.addCardHoverEffect(e.target);
-            } else if (e.target && e.target.closest) {
-                const card = e.target.closest('.m3-card');
-                if (card) {
-                    this.addCardHoverEffect(card);
-                }
-            }
-        }, true);
-    }
-
-    /**
-     * Add hover effect to card
-     */
-    addCardHoverEffect(card) {
-        if (!card || !card.classList) return;
-
-        if (!card.classList.contains('m3-card--hover')) {
-            card.classList.add('m3-card--hover');
+  /**
+   * Setup card components
+   */
+  setupCards() {
+    // Add hover effects to cards
+    document.addEventListener('mouseenter', (e) => {
+      if (e.target && e.target.classList && e.target.classList.contains('m3-card')) {
+        this.addCardHoverEffect(e.target);
+      } else if (e.target && e.target.closest) {
+        const card = e.target.closest('.m3-card');
+        if (card) {
+          this.addCardHoverEffect(card);
         }
+      }
+    }, true);
+  }
+
+  /**
+   * Add hover effect to card
+   */
+  addCardHoverEffect(card) {
+    if (!card || !card.classList) return;
+
+    if (!card.classList.contains('m3-card--hover')) {
+      card.classList.add('m3-card--hover');
     }
+  }
 
-    /**
-     * Setup loading states
-     */
-    setupLoadingStates() {
-        // Create loading component
-        this.createLoadingComponent();
-    }
+  /**
+   * Setup loading states
+   */
+  setupLoadingStates() {
+    // Loading component removed to prevent overlay issues
+  }
 
-    /**
-     * Create loading component
-     */
-    createLoadingComponent() {
-        const loadingHTML = `
-      <div class="m3-loading" id="global-loading">
-        <div class="m3-circular-progress">
-          <div class="m3-circular-progress__circle"></div>
-        </div>
-        <p class="m3-loading__text">Loading...</p>
-      </div>
-    `;
+  // Loading component methods removed to prevent overlay issues
 
-        document.body.insertAdjacentHTML('beforeend', loadingHTML);
-    }
+  /**
+   * Setup error states
+   */
+  setupErrorStates() {
+    // Create error notification system
+    this.createErrorNotificationSystem();
+  }
 
-    /**
-     * Show loading state
-     */
-    showLoading(message = 'Loading...') {
-        const loading = document.getElementById('global-loading');
-        if (loading) {
-            loading.querySelector('.m3-loading__text').textContent = message;
-            loading.style.display = 'flex';
-        }
-    }
+  /**
+   * Create error notification system
+   */
+  createErrorNotificationSystem() {
+    const errorContainer = document.createElement('div');
+    errorContainer.id = 'error-notifications';
+    errorContainer.className = 'm3-error-notifications';
+    document.body.appendChild(errorContainer);
+  }
 
-    /**
-     * Hide loading state
-     */
-    hideLoading() {
-        const loading = document.getElementById('global-loading');
-        if (loading) {
-            loading.style.display = 'none';
-        }
-    }
+  /**
+   * Show error notification
+   */
+  showError(message, type = 'error') {
+    const errorContainer = document.getElementById('error-notifications');
+    if (!errorContainer) return;
 
-    /**
-     * Setup error states
-     */
-    setupErrorStates() {
-        // Create error notification system
-        this.createErrorNotificationSystem();
-    }
-
-    /**
-     * Create error notification system
-     */
-    createErrorNotificationSystem() {
-        const errorContainer = document.createElement('div');
-        errorContainer.id = 'error-notifications';
-        errorContainer.className = 'm3-error-notifications';
-        document.body.appendChild(errorContainer);
-    }
-
-    /**
-     * Show error notification
-     */
-    showError(message, type = 'error') {
-        const errorContainer = document.getElementById('error-notifications');
-        if (!errorContainer) return;
-
-        const notification = document.createElement('div');
-        notification.className = `m3-error-notification m3-error-notification--${type}`;
-        notification.innerHTML = `
+    const notification = document.createElement('div');
+    notification.className = `m3-error-notification m3-error-notification--${type}`;
+    notification.innerHTML = `
       <div class="m3-error-notification__content">
         <svg class="m3-icon" viewBox="0 0 24 24">
           <path d="M12,2L13.09,8.26L22,9L13.09,9.74L12,16L10.91,9.74L2,9L10.91,8.26L12,2Z"/>
@@ -183,68 +147,68 @@ class SPAComponents {
       </div>
     `;
 
-        errorContainer.appendChild(notification);
+    errorContainer.appendChild(notification);
 
-        // Auto-remove after 5 seconds
-        setTimeout(() => {
-            if (notification.parentElement) {
-                notification.remove();
-            }
-        }, 5000);
-    }
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+      if (notification.parentElement) {
+        notification.remove();
+      }
+    }, 5000);
+  }
 
-    /**
-     * Show success notification
-     */
-    showSuccess(message) {
-        this.showError(message, 'success');
-    }
+  /**
+   * Show success notification
+   */
+  showSuccess(message) {
+    this.showError(message, 'success');
+  }
 
-    /**
-     * Show warning notification
-     */
-    showWarning(message) {
-        this.showError(message, 'warning');
-    }
+  /**
+   * Show warning notification
+   */
+  showWarning(message) {
+    this.showError(message, 'warning');
+  }
 
-    /**
-     * Create snackbar notification
-     */
-    showSnackbar(message, action = null) {
-        const snackbar = document.createElement('div');
-        snackbar.className = 'm3-snackbar';
-        snackbar.innerHTML = `
+  /**
+   * Create snackbar notification
+   */
+  showSnackbar(message, action = null) {
+    const snackbar = document.createElement('div');
+    snackbar.className = 'm3-snackbar';
+    snackbar.innerHTML = `
       <div class="m3-snackbar__content">
         <span>${message}</span>
         ${action ? `<button class="m3-snackbar__action">${action}</button>` : ''}
       </div>
     `;
 
-        document.body.appendChild(snackbar);
+    document.body.appendChild(snackbar);
 
-        // Show snackbar
-        setTimeout(() => {
-            snackbar.classList.add('m3-snackbar--show');
-        }, 100);
+    // Show snackbar
+    setTimeout(() => {
+      snackbar.classList.add('m3-snackbar--show');
+    }, 100);
 
-        // Auto-hide after 4 seconds
-        setTimeout(() => {
-            snackbar.classList.remove('m3-snackbar--show');
-            setTimeout(() => {
-                if (snackbar.parentElement) {
-                    snackbar.remove();
-                }
-            }, 300);
-        }, 4000);
-    }
+    // Auto-hide after 4 seconds
+    setTimeout(() => {
+      snackbar.classList.remove('m3-snackbar--show');
+      setTimeout(() => {
+        if (snackbar.parentElement) {
+          snackbar.remove();
+        }
+      }, 300);
+    }, 4000);
+  }
 
-    /**
-     * Create dialog
-     */
-    createDialog(title, content, actions = []) {
-        const dialog = document.createElement('div');
-        dialog.className = 'm3-dialog';
-        dialog.innerHTML = `
+  /**
+   * Create dialog
+   */
+  createDialog(title, content, actions = []) {
+    const dialog = document.createElement('div');
+    dialog.className = 'm3-dialog';
+    dialog.innerHTML = `
       <div class="m3-dialog__backdrop"></div>
       <div class="m3-dialog__container">
         <div class="m3-dialog__header">
@@ -264,56 +228,56 @@ class SPAComponents {
       </div>
     `;
 
-        document.body.appendChild(dialog);
+    document.body.appendChild(dialog);
 
-        // Show dialog
-        setTimeout(() => {
-            dialog.classList.add('m3-dialog--show');
-        }, 100);
+    // Show dialog
+    setTimeout(() => {
+      dialog.classList.add('m3-dialog--show');
+    }, 100);
 
-        return dialog;
-    }
+    return dialog;
+  }
 
-    /**
-     * Create progress indicator
-     */
-    createProgressIndicator(type = 'circular') {
-        const progress = document.createElement('div');
-        progress.className = `m3-progress m3-progress--${type}`;
+  /**
+   * Create progress indicator
+   */
+  createProgressIndicator(type = 'circular') {
+    const progress = document.createElement('div');
+    progress.className = `m3-progress m3-progress--${type}`;
 
-        if (type === 'circular') {
-            progress.innerHTML = `
+    if (type === 'circular') {
+      progress.innerHTML = `
         <div class="m3-circular-progress">
           <div class="m3-circular-progress__circle"></div>
         </div>
       `;
-        } else {
-            progress.innerHTML = `
+    } else {
+      progress.innerHTML = `
         <div class="m3-linear-progress">
           <div class="m3-linear-progress__bar"></div>
         </div>
       `;
-        }
-
-        return progress;
     }
 
-    /**
-     * Create skeleton loader
-     */
-    createSkeletonLoader(lines = 3) {
-        const skeleton = document.createElement('div');
-        skeleton.className = 'm3-skeleton';
+    return progress;
+  }
 
-        for (let i = 0; i < lines; i++) {
-            const line = document.createElement('div');
-            line.className = 'm3-skeleton__line';
-            line.style.width = `${Math.random() * 40 + 60}%`;
-            skeleton.appendChild(line);
-        }
+  /**
+   * Create skeleton loader
+   */
+  createSkeletonLoader(lines = 3) {
+    const skeleton = document.createElement('div');
+    skeleton.className = 'm3-skeleton';
 
-        return skeleton;
+    for (let i = 0; i < lines; i++) {
+      const line = document.createElement('div');
+      line.className = 'm3-skeleton__line';
+      line.style.width = `${Math.random() * 40 + 60}%`;
+      skeleton.appendChild(line);
     }
+
+    return skeleton;
+  }
 }
 
 // Add CSS for components
@@ -507,10 +471,10 @@ document.head.insertAdjacentHTML('beforeend', componentStyles);
 
 // Initialize components when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    window.spaComponents = new SPAComponents();
+  window.spaComponents = new SPAComponents();
 });
 
 // Export for module systems
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = SPAComponents;
+  module.exports = SPAComponents;
 }

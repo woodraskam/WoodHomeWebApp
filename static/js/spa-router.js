@@ -139,8 +139,7 @@ class SPARouter {
         // Hide all sections
         this.hideAllSections();
 
-        // Show loading indicator
-        this.showLoadingIndicator();
+        // Loading indicator removed to prevent overlay issues
 
         // Load section-specific content
         this.loadSectionContent(section);
@@ -156,25 +155,7 @@ class SPARouter {
         });
     }
 
-    /**
-     * Show loading indicator
-     */
-    showLoadingIndicator() {
-        const loading = document.getElementById('content-loading');
-        if (loading) {
-            loading.style.display = 'flex';
-        }
-    }
-
-    /**
-     * Hide loading indicator
-     */
-    hideLoadingIndicator() {
-        const loading = document.getElementById('content-loading');
-        if (loading) {
-            loading.style.display = 'none';
-        }
-    }
+    // Loading indicator methods removed to prevent overlay issues
 
     /**
      * Load section-specific content
@@ -188,7 +169,7 @@ class SPARouter {
 
         // Simulate loading delay for smooth transitions
         setTimeout(() => {
-            this.hideLoadingIndicator();
+            // Loading indicator removed - no longer needed
             this.showSection(section);
         }, 150);
     }
