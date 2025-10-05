@@ -79,10 +79,19 @@ func (s *CalendarService) GetCalendars(ctx context.Context, token *oauth2.Token)
 	// Convert to our CalendarInfo format
 	var calendars []CalendarInfo
 	for _, cal := range calendarList.Items {
+		// Use the actual background color from Google Calendar
+		var color string
+		if cal.BackgroundColor != "" {
+			color = cal.BackgroundColor
+		} else {
+			// Fallback to color ID mapping if background color is not available
+			color = s.getCalendarColor(cal.ColorId)
+		}
+
 		calendarInfo := CalendarInfo{
 			ID:    cal.Id,
 			Name:  cal.Summary,
-			Color: s.getCalendarColor(cal.ColorId),
+			Color: color,
 		}
 		calendars = append(calendars, calendarInfo)
 	}
@@ -349,7 +358,12 @@ func (s *CalendarService) GetCalendarEvents(ctx context.Context, token *oauth2.T
 				event.ExtendedProperties.Private = make(map[string]string)
 			}
 			event.ExtendedProperties.Private["calendarName"] = cal.Summary
-			event.ExtendedProperties.Private["calendarColor"] = s.getCalendarColor(cal.ColorId)
+			// Use the actual background color from Google Calendar
+			if cal.BackgroundColor != "" {
+				event.ExtendedProperties.Private["calendarColor"] = cal.BackgroundColor
+			} else {
+				event.ExtendedProperties.Private["calendarColor"] = s.getCalendarColor(cal.ColorId)
+			}
 			event.ExtendedProperties.Private["calendarId"] = cal.Id
 			allEvents = append(allEvents, event)
 		}

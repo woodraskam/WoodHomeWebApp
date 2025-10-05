@@ -2573,52 +2573,52 @@
         align-items: flex-start;
         gap: var(--m3-spacing-sm);
     }
-    
+
     .calendar-filter-actions {
         width: 100%;
         justify-content: space-between;
         flex-wrap: wrap;
         gap: var(--m3-spacing-xs);
     }
-    
+
     .calendar-filter-label {
         padding: var(--m3-spacing-md);
     }
-    
+
     .color-legend-grid {
         grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     }
-    
+
     /* Mobile Event Display */
     .m3-event-item {
         flex-direction: column;
         gap: var(--m3-spacing-sm);
     }
-    
+
     .m3-event-item__time {
         min-width: auto;
         font-size: 0.75rem;
         font-weight: 600;
         color: var(--m3-primary);
     }
-    
+
     .m3-event-item__header {
         flex-direction: column;
         align-items: flex-start;
         gap: var(--m3-spacing-xs);
     }
-    
+
     .m3-event-item__badges {
         width: 100%;
         justify-content: flex-start;
     }
-    
+
     .m3-event-item__meta {
         flex-direction: column;
         align-items: flex-start;
         gap: var(--m3-spacing-xs);
     }
-    
+
     .m3-event-item__calendar {
         font-size: 0.7rem;
     }
@@ -2629,11 +2629,11 @@
     .calendar-filter-actions {
         flex-wrap: wrap;
     }
-    
+
     .color-legend-grid {
         grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
     }
-    
+
     .m3-event-item__header {
         flex-wrap: wrap;
     }
@@ -2645,20 +2645,20 @@
         flex-direction: column;
         width: 100%;
     }
-    
+
     .calendar-filter-actions .m3-button {
         width: 100%;
         justify-content: center;
     }
-    
+
     .color-legend-grid {
         grid-template-columns: 1fr;
     }
-    
+
     .m3-event-item {
         padding: var(--m3-spacing-sm);
     }
-    
+
     .m3-event-item__badge {
         font-size: 0.5rem;
         padding: 1px 4px;
@@ -2670,7 +2670,7 @@
     .m3-event-item {
         transition: none;
     }
-    
+
     .m3-event-item:hover {
         transform: none;
     }
@@ -2681,11 +2681,11 @@
     .m3-event-item {
         border: 2px solid var(--m3-outline);
     }
-    
+
     .m3-event-item__badge {
         border: 1px solid currentColor;
     }
-    
+
     .calendar-filter-color,
     .color-legend-swatch {
         border: 2px solid var(--m3-outline);

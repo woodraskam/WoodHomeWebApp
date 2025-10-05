@@ -508,7 +508,9 @@ class CalendarSection extends AuthenticatedSection {
                 const eventElement = document.createElement('div');
                 eventElement.className = 'm3-calendar-day__event';
                 eventElement.textContent = event.title;
-                eventElement.style.backgroundColor = event.color || '#3788d8';
+                // Use calendar color if available, otherwise use event color, otherwise default
+                const eventColor = event.calendarColor || event.color || '#3788d8';
+                eventElement.style.backgroundColor = eventColor;
                 eventsContainer.appendChild(eventElement);
             });
 
@@ -574,7 +576,7 @@ class CalendarSection extends AuthenticatedSection {
             const calendarName = this.getCalendarName(event.calendarId);
             const eventType = this.getEventType(event);
             const eventIcon = this.getEventIcon(event);
-            
+
             return `
                 <div class="m3-event-item" style="border-left: 4px solid ${eventColor}">
                     <div class="m3-event-item__time">
@@ -790,7 +792,7 @@ class CalendarSection extends AuthenticatedSection {
 
     updateEventCounts() {
         if (!this.calendars || !this.events) return;
-        
+
         // Count events per calendar
         const eventCounts = {};
         this.calendars.forEach(cal => {
@@ -810,38 +812,38 @@ class CalendarSection extends AuthenticatedSection {
     getEventType(event) {
         const title = event.title.toLowerCase();
         const description = (event.description || '').toLowerCase();
-        
+
         // Meeting indicators
         if (title.includes('meeting') || title.includes('call') || title.includes('zoom') || title.includes('teams')) {
             return 'meeting';
         }
-        
+
         // Reminder indicators
         if (title.includes('reminder') || title.includes('remind') || title.includes('alert')) {
             return 'reminder';
         }
-        
+
         // Appointment indicators
         if (title.includes('appointment') || title.includes('appt') || title.includes('visit')) {
             return 'appointment';
         }
-        
+
         // Birthday indicators
         if (title.includes('birthday') || title.includes('bday') || title.includes('anniversary')) {
             return 'celebration';
         }
-        
+
         // Work indicators
         if (title.includes('work') || title.includes('office') || title.includes('deadline')) {
             return 'work';
         }
-        
+
         return null;
     }
 
     getEventIcon(event) {
         const eventType = this.getEventType(event);
-        
+
         switch (eventType) {
             case 'meeting':
                 return '<span class="material-symbols-outlined">groups</span>';
