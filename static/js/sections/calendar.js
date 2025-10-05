@@ -145,91 +145,101 @@ class CalendarSection extends AuthenticatedSection {
 
     getCalendarSectionHTML() {
         return `
-            <div class="m3-section-header">
-                <div>
-                    <h1 class="m3-section-title">Calendar</h1>
-                    <p class="m3-section-subtitle">View your Google Calendar events</p>
-                </div>
-                <div class="m3-section-actions">
-                    <button class="m3-button m3-button--icon" id="calendar-refresh-btn" title="Refresh Calendar">
-                        <span class="material-symbols-outlined">refresh</span>
-                    </button>
-                    <button class="m3-button m3-button--icon" id="calendar-view-btn" title="Change View">
-                        <span class="material-symbols-outlined">view_module</span>
-                    </button>
+
+            <!-- Authentication Section -->
+            <div class="m3-card" id="calendar-auth-card">
+                <div class="m3-card__content">
+                    <div class="m3-calendar-auth">
+                        <div class="m3-calendar-auth__icon">
+                            <span class="material-symbols-outlined">event</span>
+                        </div>
+                        <div class="m3-calendar-auth__content">
+                            <h3 class="m3-calendar-auth__title">Connect to Google Calendar</h3>
+                            <p class="m3-calendar-auth__description">
+                                Sign in to view your calendar events and manage your schedule.
+                            </p>
+                            <button class="m3-button m3-button--primary" id="calendar-login-btn">
+                                <span class="material-symbols-outlined">login</span>
+                                Sign in with Google
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <div class="m3-calendar-container">
-                <!-- Authentication Section -->
-                <div class="m3-card" id="calendar-auth-card">
-                    <div class="m3-card__content">
-                        <div class="m3-calendar-auth">
-                            <div class="m3-calendar-auth__icon">
-                                <span class="material-symbols-outlined">event</span>
+            <!-- Split-Pane Layout -->
+            <div class="m3-calendar-split-container" id="calendar-split-container" style="display: none;">
+                <!-- Left Pane: Calendar and Filter -->
+                <div class="m3-calendar-left-pane">
+                    <!-- Calendar View -->
+                    <div class="m3-card" id="calendar-view-card">
+                        <div class="m3-card__header m3-calendar-header-container">
+                            <!-- Absolutely positioned Today and Refresh buttons -->
+                            <div class="m3-calendar-absolute-controls">
+                                <button class="m3-button m3-button--outlined" id="calendar-today-btn">Today</button>
+                                <button class="m3-button m3-button--icon" id="calendar-refresh-btn" title="Refresh Calendar">
+                                    <span class="material-symbols-outlined">refresh</span>
+                                </button>
                             </div>
-                            <div class="m3-calendar-auth__content">
-                                <h3 class="m3-calendar-auth__title">Connect to Google Calendar</h3>
-                                <p class="m3-calendar-auth__description">
-                                    Sign in to view your calendar events and manage your schedule.
-                                </p>
-                                <button class="m3-button m3-button--primary" id="calendar-login-btn">
-                                    <span class="material-symbols-outlined">login</span>
-                                    Sign in with Google
+                            
+                            <!-- Main header with centered content -->
+                            <div class="m3-calendar-main-header">
+                                <!-- Left arrow -->
+                                <button class="m3-button m3-button--icon m3-calendar-nav-arrow" id="calendar-prev-btn">
+                                    <span class="material-symbols-outlined">chevron_left</span>
+                                </button>
+                                
+                                <!-- Centered content -->
+                                <div class="m3-calendar-centered-content">
+                                    <h2 class="m3-calendar-title" id="calendar-title">Calendar</h2>
+                                    <div class="m3-calendar-view-controls">
+                                        <div class="m3-button-group">
+                                            <button class="m3-button m3-button--outlined m3-button--small" data-view="month">Month</button>
+                                            <button class="m3-button m3-button--outlined m3-button--small" data-view="week">Week</button>
+                                            <button class="m3-button m3-button--outlined m3-button--small" data-view="day">Day</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Right arrow -->
+                                <button class="m3-button m3-button--icon m3-calendar-nav-arrow" id="calendar-next-btn">
+                                    <span class="material-symbols-outlined">chevron_right</span>
                                 </button>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Calendar View -->
-                <div class="m3-card" id="calendar-view-card" style="display: none;">
-                    <div class="m3-card__header">
-                        <div class="m3-calendar-header">
-                            <button class="m3-button m3-button--icon" id="calendar-prev-btn">
-                                <span class="material-symbols-outlined">chevron_left</span>
-                            </button>
-                            <h2 class="m3-calendar-title" id="calendar-title">Calendar</h2>
-                            <button class="m3-button m3-button--icon" id="calendar-next-btn">
-                                <span class="material-symbols-outlined">chevron_right</span>
-                            </button>
-                        </div>
-                        <div class="m3-calendar-view-controls">
-                            <button class="m3-button m3-button--outlined" id="calendar-today-btn">Today</button>
-                            <div class="m3-button-group">
-                                <button class="m3-button m3-button--outlined m3-button--small" data-view="month">Month</button>
-                                <button class="m3-button m3-button--outlined m3-button--small" data-view="week">Week</button>
-                                <button class="m3-button m3-button--outlined m3-button--small" data-view="day">Day</button>
+                        <div class="m3-card__content">
+                            <div class="m3-calendar-grid" id="calendar-grid">
+                                <!-- Calendar content will be generated here -->
                             </div>
                         </div>
                     </div>
-                    <div class="m3-card__content">
-                        <div class="m3-calendar-grid" id="calendar-grid">
-                            <!-- Calendar content will be generated here -->
+
+                    <!-- Calendar Filter -->
+                    <div class="m3-card" id="calendar-filter-card">
+                        <div class="m3-card__header">
+                            <h3 class="m3-card__title">Calendar Filter</h3>
+                        </div>
+                        <div class="m3-card__content">
+                            <div id="calendar-filter">
+                                <!-- Calendar filter will be populated here -->
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Calendar Filter -->
-                <div class="m3-card" id="calendar-filter-card" style="display: none;">
-                    <div class="m3-card__header">
-                        <h3 class="m3-card__title">Calendar Filter</h3>
-                    </div>
-                    <div class="m3-card__content">
-                        <div id="calendar-filter">
-                            <!-- Calendar filter will be populated here -->
-                        </div>
-                    </div>
-                </div>
+                <!-- Resizable Splitter -->
+                <div class="m3-calendar-splitter" id="calendar-splitter"></div>
 
-                <!-- Events List -->
-                <div class="m3-card" id="calendar-events-card" style="display: none;">
-                    <div class="m3-card__header">
-                        <h3 class="m3-card__title">Upcoming Events</h3>
-                    </div>
-                    <div class="m3-card__content">
-                        <div class="m3-events-list" id="calendar-events-list">
-                            <!-- Events will be populated here -->
+                <!-- Right Pane: Events List -->
+                <div class="m3-calendar-right-pane">
+                    <div class="m3-card" id="calendar-events-card">
+                        <div class="m3-card__header">
+                            <h3 class="m3-card__title">Upcoming Events</h3>
+                        </div>
+                        <div class="m3-card__content">
+                            <div class="m3-events-list" id="calendar-events-list">
+                                <!-- Events will be populated here -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -275,14 +285,10 @@ class CalendarSection extends AuthenticatedSection {
 
     showCalendarView() {
         const authCard = document.getElementById('calendar-auth-card');
-        const viewCard = document.getElementById('calendar-view-card');
-        const filterCard = document.getElementById('calendar-filter-card');
-        const eventsCard = document.getElementById('calendar-events-card');
+        const splitContainer = document.getElementById('calendar-split-container');
 
         if (authCard) authCard.style.display = 'none';
-        if (viewCard) viewCard.style.display = 'block';
-        if (filterCard) filterCard.style.display = 'block';
-        if (eventsCard) eventsCard.style.display = 'block';
+        if (splitContainer) splitContainer.style.display = 'grid';
     }
 
     setupCalendarEventListeners() {
@@ -322,6 +328,45 @@ class CalendarSection extends AuthenticatedSection {
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => this.loadEvents());
         }
+
+        // Splitter functionality
+        this.setupSplitter();
+    }
+
+    setupSplitter() {
+        const splitter = document.getElementById('calendar-splitter');
+        const container = document.getElementById('calendar-split-container');
+
+        if (!splitter || !container) return;
+
+        let isResizing = false;
+
+        splitter.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.body.style.cursor = 'col-resize';
+            document.body.style.userSelect = 'none';
+            e.preventDefault();
+        });
+
+        document.addEventListener('mousemove', (e) => {
+            if (!isResizing) return;
+
+            const containerRect = container.getBoundingClientRect();
+            const newLeftWidth = ((e.clientX - containerRect.left) / containerRect.width) * 100;
+
+            // Constrain between 20% and 80%
+            const constrainedWidth = Math.max(20, Math.min(80, newLeftWidth));
+
+            container.style.gridTemplateColumns = `${constrainedWidth}% 4px ${100 - constrainedWidth}%`;
+        });
+
+        document.addEventListener('mouseup', () => {
+            if (isResizing) {
+                isResizing = false;
+                document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+            }
+        });
     }
 
     async loadEvents() {

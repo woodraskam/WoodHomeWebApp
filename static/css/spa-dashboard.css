@@ -2566,6 +2566,150 @@
     margin-bottom: var(--m3-spacing-xs);
 }
 
+/* Calendar Header Layout */
+.m3-calendar-header-container {
+    position: relative;
+    min-height: 120px;
+    /* Fixed height for header */
+}
+
+.m3-calendar-absolute-controls {
+    position: absolute;
+    top: var(--m3-spacing-md);
+    left: var(--m3-spacing-md);
+    display: flex;
+    gap: var(--m3-spacing-sm);
+    z-index: 10;
+}
+
+.m3-calendar-main-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    padding: var(--m3-spacing-md);
+}
+
+.m3-calendar-centered-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    gap: var(--m3-spacing-sm);
+}
+
+.m3-calendar-title {
+    margin: 0;
+    text-align: center;
+}
+
+.m3-calendar-view-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.m3-calendar-view-controls .m3-button-group {
+    display: flex;
+    gap: var(--m3-spacing-xs);
+}
+
+.m3-calendar-nav-arrow {
+    flex-shrink: 0;
+    margin: 0 var(--m3-spacing-xs);
+}
+
+/* Calendar Split-Pane Layout */
+.m3-calendar-split-container {
+    display: grid;
+    grid-template-columns: 1fr 4px 1fr;
+    gap: 0;
+    height: calc(100vh - 140px);
+    /* Full height minus header height */
+    min-height: 600px;
+    margin: var(--m3-spacing-md) 0;
+}
+
+/* Calendar Grid Full Height */
+.m3-calendar-grid {
+    height: calc(100% - 120px);
+    /* Full height minus header */
+    overflow-y: auto;
+}
+
+.m3-calendar-left-pane {
+    display: flex;
+    flex-direction: column;
+    gap: var(--m3-spacing-md);
+    min-width: 0;
+    overflow: hidden;
+}
+
+.m3-calendar-right-pane {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    overflow: hidden;
+}
+
+.m3-calendar-splitter {
+    width: 4px;
+    background: var(--m3-outline-variant);
+    cursor: col-resize;
+    transition: background-color 0.2s ease;
+    position: relative;
+}
+
+.m3-calendar-splitter:hover {
+    background: var(--m3-primary);
+}
+
+.m3-calendar-splitter::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 2px;
+    height: 20px;
+    background: var(--m3-on-surface-variant);
+    border-radius: 1px;
+}
+
+/* Calendar Split-Pane Responsive Design */
+@media (max-width: 1024px) {
+    .m3-calendar-split-container {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto auto;
+        height: auto;
+        min-height: auto;
+    }
+
+    .m3-calendar-splitter {
+        display: none;
+    }
+
+    .m3-calendar-left-pane {
+        order: 1;
+    }
+
+    .m3-calendar-right-pane {
+        order: 2;
+    }
+}
+
+@media (max-width: 768px) {
+    .m3-calendar-split-container {
+        margin: var(--m3-spacing-sm) 0;
+    }
+
+    .m3-calendar-left-pane,
+    .m3-calendar-right-pane {
+        gap: var(--m3-spacing-sm);
+    }
+}
+
 /* Calendar Filter Responsive Design */
 @media (max-width: 768px) {
     .calendar-filter-header {
