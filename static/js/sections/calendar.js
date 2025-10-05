@@ -346,6 +346,7 @@ class CalendarSection extends AuthenticatedSection {
                 this.renderCalendar();
                 this.renderEventsList();
                 this.renderCalendarFilter();
+                this.updateEventCounts();
             } else {
                 console.error('Failed to load calendar events:', response.status, response.statusText);
                 // If we get a 401 or 403, we might need to re-authenticate
@@ -365,7 +366,7 @@ class CalendarSection extends AuthenticatedSection {
             if (response.ok) {
                 this.calendars = await response.json();
                 console.log('CalendarSection: Loaded calendars:', this.calendars);
-                
+
                 // Select all calendars by default
                 this.calendars.forEach(cal => this.selectedCalendars.add(cal.id));
             } else {
@@ -571,16 +572,26 @@ class CalendarSection extends AuthenticatedSection {
             // Use calendar color if available, otherwise use event color, otherwise default
             const eventColor = event.calendarColor || event.color || '#3788d8';
             const calendarName = this.getCalendarName(event.calendarId);
+            const eventType = this.getEventType(event);
+            const eventIcon = this.getEventIcon(event);
             
             return `
-                <div class="m3-event-item">
+                <div class="m3-event-item" style="border-left: 4px solid ${eventColor}">
                     <div class="m3-event-item__time">
                         ${this.formatEventTime(event)}
                     </div>
                     <div class="m3-event-item__content">
-                        <h4 class="m3-event-item__title">${event.title}</h4>
+                        <div class="m3-event-item__header">
+                            <h4 class="m3-event-item__title">${event.title}</h4>
+                            <div class="m3-event-item__badges">
+                                ${eventType ? `<span class="m3-event-item__badge m3-event-item__badge--${eventType}">${eventType}</span>` : ''}
+                                ${event.allDay ? '<span class="m3-event-item__badge m3-event-item__badge--all-day">All Day</span>' : ''}
+                            </div>
+                        </div>
                         ${event.description ? `<p class="m3-event-item__description">${event.description}</p>` : ''}
-                        ${calendarName ? `<p class="m3-event-item__calendar">${calendarName}</p>` : ''}
+                        <div class="m3-event-item__meta">
+                            ${calendarName ? `<span class="m3-event-item__calendar">${eventIcon} ${calendarName}</span>` : ''}
+                        </div>
                     </div>
                     <div class="m3-event-item__color" style="background-color: ${eventColor}"></div>
                 </div>
@@ -673,12 +684,27 @@ class CalendarSection extends AuthenticatedSection {
 
         filterContainer.innerHTML = `
             <div class="calendar-filter-header">
-                <h3>Calendars</h3>
+                <h3>Calendar Management</h3>
                 <div class="calendar-filter-actions">
                     <button class="m3-button m3-button--text" id="select-all-calendars">Select All</button>
                     <button class="m3-button m3-button--text" id="deselect-all-calendars">Deselect All</button>
+                    <button class="m3-button m3-button--text" id="toggle-color-legend">Color Legend</button>
                 </div>
             </div>
+            
+            <!-- Color Legend -->
+            <div class="calendar-color-legend" id="calendar-color-legend" style="display: none;">
+                <h4>Color Legend</h4>
+                <div class="color-legend-grid">
+                    ${this.colorPalette.slice(0, 12).map(color => `
+                        <div class="color-legend-item">
+                            <span class="color-legend-swatch" style="background-color: ${color.color}"></span>
+                            <span class="color-legend-name">${color.name}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+
             <div class="calendar-filter-list">
                 ${this.calendars.map(cal => `
                     <div class="calendar-filter-item">
@@ -689,6 +715,7 @@ class CalendarSection extends AuthenticatedSection {
                                    ${this.selectedCalendars.has(cal.id) ? 'checked' : ''}>
                             <span class="calendar-filter-color" style="background-color: ${cal.color}"></span>
                             <span class="calendar-filter-name">${cal.name}</span>
+                            <span class="calendar-filter-count" id="count-${cal.id}">0 events</span>
                         </label>
                     </div>
                 `).join('')}
@@ -720,6 +747,19 @@ class CalendarSection extends AuthenticatedSection {
             });
         }
 
+        // Toggle color legend
+        const toggleLegendBtn = document.getElementById('toggle-color-legend');
+        if (toggleLegendBtn) {
+            toggleLegendBtn.addEventListener('click', () => {
+                const legend = document.getElementById('calendar-color-legend');
+                if (legend) {
+                    const isVisible = legend.style.display !== 'none';
+                    legend.style.display = isVisible ? 'none' : 'block';
+                    toggleLegendBtn.textContent = isVisible ? 'Color Legend' : 'Hide Legend';
+                }
+            });
+        }
+
         // Individual calendar checkboxes
         const checkboxes = document.querySelectorAll('.calendar-filter-checkbox');
         checkboxes.forEach(checkbox => {
@@ -747,6 +787,76 @@ class CalendarSection extends AuthenticatedSection {
         const calendar = this.calendars.find(cal => cal.id === calendarId);
         return calendar ? calendar.name : null;
     }
+
+    updateEventCounts() {
+        if (!this.calendars || !this.events) return;
+        
+        // Count events per calendar
+        const eventCounts = {};
+        this.calendars.forEach(cal => {
+            eventCounts[cal.id] = this.events.filter(event => event.calendarId === cal.id).length;
+        });
+
+        // Update the count displays
+        this.calendars.forEach(cal => {
+            const countElement = document.getElementById(`count-${cal.id}`);
+            if (countElement) {
+                const count = eventCounts[cal.id] || 0;
+                countElement.textContent = `${count} event${count !== 1 ? 's' : ''}`;
+            }
+        });
+    }
+
+    getEventType(event) {
+        const title = event.title.toLowerCase();
+        const description = (event.description || '').toLowerCase();
+        
+        // Meeting indicators
+        if (title.includes('meeting') || title.includes('call') || title.includes('zoom') || title.includes('teams')) {
+            return 'meeting';
+        }
+        
+        // Reminder indicators
+        if (title.includes('reminder') || title.includes('remind') || title.includes('alert')) {
+            return 'reminder';
+        }
+        
+        // Appointment indicators
+        if (title.includes('appointment') || title.includes('appt') || title.includes('visit')) {
+            return 'appointment';
+        }
+        
+        // Birthday indicators
+        if (title.includes('birthday') || title.includes('bday') || title.includes('anniversary')) {
+            return 'celebration';
+        }
+        
+        // Work indicators
+        if (title.includes('work') || title.includes('office') || title.includes('deadline')) {
+            return 'work';
+        }
+        
+        return null;
+    }
+
+    getEventIcon(event) {
+        const eventType = this.getEventType(event);
+        
+        switch (eventType) {
+            case 'meeting':
+                return '<span class="material-symbols-outlined">groups</span>';
+            case 'reminder':
+                return '<span class="material-symbols-outlined">notifications</span>';
+            case 'appointment':
+                return '<span class="material-symbols-outlined">event_available</span>';
+            case 'celebration':
+                return '<span class="material-symbols-outlined">cake</span>';
+            case 'work':
+                return '<span class="material-symbols-outlined">work</span>';
+            default:
+                return '<span class="material-symbols-outlined">event</span>';
+        }
+    }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -755,3 +865,4 @@ document.addEventListener('DOMContentLoaded', () => {
         window.calendarSection = new CalendarSection();
     }
 });
+
