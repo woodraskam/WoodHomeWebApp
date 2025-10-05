@@ -81,18 +81,6 @@ class HueSection extends AuthenticatedSection {
               </div>
       </div>
       
-      <!-- Configuration Card -->
-      <div class="m3-card" id="hue-config-card">
-        <div class="m3-card-header">
-          <h3 class="m3-card-title">Configuration</h3>
-        </div>
-        <div class="m3-card-content" id="hue-config-content">
-          <div class="hue-loading">
-            <div class="m3-circular-progress"></div>
-            <p>Checking Hue configuration...</p>
-          </div>
-        </div>
-      </div>
       
 
       <!-- Rooms Section -->
@@ -152,7 +140,7 @@ class HueSection extends AuthenticatedSection {
             <div class="m3-dialog-container">
                 <div class="m3-dialog-surface">
                     <div class="m3-dialog-header">
-                        <h2 class="m3-dialog-title">Hue System Status</h2>
+                        <h2 class="m3-dialog-title">Hue Configuration</h2>
                         <button class="m3-button m3-button--icon m3-dialog-close" id="hue-popup-close">
                             <span class="material-symbols-outlined">close</span>
                         </button>
@@ -160,7 +148,7 @@ class HueSection extends AuthenticatedSection {
                     <div class="m3-dialog-content" id="hue-popup-content">
                         <div class="hue-loading">
                             <div class="m3-circular-progress"></div>
-                            <p>Loading system status...</p>
+                            <p>Loading configuration...</p>
                         </div>
                     </div>
                 </div>
@@ -175,7 +163,7 @@ class HueSection extends AuthenticatedSection {
         const infoBtn = document.getElementById('hue-info-btn');
         if (infoBtn) {
             infoBtn.addEventListener('click', () => {
-                this.showStatusPopup();
+                this.showConfigurationPopup();
             });
         }
 
@@ -314,7 +302,6 @@ class HueSection extends AuthenticatedSection {
 
         try {
             await Promise.all([
-                this.loadConfiguration(),
                 this.loadRooms(),
                 this.loadScenes(),
                 this.loadLights()
@@ -428,7 +415,7 @@ class HueSection extends AuthenticatedSection {
     }
 
     updateConfiguration(status) {
-        const content = document.getElementById('hue-config-content');
+        const content = document.getElementById('hue-popup-content');
         if (!content) return;
 
         if (status.error) {
@@ -914,6 +901,14 @@ class HueSection extends AuthenticatedSection {
                     <p>${message}</p>
                 </div>
             `;
+        }
+    }
+
+    async showConfigurationPopup() {
+        const popup = document.getElementById('hue-status-popup');
+        if (popup) {
+            popup.style.display = 'flex';
+            await this.loadConfiguration();
         }
     }
 
