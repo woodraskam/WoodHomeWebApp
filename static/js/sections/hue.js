@@ -81,7 +81,21 @@ class HueSection extends AuthenticatedSection {
               </div>
       </div>
       
-      
+      <!-- View Toggle -->
+      <div class="m3-card" id="hue-view-toggle-card">
+        <div class="m3-card-content">
+          <div class="m3-toggle-group">
+            <button class="m3-button m3-button--toggle m3-button--toggle--active" id="hue-rooms-toggle" data-view="rooms">
+              <span class="material-symbols-outlined">home</span>
+              Rooms
+            </button>
+            <button class="m3-button m3-button--toggle" id="hue-lights-toggle" data-view="lights">
+              <span class="material-symbols-outlined">lightbulb</span>
+              Lights
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- Rooms Section -->
       <div class="m3-card" id="hue-rooms-card">
@@ -96,21 +110,8 @@ class HueSection extends AuthenticatedSection {
         </div>
       </div>
 
-      <!-- Scenes Section -->
-      <div class="m3-card" id="hue-scenes-card">
-        <div class="m3-card-header">
-          <h3 class="m3-card-title">Scenes</h3>
-        </div>
-        <div class="m3-card-content" id="hue-scenes-content">
-          <div class="hue-loading">
-            <div class="m3-circular-progress"></div>
-            <p>Loading scenes...</p>
-          </div>
-        </div>
-      </div>
-
       <!-- Individual Lights Section -->
-      <div class="m3-card" id="hue-lights-card">
+      <div class="m3-card" id="hue-lights-card" style="display: none;">
         <div class="m3-card-header">
           <h3 class="m3-card-title">Individual Lights</h3>
         </div>
@@ -188,6 +189,22 @@ class HueSection extends AuthenticatedSection {
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => {
                 this.refreshData();
+            });
+        }
+
+        // View toggle buttons
+        const roomsToggle = document.getElementById('hue-rooms-toggle');
+        const lightsToggle = document.getElementById('hue-lights-toggle');
+        
+        if (roomsToggle) {
+            roomsToggle.addEventListener('click', () => {
+                this.switchView('rooms');
+            });
+        }
+        
+        if (lightsToggle) {
+            lightsToggle.addEventListener('click', () => {
+                this.switchView('lights');
             });
         }
     }
@@ -303,7 +320,6 @@ class HueSection extends AuthenticatedSection {
         try {
             await Promise.all([
                 this.loadRooms(),
-                this.loadScenes(),
                 this.loadLights()
             ]);
             console.log('HueSection: All data loaded successfully');
@@ -326,6 +342,42 @@ class HueSection extends AuthenticatedSection {
 
         if (refreshBtn) {
             refreshBtn.classList.remove('m3-button--loading');
+        }
+    }
+
+    switchView(view) {
+        console.log('HueSection: Switching to view:', view);
+        
+        // Update toggle button states
+        const roomsToggle = document.getElementById('hue-rooms-toggle');
+        const lightsToggle = document.getElementById('hue-lights-toggle');
+        const roomsCard = document.getElementById('hue-rooms-card');
+        const lightsCard = document.getElementById('hue-lights-card');
+        
+        if (view === 'rooms') {
+            // Show rooms, hide lights
+            if (roomsCard) roomsCard.style.display = 'block';
+            if (lightsCard) lightsCard.style.display = 'none';
+            
+            // Update toggle button states
+            if (roomsToggle) {
+                roomsToggle.classList.add('m3-button--toggle--active');
+            }
+            if (lightsToggle) {
+                lightsToggle.classList.remove('m3-button--toggle--active');
+            }
+        } else if (view === 'lights') {
+            // Show lights, hide rooms
+            if (roomsCard) roomsCard.style.display = 'none';
+            if (lightsCard) lightsCard.style.display = 'block';
+            
+            // Update toggle button states
+            if (roomsToggle) {
+                roomsToggle.classList.remove('m3-button--toggle--active');
+            }
+            if (lightsToggle) {
+                lightsToggle.classList.add('m3-button--toggle--active');
+            }
         }
     }
 

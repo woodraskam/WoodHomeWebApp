@@ -2973,3 +2973,48 @@
         width: 100%;
     }
 }
+
+/* Hue View Toggle Styles */
+.m3-toggle-group {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    align-items: center;
+}
+
+.m3-button--toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: 2px solid var(--md-sys-color-outline);
+    background-color: transparent;
+    color: var(--md-sys-color-on-surface);
+    border-radius: 24px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    min-width: 120px;
+    justify-content: center;
+}
+
+.m3-button--toggle:hover {
+    background-color: var(--md-sys-color-surface-container-highest);
+    border-color: var(--md-sys-color-primary);
+}
+
+.m3-button--toggle--active {
+    background-color: var(--md-sys-color-primary);
+    border-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+}
+
+.m3-button--toggle--active:hover {
+    background-color: var(--md-sys-color-primary-container);
+    border-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.m3-button--toggle .material-symbols-outlined {
+    font-size: 20px;
+}
