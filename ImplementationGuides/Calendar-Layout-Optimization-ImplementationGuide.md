@@ -77,6 +77,10 @@ Optimize the Calendar section layout by removing redundant headers, consolidatin
     min-width: 0;
 }
 
+#calendar-section{
+    height: calc(100% - 16px);
+}
+
 /* Right pane */
 .calendar-right-pane {
     display: flex;

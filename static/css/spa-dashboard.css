@@ -10,7 +10,6 @@
 /* Content Area Adjustments */
 .m3-content-area {
     flex: 1;
-    padding: var(--m3-spacing-xl);
     overflow-y: auto;
     transition: all var(--m3-motion-duration-medium2) var(--m3-motion-easing-standard);
 }
@@ -231,9 +230,6 @@
 
 /* Responsive Adjustments */
 @media (max-width: 768px) {
-    .m3-content-area {
-        padding: var(--m3-spacing-lg);
-    }
 
     .m3-dashboard-grid {
         grid-template-columns: 1fr;
@@ -253,9 +249,6 @@
 }
 
 @media (max-width: 480px) {
-    .m3-content-area {
-        padding: var(--m3-spacing-md);
-    }
 
     .m3-dashboard-widget {
         padding: var(--m3-spacing-lg);
@@ -277,7 +270,6 @@
 
     .m3-content-area {
         margin-left: 0 !important;
-        padding: 0 !important;
     }
 }
 
@@ -2713,13 +2705,17 @@
     display: grid;
     grid-template-columns: 1fr 4px 1fr;
     gap: 0;
-    height: calc(100vh - 140px);
+    height: calc(100vh - 40px);
     /* Full height minus header height */
     min-height: 600px;
     margin: var(--m3-spacing-md) 0;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
+}
+
+#calendar-view-card {
+    height: 100%;
 }
 
 /* Calendar Grid Full Height */
@@ -2965,123 +2961,6 @@
     border: 0;
 }
 
-/* Cache Management Styles */
-.m3-cache-management {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-}
-
-.m3-cache-info {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-}
-
-.m3-cache-age {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.m3-cache-label {
-    font-size: 14px;
-    color: var(--m3-color-on-surface-variant);
-    font-weight: 500;
-}
-
-.m3-cache-value {
-    font-size: 14px;
-    color: var(--m3-color-on-surface);
-    font-weight: 400;
-}
-
-.m3-cache-stats {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.cache-stat {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 4px 0;
-}
-
-.cache-stat .stat-label {
-    font-size: 12px;
-    color: var(--m3-color-on-surface-variant);
-    font-weight: 400;
-}
-
-.cache-stat .stat-value {
-    font-size: 12px;
-    color: var(--m3-color-on-surface);
-    font-weight: 500;
-}
-
-.m3-cache-actions {
-    display: flex;
-    gap: 8px;
-    flex-wrap: wrap;
-}
-
-.m3-cache-actions .m3-button {
-    flex: 1;
-    min-width: 120px;
-}
-
-.cache-status-indicator {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-    display: inline-block;
-    margin-left: 8px;
-}
-
-.cache-status-indicator.healthy {
-    background-color: #4caf50;
-    box-shadow: 0 0 0 2px rgba(76, 175, 80, 0.2);
-}
-
-.cache-status-indicator.unhealthy {
-    background-color: #f44336;
-    box-shadow: 0 0 0 2px rgba(244, 67, 54, 0.2);
-}
-
-.loading-spinner {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border: 2px solid transparent;
-    border-top: 2px solid currentColor;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
-    margin-right: 8px;
-}
-
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-/* Responsive cache management */
-@media (max-width: 768px) {
-    .m3-cache-actions {
-        flex-direction: column;
-    }
-
-    .m3-cache-actions .m3-button {
-        flex: none;
-        width: 100%;
-    }
-}
 
 /* Hue View Toggle Styles */
 .m3-toggle-group {

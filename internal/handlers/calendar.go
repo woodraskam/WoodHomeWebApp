@@ -15,7 +15,7 @@ import (
 
 // CalendarHandler handles HTTP requests for calendar operations
 type CalendarHandler struct {
-	calendarService    *services.CalendarService
+	calendarService      *services.CalendarService
 	calendarCacheService *services.CalendarCacheService
 }
 
@@ -24,7 +24,7 @@ func NewCalendarHandler(calendarService *services.CalendarService) *CalendarHand
 	// Create calendar cache service with default configuration
 	cacheConfig := services.DefaultCalendarCacheConfig()
 	calendarCacheService := services.NewCalendarCacheService(calendarService, cacheConfig)
-	
+
 	return &CalendarHandler{
 		calendarService:      calendarService,
 		calendarCacheService: calendarCacheService,
@@ -39,7 +39,7 @@ func (h *CalendarHandler) RegisterRoutes(router *mux.Router) {
 	calendarRouter.HandleFunc("/events", h.GetEventsHandler).Methods("GET")
 	calendarRouter.HandleFunc("/calendars", h.GetCalendarsHandler).Methods("GET")
 	calendarRouter.HandleFunc("/colors", h.GetColorsHandler).Methods("GET")
-	
+
 	// Cache management routes
 	calendarRouter.HandleFunc("/cache/refresh", h.RefreshCacheHandler).Methods("POST")
 	calendarRouter.HandleFunc("/cache/stats", h.GetCacheStatsHandler).Methods("GET")
