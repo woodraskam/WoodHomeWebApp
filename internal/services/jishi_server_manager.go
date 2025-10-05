@@ -51,7 +51,7 @@ func (jsm *JishiServerManager) StartJishi() error {
 
 	// Check if Jishi is already running on the port
 	if jsm.IsJishiRunning() {
-		logrus.Info("Jishi server is already running on port %d", jsm.port)
+		logrus.Infof("Jishi server is already running on port %d", jsm.port)
 		jsm.isRunning = true
 		return nil
 	}
