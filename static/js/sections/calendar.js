@@ -669,13 +669,30 @@ class CalendarSection extends AuthenticatedSection {
         const eventsList = document.getElementById('calendar-events-list');
         if (!eventsList) return;
 
-        // Show all events in the current period, sorted by start time
-        const sortedEvents = this.events
+        // Filter events to show only upcoming events (today and later)
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Start of today
+        
+        const upcomingEvents = this.events.filter(event => {
+            const eventStart = new Date(event.start);
+            // For all-day events, compare dates only
+            if (event.allDay) {
+                const eventDate = new Date(eventStart.getFullYear(), eventStart.getMonth(), eventStart.getDate());
+                const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+                return eventDate >= todayDate;
+            } else {
+                // For timed events, compare with current time
+                return eventStart >= new Date();
+            }
+        });
+
+        // Sort by start time and limit to 10 events
+        const sortedEvents = upcomingEvents
             .sort((a, b) => new Date(a.start) - new Date(b.start))
             .slice(0, 10);
 
         if (sortedEvents.length === 0) {
-            eventsList.innerHTML = '<p class="m3-text--secondary">No events in this period</p>';
+            eventsList.innerHTML = '<p class="m3-text--secondary">No upcoming events</p>';
             return;
         }
 
