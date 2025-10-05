@@ -195,13 +195,13 @@ class HueSection extends AuthenticatedSection {
         // View toggle buttons
         const roomsToggle = document.getElementById('hue-rooms-toggle');
         const lightsToggle = document.getElementById('hue-lights-toggle');
-        
+
         if (roomsToggle) {
             roomsToggle.addEventListener('click', () => {
                 this.switchView('rooms');
             });
         }
-        
+
         if (lightsToggle) {
             lightsToggle.addEventListener('click', () => {
                 this.switchView('lights');
@@ -230,7 +230,15 @@ class HueSection extends AuthenticatedSection {
         console.log('HueSection: Show called');
         const section = document.getElementById('hue-section');
         if (section) {
-            section.classList.add('m3-section--active');
+            section.style.display = 'block';
+            section.classList.add('m3-section--transitioning');
+
+            // Trigger dissolve in animation
+            requestAnimationFrame(() => {
+                section.classList.remove('m3-section--transitioning');
+                section.classList.add('m3-section--active');
+                console.log('HueSection: Section shown with dissolve transition');
+            });
         }
     }
 
@@ -242,6 +250,14 @@ class HueSection extends AuthenticatedSection {
         const section = document.getElementById('hue-section');
         if (section) {
             section.classList.remove('m3-section--active');
+            section.classList.add('m3-section--transitioning');
+
+            // Wait for transition to complete before hiding
+            setTimeout(() => {
+                section.style.display = 'none';
+                section.classList.remove('m3-section--transitioning');
+                console.log('HueSection: Section hidden with dissolve transition');
+            }, 300); // Match the CSS transition duration
         }
     }
 
@@ -347,18 +363,18 @@ class HueSection extends AuthenticatedSection {
 
     switchView(view) {
         console.log('HueSection: Switching to view:', view);
-        
+
         // Update toggle button states
         const roomsToggle = document.getElementById('hue-rooms-toggle');
         const lightsToggle = document.getElementById('hue-lights-toggle');
         const roomsCard = document.getElementById('hue-rooms-card');
         const lightsCard = document.getElementById('hue-lights-card');
-        
+
         if (view === 'rooms') {
             // Show rooms, hide lights
             if (roomsCard) roomsCard.style.display = 'block';
             if (lightsCard) lightsCard.style.display = 'none';
-            
+
             // Update toggle button states
             if (roomsToggle) {
                 roomsToggle.classList.add('m3-button--toggle--active');
@@ -370,7 +386,7 @@ class HueSection extends AuthenticatedSection {
             // Show lights, hide rooms
             if (roomsCard) roomsCard.style.display = 'none';
             if (lightsCard) lightsCard.style.display = 'block';
-            
+
             // Update toggle button states
             if (roomsToggle) {
                 roomsToggle.classList.remove('m3-button--toggle--active');

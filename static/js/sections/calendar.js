@@ -75,7 +75,15 @@ class CalendarSection extends AuthenticatedSection {
         console.log('CalendarSection: Show called');
         const section = document.getElementById('calendar-section');
         if (section) {
-            section.classList.add('m3-section--active');
+            section.style.display = 'block';
+            section.classList.add('m3-section--transitioning');
+
+            // Trigger dissolve in animation
+            requestAnimationFrame(() => {
+                section.classList.remove('m3-section--transitioning');
+                section.classList.add('m3-section--active');
+                console.log('CalendarSection: Section shown with dissolve transition');
+            });
         }
     }
 
@@ -87,6 +95,14 @@ class CalendarSection extends AuthenticatedSection {
         const section = document.getElementById('calendar-section');
         if (section) {
             section.classList.remove('m3-section--active');
+            section.classList.add('m3-section--transitioning');
+
+            // Wait for transition to complete before hiding
+            setTimeout(() => {
+                section.style.display = 'none';
+                section.classList.remove('m3-section--transitioning');
+                console.log('CalendarSection: Section hidden with dissolve transition');
+            }, 300); // Match the CSS transition duration
         }
     }
 
@@ -672,7 +688,7 @@ class CalendarSection extends AuthenticatedSection {
         // Filter events to show only upcoming events (today and later)
         const today = new Date();
         today.setHours(0, 0, 0, 0); // Start of today
-        
+
         const upcomingEvents = this.events.filter(event => {
             const eventStart = new Date(event.start);
             // For all-day events, compare dates only
@@ -702,11 +718,13 @@ class CalendarSection extends AuthenticatedSection {
             const calendarName = this.getCalendarName(event.calendarId);
             const eventType = this.getEventType(event);
             const eventIcon = this.getEventIcon(event);
+            const timeInfo = this.formatEventTime(event);
 
             return `
                 <div class="m3-event-item" style="border-left: 4px solid ${eventColor}">
                     <div class="m3-event-item__time">
-                        ${this.formatEventTime(event)}
+                        <div class="m3-event-item__date">${timeInfo.date}</div>
+                        <div class="m3-event-item__time-range">${timeInfo.time}</div>
                     </div>
                     <div class="m3-event-item__content">
                         <div class="m3-event-item__header">
@@ -728,12 +746,33 @@ class CalendarSection extends AuthenticatedSection {
     }
 
     formatEventTime(event) {
-        if (event.allDay) {
-            return 'All day';
+        const start = new Date(event.start);
+        const today = new Date();
+        const oneWeekFromNow = new Date();
+        oneWeekFromNow.setDate(today.getDate() + 7);
+
+        // Calculate the difference in days
+        const eventDate = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+        const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const daysDifference = Math.ceil((eventDate - todayDate) / (1000 * 60 * 60 * 24));
+
+        let dateInfo = '';
+
+        if (daysDifference < 7) {
+            // Less than a week away - show day of the week
+            dateInfo = start.toLocaleDateString('en-US', { weekday: 'long' });
+        } else {
+            // More than a week away - show full date
+            dateInfo = start.toLocaleDateString('en-US', {
+                month: '2-digit',
+                day: '2-digit',
+                year: 'numeric'
+            });
         }
 
-        const start = new Date(event.start);
-        const end = new Date(event.end);
+        if (event.allDay) {
+            return { date: dateInfo, time: 'All day' };
+        }
 
         const startTime = start.toLocaleTimeString('en-US', {
             hour: 'numeric',
@@ -741,13 +780,13 @@ class CalendarSection extends AuthenticatedSection {
             hour12: true
         });
 
-        const endTime = end.toLocaleTimeString('en-US', {
+        const endTime = new Date(event.end).toLocaleTimeString('en-US', {
             hour: 'numeric',
             minute: '2-digit',
             hour12: true
         });
 
-        return `${startTime} - ${endTime}`;
+        return { date: dateInfo, time: `${startTime} - ${endTime}` };
     }
 
     navigateCalendar(direction) {
