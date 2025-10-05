@@ -225,6 +225,39 @@ class CalendarSection extends AuthenticatedSection {
                             </div>
                         </div>
                     </div>
+
+                    <!-- Cache Management -->
+                    <div class="m3-card" id="calendar-cache-card">
+                        <div class="m3-card__header">
+                            <h3 class="m3-card__title">Cache Management</h3>
+                            <div class="m3-card__actions">
+                                <div id="cache-status-indicator" class="cache-status-indicator healthy" title="Cache Status"></div>
+                            </div>
+                        </div>
+                        <div class="m3-card__content">
+                            <div class="m3-cache-management">
+                                <div class="m3-cache-info">
+                                    <div class="m3-cache-age">
+                                        <span class="m3-cache-label">Last Refresh:</span>
+                                        <span id="cache-age-display" class="m3-cache-value">Unknown</span>
+                                    </div>
+                                    <div id="cache-stats-display" class="m3-cache-stats">
+                                        <!-- Cache stats will be populated here -->
+                                    </div>
+                                </div>
+                                <div class="m3-cache-actions">
+                                    <button class="m3-button m3-button--outlined" id="cache-refresh-btn">
+                                        <span class="material-symbols-outlined">refresh</span>
+                                        Refresh Cache
+                                    </button>
+                                    <button class="m3-button m3-button--outlined" id="cache-clear-btn">
+                                        <span class="material-symbols-outlined">clear_all</span>
+                                        Clear Cache
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Resizable Splitter -->
@@ -328,6 +361,37 @@ class CalendarSection extends AuthenticatedSection {
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => this.loadEvents());
         }
+
+        // Cache management buttons
+        const cacheRefreshBtn = document.getElementById('cache-refresh-btn');
+        const cacheClearBtn = document.getElementById('cache-clear-btn');
+
+        if (cacheRefreshBtn) {
+            cacheRefreshBtn.addEventListener('click', () => {
+                document.dispatchEvent(new CustomEvent('cache-refresh-requested'));
+            });
+        }
+
+        if (cacheClearBtn) {
+            cacheClearBtn.addEventListener('click', () => {
+                document.dispatchEvent(new CustomEvent('cache-clear-requested'));
+            });
+        }
+
+        // Cache event listeners
+        document.addEventListener('cache-refreshed', (e) => {
+            if (e.detail.success) {
+                console.log('Cache refreshed successfully');
+                this.loadEvents(); // Reload events after cache refresh
+            }
+        });
+
+        document.addEventListener('cache-cleared', (e) => {
+            if (e.detail.success) {
+                console.log('Cache cleared successfully');
+                this.loadEvents(); // Reload events after cache clear
+            }
+        });
 
         // Splitter functionality
         this.setupSplitter();
