@@ -2299,3 +2299,142 @@
         font-size: 1.5rem;
     }
 }
+
+/* Calendar Filter Styles */
+.calendar-filter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--m3-spacing-md);
+}
+
+.calendar-filter-header h3 {
+    margin: 0;
+    color: var(--m3-on-surface);
+}
+
+.calendar-filter-actions {
+    display: flex;
+    gap: var(--m3-spacing-sm);
+}
+
+.calendar-filter-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--m3-spacing-sm);
+}
+
+.calendar-filter-item {
+    display: flex;
+    align-items: center;
+}
+
+.calendar-filter-label {
+    display: flex;
+    align-items: center;
+    gap: var(--m3-spacing-sm);
+    cursor: pointer;
+    padding: var(--m3-spacing-sm);
+    border-radius: var(--m3-shape-corner-small);
+    transition: background-color 0.2s ease;
+}
+
+.calendar-filter-label:hover {
+    background-color: var(--m3-surface-variant);
+}
+
+.calendar-filter-checkbox {
+    margin: 0;
+}
+
+.calendar-filter-color {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 1px solid var(--m3-outline);
+    flex-shrink: 0;
+}
+
+.calendar-filter-name {
+    color: var(--m3-on-surface);
+    font-size: 0.875rem;
+}
+
+/* Enhanced Event Display Styles */
+.m3-event-item {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--m3-spacing-md);
+    padding: var(--m3-spacing-md);
+    border-radius: var(--m3-shape-corner-medium);
+    background-color: var(--m3-surface);
+    border: 1px solid var(--m3-outline-variant);
+    margin-bottom: var(--m3-spacing-sm);
+    transition: all 0.2s ease;
+}
+
+.m3-event-item:hover {
+    background-color: var(--m3-surface-variant);
+    box-shadow: var(--m3-elevation-1);
+}
+
+.m3-event-item__time {
+    color: var(--m3-on-surface-variant);
+    font-size: 0.875rem;
+    font-weight: 500;
+    min-width: 80px;
+    flex-shrink: 0;
+}
+
+.m3-event-item__content {
+    flex: 1;
+}
+
+.m3-event-item__title {
+    margin: 0 0 var(--m3-spacing-xs) 0;
+    color: var(--m3-on-surface);
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.m3-event-item__description {
+    margin: 0 0 var(--m3-spacing-xs) 0;
+    color: var(--m3-on-surface-variant);
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.m3-event-item__calendar {
+    margin: 0;
+    color: var(--m3-primary);
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.m3-event-item__color {
+    width: 4px;
+    height: 100%;
+    border-radius: 2px;
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+/* Calendar Filter Responsive Design */
+@media (max-width: 768px) {
+    .calendar-filter-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--m3-spacing-sm);
+    }
+    
+    .calendar-filter-actions {
+        width: 100%;
+        justify-content: space-between;
+    }
+    
+    .calendar-filter-label {
+        padding: var(--m3-spacing-md);
+    }
+}

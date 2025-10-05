@@ -6,8 +6,11 @@ class CalendarSection extends AuthenticatedSection {
     constructor() {
         super();
         this.events = [];
+        this.calendars = [];
+        this.selectedCalendars = new Set();
         this.currentView = 'month';
         this.currentDate = new Date();
+        this.colorPalette = [];
         this.init();
     }
 
@@ -207,6 +210,18 @@ class CalendarSection extends AuthenticatedSection {
                     </div>
                 </div>
 
+                <!-- Calendar Filter -->
+                <div class="m3-card" id="calendar-filter-card" style="display: none;">
+                    <div class="m3-card__header">
+                        <h3 class="m3-card__title">Calendar Filter</h3>
+                    </div>
+                    <div class="m3-card__content">
+                        <div id="calendar-filter">
+                            <!-- Calendar filter will be populated here -->
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Events List -->
                 <div class="m3-card" id="calendar-events-card" style="display: none;">
                     <div class="m3-card__header">
@@ -249,20 +264,24 @@ class CalendarSection extends AuthenticatedSection {
     showAuthenticationView() {
         const authCard = document.getElementById('calendar-auth-card');
         const viewCard = document.getElementById('calendar-view-card');
+        const filterCard = document.getElementById('calendar-filter-card');
         const eventsCard = document.getElementById('calendar-events-card');
 
         if (authCard) authCard.style.display = 'block';
         if (viewCard) viewCard.style.display = 'none';
+        if (filterCard) filterCard.style.display = 'none';
         if (eventsCard) eventsCard.style.display = 'none';
     }
 
     showCalendarView() {
         const authCard = document.getElementById('calendar-auth-card');
         const viewCard = document.getElementById('calendar-view-card');
+        const filterCard = document.getElementById('calendar-filter-card');
         const eventsCard = document.getElementById('calendar-events-card');
 
         if (authCard) authCard.style.display = 'none';
         if (viewCard) viewCard.style.display = 'block';
+        if (filterCard) filterCard.style.display = 'block';
         if (eventsCard) eventsCard.style.display = 'block';
     }
 
@@ -309,6 +328,12 @@ class CalendarSection extends AuthenticatedSection {
         if (!this.isAuthenticated) return;
 
         try {
+            // Load calendars and colors first (only once)
+            if (this.calendars.length === 0) {
+                await this.loadCalendars();
+                await this.loadColorPalette();
+            }
+
             const start = this.getStartOfPeriod();
             const end = this.getEndOfPeriod();
 
@@ -320,6 +345,7 @@ class CalendarSection extends AuthenticatedSection {
                 console.log(`Loaded ${this.events.length} calendar events:`, this.events);
                 this.renderCalendar();
                 this.renderEventsList();
+                this.renderCalendarFilter();
             } else {
                 console.error('Failed to load calendar events:', response.status, response.statusText);
                 // If we get a 401 or 403, we might need to re-authenticate
@@ -330,6 +356,37 @@ class CalendarSection extends AuthenticatedSection {
             }
         } catch (error) {
             console.error('Error loading calendar events:', error);
+        }
+    }
+
+    async loadCalendars() {
+        try {
+            const response = await fetch('/api/calendar/calendars');
+            if (response.ok) {
+                this.calendars = await response.json();
+                console.log('CalendarSection: Loaded calendars:', this.calendars);
+                
+                // Select all calendars by default
+                this.calendars.forEach(cal => this.selectedCalendars.add(cal.id));
+            } else {
+                console.error('Failed to load calendars:', response.status, response.statusText);
+            }
+        } catch (error) {
+            console.error('CalendarSection: Error loading calendars:', error);
+        }
+    }
+
+    async loadColorPalette() {
+        try {
+            const response = await fetch('/api/calendar/colors');
+            if (response.ok) {
+                this.colorPalette = await response.json();
+                console.log('CalendarSection: Loaded color palette:', this.colorPalette);
+            } else {
+                console.error('Failed to load color palette:', response.status, response.statusText);
+            }
+        } catch (error) {
+            console.error('CalendarSection: Error loading color palette:', error);
         }
     }
 
@@ -510,18 +567,25 @@ class CalendarSection extends AuthenticatedSection {
             return;
         }
 
-        eventsList.innerHTML = sortedEvents.map(event => `
-            <div class="m3-event-item">
-                <div class="m3-event-item__time">
-                    ${this.formatEventTime(event)}
+        eventsList.innerHTML = sortedEvents.map(event => {
+            // Use calendar color if available, otherwise use event color, otherwise default
+            const eventColor = event.calendarColor || event.color || '#3788d8';
+            const calendarName = this.getCalendarName(event.calendarId);
+            
+            return `
+                <div class="m3-event-item">
+                    <div class="m3-event-item__time">
+                        ${this.formatEventTime(event)}
+                    </div>
+                    <div class="m3-event-item__content">
+                        <h4 class="m3-event-item__title">${event.title}</h4>
+                        ${event.description ? `<p class="m3-event-item__description">${event.description}</p>` : ''}
+                        ${calendarName ? `<p class="m3-event-item__calendar">${calendarName}</p>` : ''}
+                    </div>
+                    <div class="m3-event-item__color" style="background-color: ${eventColor}"></div>
                 </div>
-                <div class="m3-event-item__content">
-                    <h4 class="m3-event-item__title">${event.title}</h4>
-                    ${event.description ? `<p class="m3-event-item__description">${event.description}</p>` : ''}
-                </div>
-                <div class="m3-event-item__color" style="background-color: ${event.color || '#3788d8'}"></div>
-            </div>
-        `).join('');
+            `;
+        }).join('');
     }
 
     formatEventTime(event) {
@@ -601,6 +665,87 @@ class CalendarSection extends AuthenticatedSection {
         if (section) {
             section.classList.remove('m3-section--active');
         }
+    }
+
+    renderCalendarFilter() {
+        const filterContainer = document.getElementById('calendar-filter');
+        if (!filterContainer || this.calendars.length === 0) return;
+
+        filterContainer.innerHTML = `
+            <div class="calendar-filter-header">
+                <h3>Calendars</h3>
+                <div class="calendar-filter-actions">
+                    <button class="m3-button m3-button--text" id="select-all-calendars">Select All</button>
+                    <button class="m3-button m3-button--text" id="deselect-all-calendars">Deselect All</button>
+                </div>
+            </div>
+            <div class="calendar-filter-list">
+                ${this.calendars.map(cal => `
+                    <div class="calendar-filter-item">
+                        <label class="calendar-filter-label">
+                            <input type="checkbox" 
+                                   class="calendar-filter-checkbox" 
+                                   value="${cal.id}" 
+                                   ${this.selectedCalendars.has(cal.id) ? 'checked' : ''}>
+                            <span class="calendar-filter-color" style="background-color: ${cal.color}"></span>
+                            <span class="calendar-filter-name">${cal.name}</span>
+                        </label>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+
+        // Add event listeners for calendar filtering
+        this.setupCalendarFilterListeners();
+    }
+
+    setupCalendarFilterListeners() {
+        // Select all calendars
+        const selectAllBtn = document.getElementById('select-all-calendars');
+        if (selectAllBtn) {
+            selectAllBtn.addEventListener('click', () => {
+                this.calendars.forEach(cal => this.selectedCalendars.add(cal.id));
+                this.updateCalendarFilterCheckboxes();
+                this.loadEvents(); // Reload events with new filter
+            });
+        }
+
+        // Deselect all calendars
+        const deselectAllBtn = document.getElementById('deselect-all-calendars');
+        if (deselectAllBtn) {
+            deselectAllBtn.addEventListener('click', () => {
+                this.selectedCalendars.clear();
+                this.updateCalendarFilterCheckboxes();
+                this.loadEvents(); // Reload events with new filter
+            });
+        }
+
+        // Individual calendar checkboxes
+        const checkboxes = document.querySelectorAll('.calendar-filter-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', (e) => {
+                const calendarId = e.target.value;
+                if (e.target.checked) {
+                    this.selectedCalendars.add(calendarId);
+                } else {
+                    this.selectedCalendars.delete(calendarId);
+                }
+                this.loadEvents(); // Reload events with new filter
+            });
+        });
+    }
+
+    updateCalendarFilterCheckboxes() {
+        const checkboxes = document.querySelectorAll('.calendar-filter-checkbox');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = this.selectedCalendars.has(checkbox.value);
+        });
+    }
+
+    getCalendarName(calendarId) {
+        if (!calendarId || !this.calendars) return null;
+        const calendar = this.calendars.find(cal => cal.id === calendarId);
+        return calendar ? calendar.name : null;
     }
 }
 

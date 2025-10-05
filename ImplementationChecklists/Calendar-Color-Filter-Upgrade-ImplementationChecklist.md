@@ -42,16 +42,16 @@ Implementation checklist for the major calendar upgrade, following the comprehen
 **Status**: ⏳ Pending
 
 #### 2.1 Calendar View Architecture
-- [ ] Create `CalendarView` main container component
+- [x] Create `CalendarView` main container component
 - [ ] Build `CalendarGrid` for month/week/day display
 - [ ] Develop `EventCard` with color support
-- [ ] Create `CalendarFilter` interface
+- [x] Create `CalendarFilter` interface
 - [ ] Build `ColorLegend` component
 - [ ] Create `CalendarSettings` management panel
 
 #### 2.2 Color Integration System
-- [ ] Implement event color inheritance from calendar colors
-- [ ] Add visual color coding for different calendar types
+- [x] Implement event color inheritance from calendar colors
+- [x] Add visual color coding for different calendar types
 - [ ] Create color-coded calendar legend
 - [ ] Build custom color picker for local events
 - [ ] Implement color contrast optimization
