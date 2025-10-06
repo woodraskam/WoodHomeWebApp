@@ -619,11 +619,28 @@ class CalendarSection extends AuthenticatedSection {
             const eventStart = new Date(event.start);
             const eventEnd = new Date(event.end);
 
-            // Check if the event overlaps with the given date
-            const eventStartDate = eventStart.toISOString().split('T')[0];
-            const eventEndDate = eventEnd.toISOString().split('T')[0];
+            // Handle all-day events (they often have end date as next day at midnight)
+            if (event.allDay) {
+                // For all-day events, compare the date strings directly from the original event data
+                // This avoids timezone conversion issues
+                const eventStartDateStr = event.start.split('T')[0];
+                const targetDateStr = dateStr;
 
-            return eventStartDate <= dateStr && eventEndDate >= dateStr;
+                return eventStartDateStr === targetDateStr;
+            }
+
+            // For timed events, use the existing logic
+            const eventStartDate = new Date(eventStart.getFullYear(), eventStart.getMonth(), eventStart.getDate());
+            const eventEndDate = new Date(eventEnd.getFullYear(), eventEnd.getMonth(), eventEnd.getDate());
+            const targetDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+            // For single-day timed events, only show on the start date
+            if (eventStartDate.getTime() === eventEndDate.getTime()) {
+                return eventStartDate.getTime() === targetDate.getTime();
+            }
+
+            // For multi-day events, show on all days they span
+            return eventStartDate <= targetDate && eventEndDate >= targetDate;
         });
     }
 
@@ -712,7 +729,30 @@ class CalendarSection extends AuthenticatedSection {
         const oneWeekFromNow = new Date();
         oneWeekFromNow.setDate(today.getDate() + 7);
 
-        // Calculate the difference in days
+        // For all-day events, use the date string directly to avoid timezone issues
+        if (event.allDay) {
+            const eventDateStr = event.start.split('T')[0];
+            const eventDate = new Date(eventDateStr + 'T00:00:00');
+            const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+            const daysDifference = Math.ceil((eventDate - todayDate) / (1000 * 60 * 60 * 24));
+
+            let dateInfo = '';
+            if (daysDifference < 7) {
+                // Less than a week away - show day of the week
+                dateInfo = eventDate.toLocaleDateString('en-US', { weekday: 'long' });
+            } else {
+                // More than a week away - show full date
+                dateInfo = eventDate.toLocaleDateString('en-US', {
+                    month: '2-digit',
+                    day: '2-digit',
+                    year: 'numeric'
+                });
+            }
+
+            return { date: dateInfo, time: 'All day' };
+        }
+
+        // For timed events, use the existing logic
         const eventDate = new Date(start.getFullYear(), start.getMonth(), start.getDate());
         const todayDate = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         const daysDifference = Math.ceil((eventDate - todayDate) / (1000 * 60 * 60 * 24));
@@ -729,10 +769,6 @@ class CalendarSection extends AuthenticatedSection {
                 day: '2-digit',
                 year: 'numeric'
             });
-        }
-
-        if (event.allDay) {
-            return { date: dateInfo, time: 'All day' };
         }
 
         const startTime = start.toLocaleTimeString('en-US', {

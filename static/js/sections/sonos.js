@@ -163,7 +163,8 @@ class SonosSection extends AuthenticatedSection {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            this.devices = await response.json();
+            const data = await response.json();
+            this.devices = data.devices || [];
             console.log('SonosSection: Loaded devices:', this.devices.length);
         } catch (error) {
             console.error('SonosSection: Failed to load devices:', error);
@@ -178,7 +179,8 @@ class SonosSection extends AuthenticatedSection {
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-            this.groups = await response.json();
+            const data = await response.json();
+            this.groups = data.groups || [];
             console.log('SonosSection: Loaded groups:', this.groups.length);
         } catch (error) {
             console.error('SonosSection: Failed to load groups:', error);
@@ -233,14 +235,14 @@ class SonosSection extends AuthenticatedSection {
         return `
             <div class="sonos-group-card" data-group-id="${group.id}">
                 <div class="group-header">
-                    <h3 class="group-name">${group.name}</h3>
+                    <h3 class="group-name">${group.coordinator?.name || 'Unknown Group'}</h3>
                     <div class="group-status">
-                        <span class="status-indicator ${group.playbackState.toLowerCase()}">${group.playbackState}</span>
+                        <span class="status-indicator ${(group.state || 'STOPPED').toLowerCase()}">${group.state || 'STOPPED'}</span>
                     </div>
                 </div>
                 <div class="group-controls">
                     <button class="control-btn play-pause" data-group-id="${group.id}">
-                        <span class="material-symbols-outlined">${group.playbackState === 'PLAYING' ? 'pause' : 'play_arrow'}</span>
+                        <span class="material-symbols-outlined">${(group.state || 'STOPPED') === 'PLAYING' ? 'pause' : 'play_arrow'}</span>
                     </button>
                     <button class="control-btn stop" data-group-id="${group.id}">
                         <span class="material-symbols-outlined">stop</span>
@@ -270,12 +272,12 @@ class SonosSection extends AuthenticatedSection {
                 <div class="device-header">
                     <h3 class="device-name">${device.name}</h3>
                     <div class="device-status">
-                        <span class="status-indicator ${device.playbackState.toLowerCase()}">${device.playbackState}</span>
+                        <span class="status-indicator ${(device.state || 'STOPPED').toLowerCase()}">${device.state || 'STOPPED'}</span>
                     </div>
                 </div>
                 <div class="device-controls">
                     <button class="control-btn play-pause" data-device-id="${device.id}">
-                        <span class="material-symbols-outlined">${device.playbackState === 'PLAYING' ? 'pause' : 'play_arrow'}</span>
+                        <span class="material-symbols-outlined">${(device.state || 'STOPPED') === 'PLAYING' ? 'pause' : 'play_arrow'}</span>
                     </button>
                     <button class="control-btn stop" data-device-id="${device.id}">
                         <span class="material-symbols-outlined">stop</span>
