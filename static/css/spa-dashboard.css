@@ -3029,7 +3029,7 @@
     font-size: 20px;
 }
 
-/* Calendar Event Modal Styles */
+/* Calendar Event Modal Styles - Moved to component file */
 .m3-modal {
     position: fixed;
     top: 0;
@@ -3068,8 +3068,8 @@
     background-color: var(--md-sys-color-surface);
     border-radius: 28px;
     box-shadow: 0 24px 38px 3px rgba(0, 0, 0, 0.14),
-                0 9px 46px 8px rgba(0, 0, 0, 0.12),
-                0 11px 15px -7px rgba(0, 0, 0, 0.2);
+        0 9px 46px 8px rgba(0, 0, 0, 0.12),
+        0 11px 15px -7px rgba(0, 0, 0, 0.2);
     transform: scale(0.9);
     transition: transform 0.3s ease;
 }
@@ -3122,14 +3122,133 @@
 
 .m3-modal__split-container {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 32px;
+    grid-template-columns: 40% 60%;
+    gap: 0;
     height: 100%;
 }
 
 .m3-modal__left-pane {
     display: flex;
     flex-direction: column;
+    border-right: 1px solid var(--md-sys-color-outline-variant);
+    overflow-y: auto;
+}
+
+/* Event List Styles */
+.m3-modal__event-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    flex-shrink: 0;
+}
+
+.m3-modal__event-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+}
+
+.m3-modal__event-item {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.m3-modal__event-item:hover {
+    background-color: var(--md-sys-color-surface-variant);
+}
+
+.m3-modal__event-item.selected {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.m3-modal__event-item.selected:hover {
+    background-color: var(--md-sys-color-primary-container);
+}
+
+.m3-modal__event-time {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+    margin-right: 12px;
+    min-width: 60px;
+}
+
+.m3-modal__event-item.selected .m3-modal__event-time {
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.m3-modal__event-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+    margin: 0;
+    flex: 1;
+}
+
+.m3-modal__event-item.selected .m3-modal__event-title {
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.m3-modal__event-all-day {
+    font-size: 10px;
+    color: var(--md-sys-color-primary);
+    margin-left: 8px;
+}
+
+.m3-modal__event-item.selected .m3-modal__event-all-day {
+    color: var(--md-sys-color-on-primary-container);
+}
+
+/* Event Details Styles */
+.m3-modal__event-details {
+    padding: 24px;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+}
+
+.m3-modal__event-details-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.m3-modal__event-details-title {
+    font-size: 20px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+    margin: 0;
+}
+
+.m3-modal__event-details-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.m3-modal__event-details-form {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.m3-modal__event-details-info {
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid var(--md-sys-color-outline-variant);
+}
+
+.m3-button--small {
+    padding: 8px 16px;
+    font-size: 14px;
 }
 
 .m3-modal__form {
@@ -3281,20 +3400,20 @@
         width: 95%;
         max-height: 95vh;
     }
-    
+
     .m3-modal__split-container {
         grid-template-columns: 1fr;
         gap: 24px;
     }
-    
+
     .m3-modal__datetime-container {
         grid-template-columns: 1fr;
     }
-    
+
     .m3-modal__header {
         padding: 16px 16px 0 16px;
     }
-    
+
     .m3-modal__body {
         padding: 16px;
     }
@@ -3307,7 +3426,7 @@
         max-height: 100vh;
         border-radius: 0;
     }
-    
+
     .m3-modal__content {
         max-height: 100vh;
     }

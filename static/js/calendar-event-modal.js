@@ -9,7 +9,7 @@ class CalendarEventModal {
         this.currentEvent = null;
         this.currentMode = 'view'; // 'view', 'edit', 'create'
         this.calendars = [];
-        
+
         this.initializeElements();
         this.setupEventListeners();
         this.loadCalendars();
@@ -19,7 +19,7 @@ class CalendarEventModal {
         // Modal elements
         this.titleElement = document.getElementById('event-modal-title');
         this.closeButton = document.getElementById('event-modal-close');
-        
+
         // Form elements
         this.titleInput = document.getElementById('event-title');
         this.descriptionInput = document.getElementById('event-description');
@@ -30,16 +30,16 @@ class CalendarEventModal {
         this.endDateInput = document.getElementById('event-end-date');
         this.endTimeInput = document.getElementById('event-end-time');
         this.calendarSelect = document.getElementById('event-calendar');
-        
+
         // Time field containers
         this.startTimeField = document.getElementById('event-start-time-field');
         this.endTimeField = document.getElementById('event-end-time-field');
-        
+
         // Action groups
         this.viewActions = document.getElementById('event-view-actions');
         this.editActions = document.getElementById('event-edit-actions');
         this.createActions = document.getElementById('event-create-actions');
-        
+
         // Action buttons
         this.editButton = document.getElementById('event-edit-btn');
         this.deleteButton = document.getElementById('event-delete-btn');
@@ -47,7 +47,7 @@ class CalendarEventModal {
         this.cancelButton = document.getElementById('event-cancel-btn');
         this.createButton = document.getElementById('event-create-btn');
         this.createCancelButton = document.getElementById('event-create-cancel-btn');
-        
+
         // Info elements
         this.createdElement = document.getElementById('event-created');
         this.modifiedElement = document.getElementById('event-modified');
@@ -58,10 +58,10 @@ class CalendarEventModal {
         // Modal close events
         this.closeButton.addEventListener('click', () => this.close());
         this.modal.querySelector('.m3-modal__backdrop').addEventListener('click', () => this.close());
-        
+
         // All day toggle
         this.allDayCheckbox.addEventListener('change', () => this.toggleAllDay());
-        
+
         // Action button events
         this.editButton.addEventListener('click', () => this.setMode('edit'));
         this.deleteButton.addEventListener('click', () => this.deleteEvent());
@@ -69,7 +69,7 @@ class CalendarEventModal {
         this.cancelButton.addEventListener('click', () => this.setMode('view'));
         this.createButton.addEventListener('click', () => this.createEvent());
         this.createCancelButton.addEventListener('click', () => this.close());
-        
+
         // Keyboard events
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape' && this.isVisible()) {
@@ -105,11 +105,11 @@ class CalendarEventModal {
     show(mode = 'view', event = null, date = null) {
         this.currentEvent = event;
         this.currentMode = mode;
-        
+
         this.setMode(mode);
         this.populateForm(event, date);
         this.modal.style.display = 'flex';
-        
+
         // Trigger animation
         requestAnimationFrame(() => {
             this.modal.classList.add('m3-modal--visible');
@@ -130,12 +130,12 @@ class CalendarEventModal {
 
     setMode(mode) {
         this.currentMode = mode;
-        
+
         // Hide all action groups
         this.viewActions.style.display = 'none';
         this.editActions.style.display = 'none';
         this.createActions.style.display = 'none';
-        
+
         // Show appropriate action group
         switch (mode) {
             case 'view':
@@ -167,11 +167,11 @@ class CalendarEventModal {
             this.endTimeInput,
             this.calendarSelect
         ];
-        
+
         inputs.forEach(input => {
             input.disabled = readonly;
         });
-        
+
         this.allDayCheckbox.disabled = readonly;
     }
 
@@ -182,7 +182,7 @@ class CalendarEventModal {
             this.descriptionInput.value = event.description || '';
             this.locationInput.value = event.location || '';
             this.allDayCheckbox.checked = event.allDay || false;
-            
+
             // Set dates and times
             if (event.start) {
                 if (event.allDay) {
@@ -192,7 +192,7 @@ class CalendarEventModal {
                     const startDate = new Date(event.start);
                     this.startDateInput.value = startDate.toISOString().split('T')[0];
                     this.startTimeInput.value = startDate.toTimeString().slice(0, 5);
-                    
+
                     if (event.end) {
                         const endDate = new Date(event.end);
                         this.endDateInput.value = endDate.toISOString().split('T')[0];
@@ -200,9 +200,9 @@ class CalendarEventModal {
                     }
                 }
             }
-            
+
             this.calendarSelect.value = event.calendarId || '';
-            
+
             // Set info
             this.createdElement.textContent = event.created ? new Date(event.created).toLocaleString() : '-';
             this.modifiedElement.textContent = event.updated ? new Date(event.updated).toLocaleString() : '-';
@@ -213,20 +213,20 @@ class CalendarEventModal {
             this.endDateInput.value = date.toISOString().split('T')[0];
             this.startTimeInput.value = '09:00';
             this.endTimeInput.value = '10:00';
-            
+
             // Clear other fields
             this.titleInput.value = '';
             this.descriptionInput.value = '';
             this.locationInput.value = '';
             this.allDayCheckbox.checked = false;
             this.calendarSelect.value = '';
-            
+
             // Clear info
             this.createdElement.textContent = '-';
             this.modifiedElement.textContent = '-';
             this.idElement.textContent = '-';
         }
-        
+
         this.toggleAllDay();
     }
 
@@ -240,7 +240,7 @@ class CalendarEventModal {
         this.endDateInput.value = '';
         this.endTimeInput.value = '';
         this.calendarSelect.value = '';
-        
+
         this.createdElement.textContent = '-';
         this.modifiedElement.textContent = '-';
         this.idElement.textContent = '-';
@@ -255,7 +255,7 @@ class CalendarEventModal {
     async createEvent() {
         const eventData = this.getFormData();
         if (!this.validateForm(eventData)) return;
-        
+
         try {
             const response = await fetch('/api/calendar/events', {
                 method: 'POST',
@@ -264,7 +264,7 @@ class CalendarEventModal {
                 },
                 body: JSON.stringify(eventData)
             });
-            
+
             if (response.ok) {
                 const newEvent = await response.json();
                 this.close();
@@ -281,10 +281,10 @@ class CalendarEventModal {
 
     async saveEvent() {
         if (!this.currentEvent) return;
-        
+
         const eventData = this.getFormData();
         if (!this.validateForm(eventData)) return;
-        
+
         try {
             const response = await fetch(`/api/calendar/events/${this.currentEvent.id}`, {
                 method: 'PUT',
@@ -293,7 +293,7 @@ class CalendarEventModal {
                 },
                 body: JSON.stringify(eventData)
             });
-            
+
             if (response.ok) {
                 const updatedEvent = await response.json();
                 this.close();
@@ -310,14 +310,14 @@ class CalendarEventModal {
 
     async deleteEvent() {
         if (!this.currentEvent) return;
-        
+
         if (!confirm('Are you sure you want to delete this event?')) return;
-        
+
         try {
             const response = await fetch(`/api/calendar/events/${this.currentEvent.id}`, {
                 method: 'DELETE'
             });
-            
+
             if (response.ok) {
                 this.close();
                 this.dispatchEvent('eventDeleted', this.currentEvent);
@@ -333,7 +333,7 @@ class CalendarEventModal {
 
     getFormData() {
         const isAllDay = this.allDayCheckbox.checked;
-        
+
         const eventData = {
             calendarId: this.calendarSelect.value,
             title: this.titleInput.value,
@@ -341,7 +341,7 @@ class CalendarEventModal {
             location: this.locationInput.value,
             allDay: isAllDay
         };
-        
+
         if (isAllDay) {
             eventData.start = {
                 date: this.startDateInput.value
@@ -352,7 +352,7 @@ class CalendarEventModal {
         } else {
             const startDateTime = new Date(`${this.startDateInput.value}T${this.startTimeInput.value}`);
             const endDateTime = new Date(`${this.endDateInput.value}T${this.endTimeInput.value}`);
-            
+
             eventData.start = {
                 dateTime: startDateTime.toISOString()
             };
@@ -360,7 +360,7 @@ class CalendarEventModal {
                 dateTime: endDateTime.toISOString()
             };
         }
-        
+
         return eventData;
     }
 
@@ -370,25 +370,25 @@ class CalendarEventModal {
             this.titleInput.focus();
             return false;
         }
-        
+
         if (!eventData.calendarId) {
             alert('Please select a calendar');
             this.calendarSelect.focus();
             return false;
         }
-        
+
         if (!eventData.start.date && !eventData.start.dateTime) {
             alert('Please enter a start date');
             this.startDateInput.focus();
             return false;
         }
-        
+
         if (!eventData.end.date && !eventData.end.dateTime) {
             alert('Please enter an end date');
             this.endDateInput.focus();
             return false;
         }
-        
+
         return true;
     }
 

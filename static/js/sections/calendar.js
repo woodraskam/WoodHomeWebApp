@@ -606,13 +606,13 @@ class CalendarSection extends AuthenticatedSection {
                 // Use calendar color if available, otherwise use event color, otherwise default
                 const eventColor = event.calendarColor || event.color || '#3788d8';
                 eventElement.style.backgroundColor = eventColor;
-                
+
                 // Add click handler for viewing/editing events
                 eventElement.addEventListener('click', (e) => {
                     e.stopPropagation(); // Prevent day click handler
-                    this.openEventModal('view', event);
+                    this.openEventModal('view', event, date);
                 });
-                
+
                 eventsContainer.appendChild(eventElement);
             });
 
@@ -1040,7 +1040,7 @@ class CalendarSection extends AuthenticatedSection {
 
     openEventModal(mode, event, date) {
         if (window.calendarEventModal) {
-            window.calendarEventModal.show(mode, event, date);
+            window.calendarEventModal.show(date, event);
         } else {
             console.error('Calendar event modal not available');
         }
