@@ -153,6 +153,12 @@ class SPARouter {
         sections.forEach(section => {
             section.classList.remove('m3-section--active');
         });
+
+        // Dispatch sectionchange event to hide all sections
+        const event = new CustomEvent('sectionchange', {
+            detail: { section: null }
+        });
+        document.dispatchEvent(event);
     }
 
     // Loading indicator methods removed to prevent overlay issues
@@ -182,6 +188,12 @@ class SPARouter {
         if (sectionElement) {
             sectionElement.classList.add('m3-section--active');
         }
+
+        // Dispatch sectionchange event for sections that listen to it
+        const event = new CustomEvent('sectionchange', {
+            detail: { section }
+        });
+        document.dispatchEvent(event);
     }
 
     /**

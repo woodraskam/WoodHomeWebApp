@@ -1758,7 +1758,6 @@
     width: 100%;
     box-sizing: border-box;
     flex: 1;
-    grid-template-rows: repeat(6, minmax(0, 1fr));
     min-height: 0;
 }
 

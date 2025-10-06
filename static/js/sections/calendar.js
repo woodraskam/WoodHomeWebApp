@@ -534,8 +534,31 @@ class CalendarSection extends AuthenticatedSection {
         const startDate = new Date(firstDay);
         startDate.setDate(startDate.getDate() - firstDay.getDay());
 
-        // Generate 42 days (6 weeks)
-        for (let i = 0; i < 42; i++) {
+        // Calculate the number of weeks needed for this month
+        const lastDay = new Date(year, month + 1, 0);
+
+        // Calculate the end date (last Saturday of the month)
+        const endDate = new Date(lastDay);
+        const daysToAdd = (6 - lastDay.getDay()) % 7;
+        endDate.setDate(endDate.getDate() + daysToAdd);
+
+        // Ensure we don't extend beyond the current month
+        const nextMonth = new Date(year, month + 1, 1);
+        if (endDate >= nextMonth) {
+            endDate.setTime(nextMonth.getTime() - 1);
+        }
+
+        // Calculate total days from start to end (inclusive)
+        const totalDays = Math.ceil((endDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+        const weeksNeeded = Math.ceil(totalDays / 7);
+
+        console.log(`Month ${month + 1}/${year}: Start=${startDate.toDateString()}, End=${endDate.toDateString()}, TotalDays=${totalDays}, WeeksNeeded=${weeksNeeded}`);
+
+        // Set grid rows dynamically
+        monthGrid.style.gridTemplateRows = `repeat(${weeksNeeded}, minmax(0, 1fr))`;
+
+        // Generate days for the calculated weeks
+        for (let i = 0; i < totalDays; i++) {
             const date = new Date(startDate);
             date.setDate(startDate.getDate() + i);
 
