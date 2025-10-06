@@ -81,11 +81,11 @@ class SonosSection extends AuthenticatedSection {
 
             // Wait for transition to complete before hiding
             setTimeout(() => {
-                section.style.display = 'none';
+            section.style.display = 'none';
                 section.classList.remove('m3-section--transitioning');
                 console.log('SonosSection: Section hidden with dissolve transition');
             }, 300); // Match the CSS transition duration
-        }
+    }
 
         // Disconnect WebSocket
         this.disconnectWebSocket();
@@ -131,7 +131,7 @@ class SonosSection extends AuthenticatedSection {
         sonosSection.style.display = 'none'; // Start hidden
 
         contentArea.appendChild(sonosSection);
-        this.setupSonosEventListeners();
+            this.setupSonosEventListeners();
     }
 
     setupSonosEventListeners() {
@@ -164,7 +164,7 @@ class SonosSection extends AuthenticatedSection {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            this.devices = data.devices || [];
+                this.devices = data.devices || [];
             console.log('SonosSection: Loaded devices:', this.devices.length);
         } catch (error) {
             console.error('SonosSection: Failed to load devices:', error);
@@ -180,7 +180,7 @@ class SonosSection extends AuthenticatedSection {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
             const data = await response.json();
-            this.groups = data.groups || [];
+                this.groups = data.groups || [];
             console.log('SonosSection: Loaded groups:', this.groups.length);
         } catch (error) {
             console.error('SonosSection: Failed to load groups:', error);
@@ -207,7 +207,7 @@ class SonosSection extends AuthenticatedSection {
             html += '<h2 class="section-title">Groups</h2>';
             html += '<div class="sonos-groups-grid">';
 
-            this.groups.forEach(group => {
+        this.groups.forEach(group => {
                 html += this.renderGroupCard(group);
             });
 
@@ -264,10 +264,10 @@ class SonosSection extends AuthenticatedSection {
                     </div>
                 </div>
             `;
-    }
+        }
 
     renderDeviceCard(device) {
-        return `
+            return `
             <div class="sonos-device-card" data-device-id="${device.id}">
                 <div class="device-header">
                     <h3 class="device-name">${device.name}</h3>
@@ -320,7 +320,7 @@ class SonosSection extends AuthenticatedSection {
             try {
                 const data = JSON.parse(event.data);
                 this.handleWebSocketMessage(data);
-            } catch (error) {
+        } catch (error) {
                 console.error('SonosSection: Error parsing WebSocket message:', error);
             }
         };
