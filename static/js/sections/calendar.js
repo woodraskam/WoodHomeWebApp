@@ -12,6 +12,7 @@ class CalendarSection extends AuthenticatedSection {
         this.currentDate = new Date();
         this.colorPalette = [];
         this.init();
+        this.setupModalEventListeners();
     }
 
     init() {
@@ -579,6 +580,14 @@ class CalendarSection extends AuthenticatedSection {
             dayElement.classList.add('m3-calendar-day--today');
         }
 
+        // Add click handler for creating new events
+        dayElement.addEventListener('click', (e) => {
+            // Only trigger if clicking on the day itself, not on events
+            if (e.target === dayElement || e.target.classList.contains('m3-calendar-day__number')) {
+                this.openEventModal('create', null, date);
+            }
+        });
+
         const dayNumber = document.createElement('div');
         dayNumber.className = 'm3-calendar-day__number';
         dayNumber.textContent = date.getDate();
@@ -597,6 +606,13 @@ class CalendarSection extends AuthenticatedSection {
                 // Use calendar color if available, otherwise use event color, otherwise default
                 const eventColor = event.calendarColor || event.color || '#3788d8';
                 eventElement.style.backgroundColor = eventColor;
+                
+                // Add click handler for viewing/editing events
+                eventElement.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevent day click handler
+                    this.openEventModal('view', event);
+                });
+                
                 eventsContainer.appendChild(eventElement);
             });
 
@@ -1020,6 +1036,29 @@ class CalendarSection extends AuthenticatedSection {
             default:
                 return '<span class="material-symbols-outlined">event</span>';
         }
+    }
+
+    openEventModal(mode, event, date) {
+        if (window.calendarEventModal) {
+            window.calendarEventModal.show(mode, event, date);
+        } else {
+            console.error('Calendar event modal not available');
+        }
+    }
+
+    // Listen for modal events to refresh calendar
+    setupModalEventListeners() {
+        document.addEventListener('eventCreated', () => {
+            this.loadEvents();
+        });
+
+        document.addEventListener('eventUpdated', () => {
+            this.loadEvents();
+        });
+
+        document.addEventListener('eventDeleted', () => {
+            this.loadEvents();
+        });
     }
 }
 

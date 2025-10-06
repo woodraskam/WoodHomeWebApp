@@ -188,6 +188,147 @@
             </main>
         </div>
 
+        <!-- Calendar Event Modal -->
+        <div id="event-modal" class="m3-modal" style="display: none;">
+            <div class="m3-modal__backdrop"></div>
+            <div class="m3-modal__container">
+                <div class="m3-modal__content">
+                    <!-- Modal Header -->
+                    <div class="m3-modal__header">
+                        <h2 class="m3-modal__title" id="event-modal-title">Event Details</h2>
+                        <button class="m3-icon-button m3-icon-button--close" id="event-modal-close">
+                            <span class="material-symbols-rounded">close</span>
+                        </button>
+                    </div>
+
+                    <!-- Modal Body -->
+                    <div class="m3-modal__body">
+                        <div class="m3-modal__split-container">
+                            <!-- Left Pane - Event Details -->
+                            <div class="m3-modal__left-pane">
+                                <div class="m3-modal__form">
+                                    <!-- Event Title -->
+                                    <div class="m3-text-field">
+                                        <label class="m3-text-field__label" for="event-title">Title</label>
+                                        <input type="text" id="event-title" class="m3-text-field__input" placeholder="Event title">
+                                    </div>
+
+                                    <!-- Event Description -->
+                                    <div class="m3-text-field">
+                                        <label class="m3-text-field__label" for="event-description">Description</label>
+                                        <textarea id="event-description" class="m3-text-field__input m3-text-field__input--textarea" placeholder="Event description" rows="3"></textarea>
+                                    </div>
+
+                                    <!-- Event Location -->
+                                    <div class="m3-text-field">
+                                        <label class="m3-text-field__label" for="event-location">Location</label>
+                                        <input type="text" id="event-location" class="m3-text-field__input" placeholder="Event location">
+                                    </div>
+
+                                    <!-- All Day Toggle -->
+                                    <div class="m3-switch">
+                                        <input type="checkbox" id="event-all-day" class="m3-switch__input">
+                                        <label for="event-all-day" class="m3-switch__label">All Day Event</label>
+                                    </div>
+
+                                    <!-- Date and Time Fields -->
+                                    <div class="m3-modal__datetime-container">
+                                        <div class="m3-text-field">
+                                            <label class="m3-text-field__label" for="event-start-date">Start Date</label>
+                                            <input type="date" id="event-start-date" class="m3-text-field__input">
+                                        </div>
+                                        <div class="m3-text-field" id="event-start-time-field">
+                                            <label class="m3-text-field__label" for="event-start-time">Start Time</label>
+                                            <input type="time" id="event-start-time" class="m3-text-field__input">
+                                        </div>
+                                    </div>
+
+                                    <div class="m3-modal__datetime-container">
+                                        <div class="m3-text-field">
+                                            <label class="m3-text-field__label" for="event-end-date">End Date</label>
+                                            <input type="date" id="event-end-date" class="m3-text-field__input">
+                                        </div>
+                                        <div class="m3-text-field" id="event-end-time-field">
+                                            <label class="m3-text-field__label" for="event-end-time">End Time</label>
+                                            <input type="time" id="event-end-time" class="m3-text-field__input">
+                                        </div>
+                                    </div>
+
+                                    <!-- Calendar Selection -->
+                                    <div class="m3-text-field">
+                                        <label class="m3-text-field__label" for="event-calendar">Calendar</label>
+                                        <select id="event-calendar" class="m3-text-field__input">
+                                            <option value="">Select Calendar</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Pane - Event Actions -->
+                            <div class="m3-modal__right-pane">
+                                <div class="m3-modal__actions">
+                                    <h3 class="m3-modal__section-title">Actions</h3>
+                                    
+                                    <!-- View Mode Actions -->
+                                    <div id="event-view-actions" class="m3-modal__action-group">
+                                        <button class="m3-button m3-button--filled" id="event-edit-btn">
+                                            <span class="material-symbols-rounded">edit</span>
+                                            Edit Event
+                                        </button>
+                                        <button class="m3-button m3-button--outlined" id="event-delete-btn">
+                                            <span class="material-symbols-rounded">delete</span>
+                                            Delete Event
+                                        </button>
+                                    </div>
+
+                                    <!-- Edit Mode Actions -->
+                                    <div id="event-edit-actions" class="m3-modal__action-group" style="display: none;">
+                                        <button class="m3-button m3-button--filled" id="event-save-btn">
+                                            <span class="material-symbols-rounded">save</span>
+                                            Save Changes
+                                        </button>
+                                        <button class="m3-button m3-button--outlined" id="event-cancel-btn">
+                                            <span class="material-symbols-rounded">cancel</span>
+                                            Cancel
+                                        </button>
+                                    </div>
+
+                                    <!-- Create Mode Actions -->
+                                    <div id="event-create-actions" class="m3-modal__action-group" style="display: none;">
+                                        <button class="m3-button m3-button--filled" id="event-create-btn">
+                                            <span class="material-symbols-rounded">add</span>
+                                            Create Event
+                                        </button>
+                                        <button class="m3-button m3-button--outlined" id="event-create-cancel-btn">
+                                            <span class="material-symbols-rounded">cancel</span>
+                                            Cancel
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Event Info -->
+                                <div class="m3-modal__info">
+                                    <h3 class="m3-modal__section-title">Event Information</h3>
+                                    <div class="m3-modal__info-item">
+                                        <span class="m3-modal__info-label">Created:</span>
+                                        <span id="event-created" class="m3-modal__info-value">-</span>
+                                    </div>
+                                    <div class="m3-modal__info-item">
+                                        <span class="m3-modal__info-label">Last Modified:</span>
+                                        <span id="event-modified" class="m3-modal__info-value">-</span>
+                                    </div>
+                                    <div class="m3-modal__info-item">
+                                        <span class="m3-modal__info-label">Event ID:</span>
+                                        <span id="event-id" class="m3-modal__info-value">-</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- JavaScript -->
         <script src="/static/js/authentication-manager.js"></script>
         <script src="/static/js/authenticated-section.js"></script>
@@ -203,6 +344,7 @@
         <script src="/static/js/sections/sonos.js"></script>
         <script src="/static/js/sections/calendar.js"></script>
         <script src="/static/js/sections/games.js"></script>
+        <script src="/static/js/calendar-event-modal.js"></script>
         <script src="/static/js/spa-app.js"></script>
     </body>
 
