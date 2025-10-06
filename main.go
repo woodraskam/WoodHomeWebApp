@@ -515,6 +515,9 @@ func main() {
 	oauthConfig := services.NewGoogleOAuthConfig()
 	calendarService := services.NewCalendarService(oauthConfig)
 	calendarHandler := handlers.NewCalendarHandler(calendarService)
+	
+	// Initialize Calendar Events service
+	calendarEventsHandler := handlers.NewCalendarEventsHandler()
 
 	// Start services
 	ctx := context.Background()
@@ -606,6 +609,11 @@ func main() {
 	calendarRouter := mux.NewRouter()
 	calendarHandler.RegisterRoutes(calendarRouter)
 	http.Handle("/api/calendar/", calendarRouter)
+	
+	// Calendar Events API routes (using mux for better routing)
+	calendarEventsRouter := mux.NewRouter()
+	calendarEventsHandler.RegisterRoutes(calendarEventsRouter)
+	http.Handle("/api/calendar/", calendarEventsRouter)
 
 	// Existing routes
 	http.HandleFunc("/play/CandyLand", candyLandHandler)

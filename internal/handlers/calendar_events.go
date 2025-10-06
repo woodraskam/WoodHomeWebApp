@@ -20,6 +20,16 @@ func NewCalendarEventsHandler() *CalendarEventsHandler {
 	return &CalendarEventsHandler{}
 }
 
+// RegisterRoutes registers all calendar event routes
+func (h *CalendarEventsHandler) RegisterRoutes(router *mux.Router) {
+	// Calendar event CRUD routes
+	router.HandleFunc("/events", h.CreateEventHandler).Methods("POST")
+	router.HandleFunc("/events/{id}", h.GetEventHandler).Methods("GET")
+	router.HandleFunc("/events/{id}", h.UpdateEventHandler).Methods("PUT")
+	router.HandleFunc("/events/{id}", h.DeleteEventHandler).Methods("DELETE")
+	router.HandleFunc("/events/date/{date}", h.GetEventsForDateHandler).Methods("GET")
+}
+
 // CreateEventHandler handles creating a new calendar event
 func (h *CalendarEventsHandler) CreateEventHandler(w http.ResponseWriter, r *http.Request) {
 	// Check authentication
