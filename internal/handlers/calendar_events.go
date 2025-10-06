@@ -5,9 +5,10 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/gorilla/mux"
 	"woodhome-webapp/internal/models"
 	"woodhome-webapp/internal/services"
+
+	"github.com/gorilla/mux"
 )
 
 // CalendarEventsHandler handles calendar event operations
