@@ -15,6 +15,7 @@ class CalendarSection extends AuthenticatedSection {
         this.colorManager = new CalendarColorManager();
         this.navigationSetup = false; // Flag to prevent duplicate event listeners
         this.keyboardSetup = false; // Flag to prevent duplicate keyboard listeners
+        this.filterChips = null;
         this.init();
         this.setupModalEventListeners();
     }
@@ -595,7 +596,15 @@ class CalendarSection extends AuthenticatedSection {
             const end = this.getEndOfPeriod();
 
             console.log(`Loading calendar events from ${start} to ${end}`);
-            const response = await fetch(`/api/calendar/events?start=${start}&end=${end}`);
+            
+            // Build API URL with calendar filter
+            let apiUrl = `/api/calendar/events?start=${start}&end=${end}`;
+            if (this.selectedCalendars.size > 0) {
+                const calendarIds = Array.from(this.selectedCalendars);
+                apiUrl += `&calendars=${calendarIds.join(',')}`;
+            }
+            
+            const response = await fetch(apiUrl);
 
             if (response.ok) {
                 this.events = await response.json();
@@ -1051,107 +1060,58 @@ class CalendarSection extends AuthenticatedSection {
 
     renderCalendarFilter() {
         const filterContainer = document.getElementById('calendar-filter');
-        if (!filterContainer || this.calendars.length === 0) return;
+        if (!filterContainer) return;
 
-        filterContainer.innerHTML = `
-            <div class="calendar-filter-header">
-                <h3>Calendar Management</h3>
-                <div class="calendar-filter-actions">
-                    <button class="m3-button m3-button--text" id="select-all-calendars">Select All</button>
-                    <button class="m3-button m3-button--text" id="deselect-all-calendars">Deselect All</button>
-                    <button class="m3-button m3-button--text" id="toggle-color-legend">Color Legend</button>
-                </div>
-            </div>
-            
-            <!-- Color Legend -->
-            <div class="calendar-color-legend" id="calendar-color-legend" style="display: none;">
-                <h4>Color Legend</h4>
-                <div class="color-legend-grid">
-                    ${this.colorPalette.slice(0, 12).map(color => `
-                        <div class="color-legend-item">
-                            <span class="color-legend-swatch" style="background-color: ${color.color}"></span>
-                            <span class="color-legend-name">${color.name}</span>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-
-            <div class="calendar-filter-list">
-                ${this.calendars.map(cal => `
-                    <div class="calendar-filter-item">
-                        <label class="calendar-filter-label">
-                            <input type="checkbox" 
-                                   class="calendar-filter-checkbox" 
-                                   value="${cal.id}" 
-                                   ${this.selectedCalendars.has(cal.id) ? 'checked' : ''}>
-                            <span class="calendar-filter-color" style="background-color: ${cal.color}"></span>
-                            <span class="calendar-filter-name">${cal.name}</span>
-                            <span class="calendar-filter-count" id="count-${cal.id}">0 events</span>
-                        </label>
-                    </div>
-                `).join('')}
-            </div>
-        `;
-
-        // Add event listeners for calendar filtering
-        this.setupCalendarFilterListeners();
+        // Initialize filter chips if not already done
+        if (!this.filterChips) {
+            this.initializeFilterChips();
+        }
     }
 
-    setupCalendarFilterListeners() {
-        // Select all calendars
-        const selectAllBtn = document.getElementById('select-all-calendars');
-        if (selectAllBtn) {
-            selectAllBtn.addEventListener('click', () => {
-                this.calendars.forEach(cal => this.selectedCalendars.add(cal.id));
-                this.updateCalendarFilterCheckboxes();
-                this.loadEvents(); // Reload events with new filter
-            });
-        }
+    initializeFilterChips() {
+        const filterContainer = document.getElementById('calendar-filter');
+        if (!filterContainer) return;
 
-        // Deselect all calendars
-        const deselectAllBtn = document.getElementById('deselect-all-calendars');
-        if (deselectAllBtn) {
-            deselectAllBtn.addEventListener('click', () => {
-                this.selectedCalendars.clear();
-                this.updateCalendarFilterCheckboxes();
-                this.loadEvents(); // Reload events with new filter
-            });
-        }
+        // Create a container for the filter chips
+        filterContainer.innerHTML = '<div id="calendar-filter-chips-container"></div>';
 
-        // Toggle color legend
-        const toggleLegendBtn = document.getElementById('toggle-color-legend');
-        if (toggleLegendBtn) {
-            toggleLegendBtn.addEventListener('click', () => {
-                const legend = document.getElementById('calendar-color-legend');
-                if (legend) {
-                    const isVisible = legend.style.display !== 'none';
-                    legend.style.display = isVisible ? 'none' : 'block';
-                    toggleLegendBtn.textContent = isVisible ? 'Color Legend' : 'Hide Legend';
-                }
-            });
-        }
+        // Initialize the filter chips component
+        this.filterChips = new CalendarFilterChips('calendar-filter-chips-container', {
+            showActions: true,
+            showSelectAll: true,
+            showClearAll: true,
+            persistState: true,
+            storageKey: 'calendar-filter-chips',
+            onFilterChange: (filterState) => {
+                console.log('Calendar filter changed:', filterState);
+                this.handleFilterChange(filterState);
+            },
+            onError: (error) => {
+                console.error('Calendar filter error:', error);
+                this.showError('Failed to load calendar filters');
+            }
+        });
 
-        // Individual calendar checkboxes
-        const checkboxes = document.querySelectorAll('.calendar-filter-checkbox');
-        checkboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', (e) => {
-                const calendarId = e.target.value;
-                if (e.target.checked) {
-                    this.selectedCalendars.add(calendarId);
-                } else {
-                    this.selectedCalendars.delete(calendarId);
-                }
-                this.loadEvents(); // Reload events with new filter
-            });
+        // Listen for filter changes
+        filterContainer.addEventListener('calendarFilterChange', (e) => {
+            this.handleFilterChange(e.detail);
         });
     }
 
-    updateCalendarFilterCheckboxes() {
-        const checkboxes = document.querySelectorAll('.calendar-filter-checkbox');
-        checkboxes.forEach(checkbox => {
-            checkbox.checked = this.selectedCalendars.has(checkbox.value);
+    handleFilterChange(filterState) {
+        // Update selected calendars
+        this.selectedCalendars.clear();
+        filterState.calendars.forEach(calendarId => {
+            this.selectedCalendars.add(calendarId);
         });
+
+        console.log('Updated selected calendars:', Array.from(this.selectedCalendars));
+
+        // Reload events with new filter
+        this.loadEvents();
     }
+
+
 
     getCalendarName(calendarId) {
         if (!calendarId || !this.calendars) return null;
