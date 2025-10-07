@@ -94,6 +94,7 @@ body {
     padding: var(--m3-spacing-lg);
     box-shadow: var(--m3-elevation-1);
     transition: box-shadow var(--m3-motion-duration-short4) var(--m3-motion-easing-standard);
+    margin: 8px 12px;
 }
 
 .m3-card--elevated {
@@ -371,10 +372,6 @@ body {
     min-height: 100vh;
     background: var(--m3-surface);
     transition: margin-left var(--m3-motion-duration-medium2) var(--m3-motion-easing-standard);
-}
-
-.m3-card__content {
-    height: calc(100% - 100px);
 }
 
 /* Loading States */

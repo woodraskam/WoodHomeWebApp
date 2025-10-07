@@ -227,7 +227,6 @@ func (h *CalendarHandler) GetColorsHandler(w http.ResponseWriter, r *http.Reques
 		}
 	}
 
-
 	// Return JSON response
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(colors)

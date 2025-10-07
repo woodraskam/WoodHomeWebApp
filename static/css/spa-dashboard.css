@@ -16,7 +16,7 @@
 }
 
 .m3-card__content {
-    height: calc(100% - 100px);
+    height: calc(100% - 95px);
 }
 
 /* Section Content */
@@ -29,6 +29,7 @@
 .m3-section--active {
     display: block;
     opacity: 1;
+    height: 100%;
 }
 
 .m3-section--transitioning {
@@ -1736,7 +1737,7 @@
 }
 
 .m3-calendar-month__day {
-    padding: var(--m3-spacing-sm);
+    padding: 2px 4px;
     text-align: center;
     font-size: var(--m3-body-small-size);
     font-weight: var(--m3-body-small-weight);
@@ -2671,7 +2672,6 @@
 /* Calendar Header Layout */
 .m3-calendar-header-container {
     position: relative;
-    min-height: 120px;
     /* Fixed height for header */
 }
 
@@ -2727,10 +2727,9 @@
     display: grid;
     grid-template-columns: 1fr 4px 1fr;
     gap: 0;
-    height: calc(100vh - 40px);
+    height: 100%;
     /* Full height minus header height */
     min-height: 600px;
-    margin: var(--m3-spacing-md) 0;
     width: 100%;
     max-width: 100%;
     box-sizing: border-box;
@@ -2738,6 +2737,7 @@
 
 #calendar-view-card {
     height: 100%;
+    padding: 0;
 }
 
 /* Calendar Grid Full Height */
@@ -2774,15 +2774,19 @@
 }
 
 .m3-calendar-splitter {
-    width: 4px;
+    width: 12px;
     background: var(--m3-outline-variant);
     cursor: col-resize;
     transition: background-color 0.2s ease;
     position: relative;
+    min-width: 12px;
+    touch-action: none;
 }
 
-.m3-calendar-splitter:hover {
+.m3-calendar-splitter:hover,
+.m3-calendar-splitter:active {
     background: var(--m3-primary);
+    width: 16px;
 }
 
 .m3-calendar-splitter::before {
@@ -2797,6 +2801,19 @@
     border-radius: 1px;
 }
 
+
+/* Touch-friendly splitter for touch devices */
+@media (hover: none) and (pointer: coarse) {
+    .m3-calendar-splitter {
+        width: 16px;
+        min-width: 16px;
+    }
+    
+    .m3-calendar-splitter:hover,
+    .m3-calendar-splitter:active {
+        width: 20px;
+    }
+}
 
 /* Calendar Split-Pane Responsive Design */
 @media (max-width: 1024px) {
