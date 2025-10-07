@@ -46,7 +46,7 @@ class CalendarSection extends AuthenticatedSection {
 
         // Google Calendar header navigation
         this.setupHeaderNavigation();
-        
+
         // Keyboard navigation
         this.setupKeyboardNavigation();
 
@@ -468,9 +468,9 @@ class CalendarSection extends AuthenticatedSection {
     }
 
     updateHeaderTitle() {
-        const title = this.currentDate.toLocaleDateString('en-US', { 
-            month: 'long', 
-            year: 'numeric' 
+        const title = this.currentDate.toLocaleDateString('en-US', {
+            month: 'long',
+            year: 'numeric'
         });
         const titleElement = document.getElementById('calendar-title');
         if (titleElement) {
@@ -493,7 +493,7 @@ class CalendarSection extends AuthenticatedSection {
             const eventElement = document.createElement('div');
             eventElement.className = 'm3-calendar-day__event';
             eventElement.textContent = event.title;
-            
+
             // Apply Google Calendar API colors using the color manager
             this.colorManager.applyEventColor(event, eventElement);
 
@@ -512,7 +512,7 @@ class CalendarSection extends AuthenticatedSection {
             // Only handle keyboard navigation when calendar is active
             if (!this.isActive) return;
 
-            switch(e.key) {
+            switch (e.key) {
                 case 'ArrowLeft':
                     e.preventDefault();
                     this.previousMonth();
@@ -751,7 +751,7 @@ class CalendarSection extends AuthenticatedSection {
                 const eventElement = document.createElement('div');
                 eventElement.className = 'm3-calendar-day__event';
                 eventElement.textContent = event.title;
-                
+
                 // Apply Google Calendar API colors using the color manager
                 this.colorManager.applyEventColor(event, eventElement);
 

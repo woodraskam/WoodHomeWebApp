@@ -1751,21 +1751,23 @@
 .m3-calendar-month__grid {
     display: grid;
     grid-template-columns: repeat(7, minmax(0, 1fr));
+    grid-template-rows: repeat(6, minmax(0, 1fr));
     gap: 1px;
     background: var(--m3-outline-variant);
     border: 1px solid var(--m3-outline-variant);
     border-radius: var(--m3-shape-corner-medium);
     overflow: hidden;
     width: 100%;
+    height: 100%;
     box-sizing: border-box;
     flex: 1;
     min-height: 0;
 }
 
 .m3-calendar-day {
-    min-height: 120px;
     background: var(--m3-surface);
     padding: var(--m3-spacing-xs);
+    height: 100%;
     border: 1px solid var(--m3-outline-variant);
     transition: background-color var(--m3-motion-duration-short4) var(--m3-motion-easing-standard);
     cursor: pointer;
@@ -3356,7 +3358,8 @@
 
 @media (max-width: 480px) {
     .m3-calendar-header__right {
-        display: none; /* Hide non-essential buttons on very small screens */
+        display: none;
+        /* Hide non-essential buttons on very small screens */
     }
 
     .m3-calendar-day {
