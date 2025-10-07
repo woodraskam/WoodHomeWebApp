@@ -266,6 +266,7 @@ func (s *CalendarEventService) convertToCalendarEvent(event *calendar.Event) *mo
 		Status:      event.Status,
 		Visibility:  event.Visibility,
 		ColorID:     event.ColorId,
+		CalendarID:  "primary", // For now, all events are from primary calendar
 		Created:     parseTime(event.Created),
 		Updated:     parseTime(event.Updated),
 	}

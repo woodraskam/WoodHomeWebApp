@@ -23,6 +23,7 @@ type CalendarEvent struct {
 	Status      string                 `json:"status,omitempty"`
 	Visibility  string                 `json:"visibility,omitempty"`
 	ColorID     string                 `json:"colorId,omitempty"`
+	CalendarID  string                 `json:"calendarId,omitempty"`
 	ExtendedProperties map[string]interface{} `json:"extendedProperties,omitempty"`
 }
 
