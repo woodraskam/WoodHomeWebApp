@@ -182,7 +182,7 @@ class CalendarSection extends AuthenticatedSection {
         setTimeout(() => {
             if (window.CalendarFilterDropdown) {
                 this.filterDropdown = new CalendarFilterDropdown();
-                
+
                 // Set up filter change callback
                 this.filterDropdown.setFilterChangeCallback((selectedCalendarIds) => {
                     console.log('Calendar filter changed:', selectedCalendarIds);
@@ -192,17 +192,30 @@ class CalendarSection extends AuthenticatedSection {
                             this.selectedCalendars.add(id);
                         }
                     });
-                    
+
                     // Reload events with new filter
                     this.loadEvents();
                 });
+
+                // Check if calendars are already loaded and populate dropdown
+                this.populateDropdownIfReady();
                 
-                // Don't load calendars yet - wait for them to be loaded by the main section
                 console.log('Calendar filter dropdown initialized');
             } else {
                 console.error('CalendarFilterDropdown class not found');
             }
         }, 100);
+    }
+
+    /**
+     * Populate dropdown with calendars if it's ready
+     */
+    populateDropdownIfReady() {
+        if (this.filterDropdown && this.calendars && this.calendars.length > 0) {
+            console.log('Populating dropdown with calendars');
+            this.filterDropdown.loadCalendars(this.calendars);
+            this.filterDropdown.setSelectedCalendars(Array.from(this.selectedCalendars));
+        }
     }
 
     getCalendarSectionHTML() {
@@ -672,10 +685,7 @@ class CalendarSection extends AuthenticatedSection {
                 this.calendars.forEach(cal => this.selectedCalendars.add(cal.id));
 
                 // Update dropdown with calendars and selected state
-                if (this.filterDropdown) {
-                    this.filterDropdown.loadCalendars(this.calendars);
-                    this.filterDropdown.setSelectedCalendars(Array.from(this.selectedCalendars));
-                }
+                this.populateDropdownIfReady();
             } else {
                 console.error('Failed to load calendars:', response.status, response.statusText);
             }
