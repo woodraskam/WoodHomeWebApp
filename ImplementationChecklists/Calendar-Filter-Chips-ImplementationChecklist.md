@@ -66,18 +66,18 @@ Implementation checklist for calendar filter dropdown menu feature, following th
 **Status**: ⏳ Pending
 
 #### 3.1 Calendar Header Integration
-- [ ] Update existing calendar icon in header to trigger dropdown
-- [ ] Add dropdown positioning relative to calendar icon
-- [ ] Implement click-outside-to-close behavior
-- [ ] Add visual feedback for active filter state
-- [ ] Handle responsive behavior for mobile devices
+- [x] Update existing calendar icon in header to trigger dropdown
+- [x] Add dropdown positioning relative to calendar icon
+- [x] Implement click-outside-to-close behavior
+- [x] Add visual feedback for active filter state
+- [x] Handle responsive behavior for mobile devices
 
 #### 3.2 Event Filtering Logic
-- [ ] Update event loading to include calendar filter parameter
-- [ ] Implement client-side event filtering as fallback
-- [ ] Add filter state management
-- [ ] Handle edge cases (no calendars selected, all calendars selected)
-- [ ] Add real-time event filtering without page reload
+- [x] Update event loading to include calendar filter parameter
+- [x] Implement client-side event filtering as fallback
+- [x] Add filter state management
+- [x] Handle edge cases (no calendars selected, all calendars selected)
+- [x] Add real-time event filtering without page reload
 
 #### 3.3 Integration Testing
 - [ ] Test dropdown rendering with different numbers of calendars

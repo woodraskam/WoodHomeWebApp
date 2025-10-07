@@ -15,6 +15,7 @@ class CalendarSection extends AuthenticatedSection {
         this.colorManager = new CalendarColorManager();
         this.navigationSetup = false; // Flag to prevent duplicate event listeners
         this.keyboardSetup = false; // Flag to prevent duplicate keyboard listeners
+        this.filterDropdown = null; // Calendar filter dropdown instance
         this.init();
         this.setupModalEventListeners();
     }
@@ -168,6 +169,39 @@ class CalendarSection extends AuthenticatedSection {
         calendarSection.innerHTML = this.getCalendarSectionHTML();
 
         contentArea.appendChild(calendarSection);
+        
+        // Initialize the calendar filter dropdown
+        this.initializeFilterDropdown();
+    }
+
+    /**
+     * Initialize the calendar filter dropdown
+     */
+    initializeFilterDropdown() {
+        // Wait for the calendar icon to be available
+        setTimeout(() => {
+            if (window.CalendarFilterDropdown) {
+                this.filterDropdown = new CalendarFilterDropdown();
+                
+                // Set up filter change callback
+                this.filterDropdown.setFilterChangeCallback((selectedCalendarIds) => {
+                    console.log('Calendar filter changed:', selectedCalendarIds);
+                    this.selectedCalendars.clear();
+                    selectedCalendarIds.forEach(id => {
+                        if (id !== 'all') {
+                            this.selectedCalendars.add(id);
+                        }
+                    });
+                    
+                    // Reload events with new filter
+                    this.loadEvents();
+                });
+                
+                console.log('Calendar filter dropdown initialized');
+            } else {
+                console.error('CalendarFilterDropdown class not found');
+            }
+        }, 100);
     }
 
     getCalendarSectionHTML() {
@@ -595,7 +629,16 @@ class CalendarSection extends AuthenticatedSection {
             const end = this.getEndOfPeriod();
 
             console.log(`Loading calendar events from ${start} to ${end}`);
-            const response = await fetch(`/api/calendar/events?start=${start}&end=${end}`);
+            
+            // Build API URL with calendar filter if calendars are selected
+            let apiUrl = `/api/calendar/events?start=${start}&end=${end}`;
+            if (this.selectedCalendars.size > 0 && this.selectedCalendars.size < this.calendars.length) {
+                const selectedIds = Array.from(this.selectedCalendars);
+                apiUrl += `&calendars=${selectedIds.join(',')}`;
+                console.log(`Filtering events for calendars: ${selectedIds.join(', ')}`);
+            }
+            
+            const response = await fetch(apiUrl);
 
             if (response.ok) {
                 this.events = await response.json();
@@ -626,6 +669,11 @@ class CalendarSection extends AuthenticatedSection {
 
                 // Select all calendars by default
                 this.calendars.forEach(cal => this.selectedCalendars.add(cal.id));
+                
+                // Update dropdown with selected calendars
+                if (this.filterDropdown) {
+                    this.filterDropdown.setSelectedCalendars(Array.from(this.selectedCalendars));
+                }
             } else {
                 console.error('Failed to load calendars:', response.status, response.statusText);
             }
