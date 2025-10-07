@@ -388,7 +388,9 @@ class CalendarSection extends AuthenticatedSection {
         if (!splitter || !container) return;
 
         let isResizing = false;
+        let isTouchResizing = false;
 
+        // Mouse events
         splitter.addEventListener('mousedown', (e) => {
             isResizing = true;
             document.body.style.cursor = 'col-resize';
@@ -412,6 +414,37 @@ class CalendarSection extends AuthenticatedSection {
             if (isResizing) {
                 isResizing = false;
                 document.body.style.cursor = '';
+                document.body.style.userSelect = '';
+            }
+        });
+
+        // Touch events for mobile/tablet support
+        splitter.addEventListener('touchstart', (e) => {
+            isTouchResizing = true;
+            document.body.style.userSelect = 'none';
+            e.preventDefault();
+        }, { passive: false });
+
+        document.addEventListener('touchmove', (e) => {
+            if (!isTouchResizing) return;
+
+            const touch = e.touches[0];
+            if (!touch) return;
+
+            const containerRect = container.getBoundingClientRect();
+            const newLeftWidth = ((touch.clientX - containerRect.left) / containerRect.width) * 100;
+
+            // Constrain between 20% and 80%
+            const constrainedWidth = Math.max(20, Math.min(80, newLeftWidth));
+
+            container.style.gridTemplateColumns = `${constrainedWidth}% 4px ${100 - constrainedWidth}%`;
+            
+            e.preventDefault();
+        }, { passive: false });
+
+        document.addEventListener('touchend', () => {
+            if (isTouchResizing) {
+                isTouchResizing = false;
                 document.body.style.userSelect = '';
             }
         });
