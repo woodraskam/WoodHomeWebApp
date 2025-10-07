@@ -13,6 +13,7 @@ class CalendarSection extends AuthenticatedSection {
         this.colorPalette = [];
         this.calendarColors = {}; // Store calendar colors from API
         this.colorManager = new CalendarColorManager();
+        this.navigationSetup = false; // Flag to prevent duplicate event listeners
         this.init();
         this.setupModalEventListeners();
     }
@@ -421,6 +422,12 @@ class CalendarSection extends AuthenticatedSection {
     }
 
     setupHeaderNavigation() {
+        // Prevent duplicate event listeners
+        if (this.navigationSetup) {
+            return;
+        }
+        this.navigationSetup = true;
+
         // Today button
         document.addEventListener('click', (e) => {
             if (e.target.id === 'calendar-today-btn') {
