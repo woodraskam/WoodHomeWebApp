@@ -760,7 +760,7 @@ class CalendarSection extends AuthenticatedSection {
                 const eventElement = document.createElement('div');
                 eventElement.className = 'm3-calendar-day__event';
                 eventElement.textContent = event.title;
-                
+
                 // Debug: Log event data to see what properties are available
                 console.log('Event data for color application:', {
                     title: event.title,
@@ -768,7 +768,7 @@ class CalendarSection extends AuthenticatedSection {
                     colorId: event.colorId,
                     event: event
                 });
-                
+
                 // Apply Google Calendar API colors using the color manager
                 this.colorManager.applyEventColor(event, eventElement);
 
@@ -1286,7 +1286,8 @@ class CalendarColorManager {
             eventTitle: event.title,
             eventColorId: event.colorId,
             eventCalendarId: event.calendarId,
-            availableCalendarColors: Object.keys(this.calendarColors)
+            availableCalendarColors: Object.keys(this.calendarColors),
+            calendarColorsObject: this.calendarColors
         });
 
         if (event.colorId) {
