@@ -11,6 +11,7 @@ import (
 
 	"github.com/gorilla/mux"
 	"golang.org/x/oauth2"
+	"google.golang.org/api/calendar/v3"
 )
 
 // CalendarHandler handles HTTP requests for calendar operations
@@ -172,7 +173,7 @@ func (h *CalendarHandler) GetCalendarsHandler(w http.ResponseWriter, r *http.Req
 	json.NewEncoder(w).Encode(calendars)
 }
 
-// GetColorsHandler returns the Google Calendar color palette
+// GetColorsHandler returns the Google Calendar color palette and calendar colors
 func (h *CalendarHandler) GetColorsHandler(w http.ResponseWriter, r *http.Request) {
 	// 1. Check authentication
 	session, _ := GetSessionStore().Get(r, "auth-session")
@@ -182,25 +183,53 @@ func (h *CalendarHandler) GetColorsHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// 2. Return color palette
-	colorPalette := []map[string]string{
-		{"id": "1", "color": "#a4bdfc", "name": "Lavender"},
-		{"id": "2", "color": "#7ae7bf", "name": "Sage"},
-		{"id": "3", "color": "#dbadff", "name": "Grape"},
-		{"id": "4", "color": "#ff887c", "name": "Flamingo"},
-		{"id": "5", "color": "#fbd75b", "name": "Banana"},
-		{"id": "6", "color": "#ffb878", "name": "Tangerine"},
-		{"id": "7", "color": "#46d6db", "name": "Peacock"},
-		{"id": "8", "color": "#e1e1e1", "name": "Graphite"},
-		{"id": "9", "color": "#5484ed", "name": "Blueberry"},
-		{"id": "10", "color": "#51b749", "name": "Basil"},
-		{"id": "11", "color": "#dc2127", "name": "Tomato"},
-		{"id": "12", "color": "#eb7c00", "name": "Pumpkin"},
+	// Get user ID from session
+	userID, ok := session.Values["user_id"].(int)
+	if !ok {
+		http.Error(w, "Invalid user session", http.StatusUnauthorized)
+		return
 	}
 
-	// 3. Return JSON response
+	// Get OAuth token
+	token, err := getOAuthTokenFromSQLite(userID)
+	if err != nil {
+		log.Printf("Failed to get token from SQLite: %v", err)
+		http.Error(w, "Token not found", http.StatusUnauthorized)
+		return
+	}
+
+	// Create OAuth2 client
+	client := oauth2.NewClient(r.Context(), oauth2.StaticTokenSource(token))
+	
+	// Create Google Calendar service
+	service, err := calendar.New(client)
+	if err != nil {
+		log.Printf("Failed to create calendar service: %v", err)
+		http.Error(w, "Failed to create calendar service", http.StatusInternalServerError)
+		return
+	}
+
+	// Fetch calendar list from Google Calendar API
+	calendarList, err := service.CalendarList.List().Do()
+	if err != nil {
+		log.Printf("Failed to fetch calendar list: %v", err)
+		http.Error(w, "Failed to fetch calendar list", http.StatusInternalServerError)
+		return
+	}
+
+	// Extract color information
+	colors := make(map[string]map[string]string)
+	for _, calendar := range calendarList.Items {
+		colors[calendar.Id] = map[string]string{
+			"backgroundColor": calendar.BackgroundColor,
+			"foregroundColor": calendar.ForegroundColor,
+			"summary":         calendar.Summary,
+		}
+	}
+
+	// Return JSON response
 	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(colorPalette)
+	json.NewEncoder(w).Encode(colors)
 }
 
 // RefreshCacheHandler manually refreshes the cache for the current user
@@ -305,3 +334,4 @@ func (h *CalendarHandler) ClearCacheHandler(w http.ResponseWriter, r *http.Reque
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
+
