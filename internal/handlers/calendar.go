@@ -227,15 +227,6 @@ func (h *CalendarHandler) GetColorsHandler(w http.ResponseWriter, r *http.Reques
 		}
 	}
 
-	// Debug logging
-	log.Printf("GetColorsHandler: Returning %d calendar colors", len(colors))
-	log.Printf("GetColorsHandler: Colors map keys: %v", func() []string {
-		keys := make([]string, 0, len(colors))
-		for k := range colors {
-			keys = append(keys, k)
-		}
-		return keys
-	}())
 
 	// Return JSON response
 	w.Header().Set("Content-Type", "application/json")

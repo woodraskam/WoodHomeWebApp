@@ -761,13 +761,6 @@ class CalendarSection extends AuthenticatedSection {
                 eventElement.className = 'm3-calendar-day__event';
                 eventElement.textContent = event.title;
 
-                // Debug: Log event data to see what properties are available
-                console.log('Event data for color application:', {
-                    title: event.title,
-                    calendarId: event.calendarId,
-                    colorId: event.colorId,
-                    event: event
-                });
 
                 // Apply Google Calendar API colors using the color manager
                 this.colorManager.applyEventColor(event, eventElement);
@@ -1282,34 +1275,22 @@ class CalendarColorManager {
         let backgroundColor = '#4285f4'; // Default blue
         let foregroundColor = '#ffffff'; // Default white text
 
-        console.log('ColorManager: Applying color to event:', {
-            eventTitle: event.title,
-            eventColorId: event.colorId,
-            eventCalendarId: event.calendarId,
-            availableCalendarColors: Object.keys(this.calendarColors),
-            calendarColorsObject: this.calendarColors
-        });
 
         if (event.colorId) {
             // Use Google Calendar's colorId mapping
             const colorData = this.getGoogleCalendarColor(event.colorId);
             backgroundColor = colorData.background;
             foregroundColor = colorData.foreground;
-            console.log('ColorManager: Using colorId', event.colorId, '->', colorData);
         } else if (event.calendarId && this.calendarColors[event.calendarId]) {
             // Use calendar's background color
             const calendarColor = this.calendarColors[event.calendarId];
             backgroundColor = calendarColor.backgroundColor;
             foregroundColor = calendarColor.foregroundColor;
-            console.log('ColorManager: Using calendar color for', event.calendarId, '->', calendarColor);
-        } else {
-            console.log('ColorManager: Using default color (no colorId or calendarId found)');
         }
 
         // Apply colors via inline styles
         eventElement.style.backgroundColor = backgroundColor;
         eventElement.style.color = foregroundColor;
-        console.log('ColorManager: Applied colors:', { backgroundColor, foregroundColor });
     }
 }
 
