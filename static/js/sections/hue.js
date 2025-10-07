@@ -131,33 +131,7 @@ class HueSection extends AuthenticatedSection {
         this.setupHueEventListeners();
     }
 
-    createStatusPopup() {
-        // Create Material Design 3 popup dialog
-        const popup = document.createElement('div');
-        popup.id = 'hue-status-popup';
-        popup.className = 'm3-dialog';
-        popup.innerHTML = `
-            <div class="m3-dialog-backdrop"></div>
-            <div class="m3-dialog-container">
-                <div class="m3-dialog-surface">
-                    <div class="m3-dialog-header">
-                        <h2 class="m3-dialog-title">Hue Configuration</h2>
-                        <button class="m3-button m3-button--icon m3-dialog-close" id="hue-popup-close">
-                            <span class="material-symbols-outlined">close</span>
-                        </button>
-                    </div>
-                    <div class="m3-dialog-content" id="hue-popup-content">
-                        <div class="hue-loading">
-                            <div class="m3-circular-progress"></div>
-                            <p>Loading configuration...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
 
-        document.body.appendChild(popup);
-    }
 
     setupHueEventListeners() {
         // Info button
@@ -176,13 +150,7 @@ class HueSection extends AuthenticatedSection {
             });
         }
 
-        // Popup backdrop click
-        const backdrop = document.querySelector('#hue-status-popup .m3-dialog-backdrop');
-        if (backdrop) {
-            backdrop.addEventListener('click', () => {
-                this.hideStatusPopup();
-            });
-        }
+
 
         // Refresh button
         const refreshBtn = document.getElementById('hue-refresh-btn');
@@ -972,28 +940,8 @@ class HueSection extends AuthenticatedSection {
         }
     }
 
-    async showConfigurationPopup() {
-        const popup = document.getElementById('hue-status-popup');
-        if (popup) {
-            popup.style.display = 'flex';
-            await this.loadConfiguration();
-        }
-    }
 
-    async showStatusPopup() {
-        const popup = document.getElementById('hue-status-popup');
-        if (popup) {
-            popup.style.display = 'flex';
-            await this.loadSystemStatus();
-        }
-    }
 
-    hideStatusPopup() {
-        const popup = document.getElementById('hue-status-popup');
-        if (popup) {
-            popup.style.display = 'none';
-        }
-    }
 
     show() {
         const section = document.getElementById('hue-section');

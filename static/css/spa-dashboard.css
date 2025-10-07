@@ -3193,13 +3193,6 @@
     border-right: none;
 }
 
-.m3-calendar-month {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    grid-template-rows: repeat(6, 1fr);
-    flex: 1;
-    min-height: 0;
-}
 
 .m3-calendar-day {
     border-right: 1px solid var(--md-sys-color-outline-variant);
