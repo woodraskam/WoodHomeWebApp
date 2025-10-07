@@ -14,6 +14,7 @@ class CalendarSection extends AuthenticatedSection {
         this.calendarColors = {}; // Store calendar colors from API
         this.colorManager = new CalendarColorManager();
         this.navigationSetup = false; // Flag to prevent duplicate event listeners
+        this.keyboardSetup = false; // Flag to prevent duplicate keyboard listeners
         this.init();
         this.setupModalEventListeners();
     }
@@ -356,12 +357,7 @@ class CalendarSection extends AuthenticatedSection {
         const nextBtn = document.getElementById('calendar-next-btn');
         const todayBtn = document.getElementById('calendar-today-btn');
 
-        if (prevBtn) {
-            prevBtn.addEventListener('click', () => this.navigateCalendar(-1));
-        }
-        if (nextBtn) {
-            nextBtn.addEventListener('click', () => this.navigateCalendar(1));
-        }
+        // Navigation is now handled by setupHeaderNavigation()
         if (todayBtn) {
             todayBtn.addEventListener('click', () => this.goToToday());
         }
@@ -515,6 +511,12 @@ class CalendarSection extends AuthenticatedSection {
     }
 
     setupKeyboardNavigation() {
+        // Prevent duplicate keyboard event listeners
+        if (this.keyboardSetup) {
+            return;
+        }
+        this.keyboardSetup = true;
+
         document.addEventListener('keydown', (e) => {
             // Only handle keyboard navigation when calendar is active
             if (!this.isActive) return;
