@@ -345,7 +345,7 @@ This guide outlines the implementation of a Material Design 3 styled calendar ev
 
 .m3-switch__track {
     width: 40px;
-    height: 20px;
+    height: 30px;
     background-color: var(--md-sys-color-surface-variant);
     border-radius: 10px;
     position: relative;

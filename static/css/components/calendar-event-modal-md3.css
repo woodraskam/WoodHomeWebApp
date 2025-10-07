@@ -1,0 +1,460 @@
+/* Calendar Event Modal - Material Design 3 Styles */
+
+/* Modal Container */
+.m3-calendar-event-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1000;
+
+    /* Backdrop */
+    backdrop-filter: blur(8px);
+    background-color: rgba(0, 0, 0, 0.32);
+
+    /* Animation */
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s cubic-bezier(0.2, 0, 0, 1),
+        visibility 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.m3-calendar-event-modal--visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.m3-calendar-event-modal__container {
+    /* Material Design 3 Surface */
+    background-color: var(--md-sys-color-surface);
+    border-radius: var(--md-sys-shape-corner-extra-large);
+    box-shadow: var(--md-sys-elevation-level5);
+
+    /* Positioning */
+    position: relative;
+    width: 90%;
+    max-width: 1200px;
+    max-height: 90vh;
+    margin: 5vh auto;
+
+    /* Animation */
+    transform: scale(0.9);
+    transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.m3-calendar-event-modal--visible .m3-calendar-event-modal__container {
+    transform: scale(1);
+}
+
+.m3-calendar-event-modal__content {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    max-height: 90vh;
+}
+
+/* Header */
+.m3-calendar-event-modal__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 24px 0 24px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    flex-shrink: 0;
+}
+
+.m3-calendar-event-modal__title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 24px;
+    font-weight: 400;
+    color: var(--md-sys-color-on-surface);
+    margin: 0;
+}
+
+.m3-icon-button--close {
+    background: none;
+    border: none;
+    color: var(--md-sys-color-on-surface);
+    cursor: pointer;
+    padding: 8px;
+    border-radius: 20px;
+    transition: background-color 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.m3-icon-button--close:hover {
+    background-color: var(--md-sys-color-surface-variant);
+}
+
+/* Body */
+.m3-calendar-event-modal__body {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.m3-calendar-event-modal__split-container {
+    display: grid;
+    grid-template-columns: 40% 60%;
+    gap: 0;
+    height: 100%;
+    min-height: 0;
+}
+
+/* Left Pane - Event List */
+.m3-calendar-event-modal__left-pane {
+    width: 100%;
+    border-right: 1px solid var(--md-sys-color-outline-variant);
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.m3-calendar-event-modal__event-list-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    flex-shrink: 0;
+}
+
+.m3-calendar-event-modal__event-list-title {
+    font-size: 16px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+    margin: 0;
+}
+
+.m3-calendar-event-modal__event-list {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0;
+}
+
+.m3-calendar-event-modal__event-item {
+    display: flex;
+    align-items: center;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    cursor: pointer;
+    transition: background-color 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.m3-calendar-event-modal__event-item:hover {
+    background-color: var(--md-sys-color-surface-variant);
+}
+
+.m3-calendar-event-modal__event-item.selected {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.m3-calendar-event-modal__event-time {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+    margin-right: 12px;
+    min-width: 60px;
+}
+
+.m3-calendar-event-modal__event-item.selected .m3-calendar-event-modal__event-time {
+    color: var(--md-sys-color-on-primary-container);
+}
+
+.m3-calendar-event-modal__event-title {
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+    margin: 0;
+    flex: 1;
+}
+
+.m3-calendar-event-modal__event-item.selected .m3-calendar-event-modal__event-title {
+    color: var(--md-sys-color-on-primary-container);
+}
+
+/* Right Pane - Event Details */
+.m3-calendar-event-modal__right-pane {
+    width: 100%;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.m3-calendar-event-modal__event-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.m3-calendar-event-modal__event-details-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px;
+    border-bottom: 1px solid var(--md-sys-color-outline-variant);
+    flex-shrink: 0;
+}
+
+.m3-calendar-event-modal__event-details-title {
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+    margin: 0;
+}
+
+.m3-calendar-event-modal__event-details-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.m3-calendar-event-modal__event-details-form {
+    flex: 1;
+    padding: 24px;
+    overflow-y: auto;
+}
+
+/* Material Design 3 Form Components */
+
+/* Text Field */
+.m3-text-field {
+    position: relative;
+    margin-bottom: 24px;
+}
+
+.m3-text-field__label {
+    display: block;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--md-sys-color-on-surface);
+    margin-bottom: 8px;
+}
+
+.m3-text-field__input {
+    width: 100%;
+    padding: 16px;
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: var(--md-sys-shape-corner-small);
+    font-size: 16px;
+    background-color: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    transition: border-color 0.2s cubic-bezier(0.2, 0, 0, 1),
+        box-shadow 0.2s cubic-bezier(0.2, 0, 0, 1);
+    box-sizing: border-box;
+}
+
+.m3-text-field__input:focus {
+    outline: none;
+    border-color: var(--md-sys-color-primary);
+    box-shadow: 0 0 0 2px var(--md-sys-color-primary-container);
+}
+
+.m3-text-field__input--textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.m3-text-field__supporting-text {
+    font-size: 12px;
+    color: var(--md-sys-color-on-surface-variant);
+    margin-top: 4px;
+}
+
+/* Switch Component */
+.m3-switch {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.m3-switch__input {
+    display: none;
+}
+
+.m3-switch__label {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--md-sys-color-on-surface);
+}
+
+.m3-switch__track {
+    width: 40px;
+    height: 30px;
+    background-color: var(--md-sys-color-surface-variant);
+    border-radius: 10px;
+    position: relative;
+    transition: background-color 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.m3-switch__thumb {
+    width: 16px;
+    height: 16px;
+    background-color: var(--md-sys-color-outline);
+    border-radius: 50%;
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    transition: transform 0.2s cubic-bezier(0.2, 0, 0, 1),
+        background-color 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.m3-switch__input:checked+.m3-switch__label .m3-switch__track {
+    background-color: var(--md-sys-color-primary);
+}
+
+.m3-switch__input:checked+.m3-switch__label .m3-switch__thumb {
+    transform: translateX(20px);
+    background-color: var(--md-sys-color-on-primary);
+}
+
+/* Button Components */
+.m3-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border: none;
+    border-radius: var(--md-sys-shape-corner-small);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+    text-decoration: none;
+}
+
+.m3-button--filled {
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    box-shadow: var(--md-sys-elevation-level1);
+}
+
+.m3-button--filled:hover {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    box-shadow: var(--md-sys-elevation-level2);
+}
+
+.m3-button--filled:disabled {
+    background-color: var(--md-sys-color-surface-variant);
+    color: var(--md-sys-color-on-surface-variant);
+    box-shadow: none;
+    cursor: not-allowed;
+}
+
+.m3-button--outlined {
+    background-color: transparent;
+    color: var(--md-sys-color-primary);
+    border: 1px solid var(--md-sys-color-outline);
+}
+
+.m3-button--outlined:hover {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+}
+
+/* FAB Component */
+.m3-fab {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background-color: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    cursor: pointer;
+    box-shadow: var(--md-sys-elevation-level3);
+    transition: all 0.2s cubic-bezier(0.2, 0, 0, 1);
+}
+
+.m3-fab:hover {
+    background-color: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    box-shadow: var(--md-sys-elevation-level4);
+}
+
+.m3-fab--small {
+    width: 32px;
+    height: 32px;
+}
+
+/* DateTime Container */
+.m3-calendar-event-modal__datetime-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+/* Empty State */
+.m3-calendar-event-modal__empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    text-align: center;
+    color: var(--md-sys-color-on-surface-variant);
+}
+
+.m3-calendar-event-modal__empty-state-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.6;
+}
+
+.m3-calendar-event-modal__empty-state-text {
+    font-size: 16px;
+    margin-bottom: 8px;
+}
+
+.m3-calendar-event-modal__empty-state-subtext {
+    font-size: 14px;
+    opacity: 0.8;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .m3-calendar-event-modal__container {
+        width: 95%;
+        max-height: 95vh;
+    }
+
+    .m3-calendar-event-modal__split-container {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+
+    .m3-calendar-event-modal__datetime-container {
+        grid-template-columns: 1fr;
+    }
+
+    .m3-calendar-event-modal__header {
+        padding: 16px 16px 0 16px;
+    }
+
+    .m3-calendar-event-modal__body {
+        padding: 16px;
+    }
+}
+
+@media (max-width: 480px) {
+    .m3-calendar-event-modal__container {
+        width: 100%;
+        height: 100%;
+        max-height: 100vh;
+        border-radius: 0;
+    }
+
+    .m3-calendar-event-modal__content {
+        max-height: 100vh;
+    }
+}

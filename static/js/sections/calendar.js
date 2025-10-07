@@ -191,37 +191,50 @@ class CalendarSection extends AuthenticatedSection {
                     <!-- Calendar View -->
                     <div class="m3-card" id="calendar-view-card">
                         <div class="m3-card__header m3-calendar-header-container">
-                            <!-- Absolutely positioned Today and Refresh buttons -->
-                            <div class="m3-calendar-absolute-controls">
-                                <button class="m3-button m3-button--outlined" id="calendar-today-btn">Today</button>
-                                <button class="m3-button m3-button--icon" id="calendar-refresh-btn" title="Refresh Calendar">
-                                    <span class="material-symbols-outlined">refresh</span>
-                                </button>
-                            </div>
-                            
-                            <!-- Main header with centered content -->
-                            <div class="m3-calendar-main-header">
-                                <!-- Left arrow -->
-                                <button class="m3-button m3-button--icon m3-calendar-nav-arrow" id="calendar-prev-btn">
-                                    <span class="material-symbols-outlined">chevron_left</span>
-                                </button>
-                                
-                                <!-- Centered content -->
-                                <div class="m3-calendar-centered-content">
-                                    <h2 class="m3-calendar-title" id="calendar-title">Calendar</h2>
-                                    <div class="m3-calendar-view-controls">
-                                        <div class="m3-button-group">
-                                            <button class="m3-button m3-button--outlined m3-button--small" data-view="month">Month</button>
-                                            <button class="m3-button m3-button--outlined m3-button--small" data-view="week">Week</button>
-                                            <button class="m3-button m3-button--outlined m3-button--small" data-view="day">Day</button>
-                                        </div>
+                            <!-- Google Calendar Style Header -->
+                            <div class="m3-calendar-header">
+                                <div class="m3-calendar-header__left">
+                                    <button class="m3-button m3-button--today" id="calendar-today-btn">Today</button>
+                                    <div class="m3-calendar-header__navigation">
+                                        <button class="m3-icon-button m3-icon-button--nav" id="calendar-prev-btn">
+                                            <span class="material-symbols-rounded">chevron_left</span>
+                                        </button>
+                                        <button class="m3-icon-button m3-icon-button--nav" id="calendar-next-btn">
+                                            <span class="material-symbols-rounded">chevron_right</span>
+                                        </button>
+                                    </div>
+                                    <h1 class="m3-calendar-header__title" id="calendar-title">October 2025</h1>
+                                </div>
+                                <div class="m3-calendar-header__right">
+                                    <button class="m3-icon-button" id="calendar-search-btn">
+                                        <span class="material-symbols-rounded">search</span>
+                                    </button>
+                                    <button class="m3-icon-button" id="calendar-help-btn">
+                                        <span class="material-symbols-rounded">help</span>
+                                    </button>
+                                    <button class="m3-icon-button" id="calendar-settings-btn">
+                                        <span class="material-symbols-rounded">settings</span>
+                                    </button>
+                                    <div class="m3-calendar-header__view-selector">
+                                        <button class="m3-button m3-button--view-selector" id="calendar-view-selector">
+                                            Month <span class="material-symbols-rounded">keyboard_arrow_down</span>
+                                        </button>
+                                    </div>
+                                    <button class="m3-icon-button" id="calendar-manager-btn">
+                                        <span class="material-symbols-rounded">calendar_month</span>
+                                    </button>
+                                    <button class="m3-icon-button" id="calendar-tasks-btn">
+                                        <span class="material-symbols-rounded">checklist</span>
+                                    </button>
+                                    <button class="m3-icon-button" id="calendar-apps-btn">
+                                        <span class="material-symbols-rounded">apps</span>
+                                    </button>
+                                    <div class="m3-calendar-header__profile">
+                                        <button class="m3-profile-button" id="calendar-profile-btn">
+                                            <div class="m3-profile-avatar">M</div>
+                                        </button>
                                     </div>
                                 </div>
-                                
-                                <!-- Right arrow -->
-                                <button class="m3-button m3-button--icon m3-calendar-nav-arrow" id="calendar-next-btn">
-                                    <span class="material-symbols-outlined">chevron_right</span>
-                                </button>
                             </div>
                         </div>
                         <div class="m3-card__content">
@@ -1039,8 +1052,8 @@ class CalendarSection extends AuthenticatedSection {
     }
 
     openEventModal(mode, event, date) {
-        if (window.calendarEventModal) {
-            window.calendarEventModal.show(date, event);
+        if (window.calendarEventModalMD3) {
+            window.calendarEventModalMD3.show(date, event);
         } else {
             console.error('Calendar event modal not available');
         }
