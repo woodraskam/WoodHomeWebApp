@@ -40,26 +40,26 @@ Implementation checklist for calendar filter dropdown menu feature, following th
 **Status**: ⏳ Pending
 
 #### 2.1 Dropdown Menu Component Files
-- [ ] Create `static/css/components/calendar-filter-dropdown.css`
-- [ ] Create `static/js/components/calendar-filter-dropdown.js`
-- [ ] Add Material Design 3 dropdown menu base styles
-- [ ] Implement calendar-specific menu item styling
-- [ ] Add responsive design for mobile devices
+- [x] Create `static/css/components/calendar-filter-dropdown.css`
+- [x] Create `static/js/components/calendar-filter-dropdown.js`
+- [x] Add Material Design 3 dropdown menu base styles
+- [x] Implement calendar-specific menu item styling
+- [x] Add responsive design for mobile devices
 
 #### 2.2 Dropdown Menu Component Implementation
-- [ ] Create `CalendarFilterDropdown` class for main dropdown
-- [ ] Create `CalendarFilterMenuItem` class for individual menu items
-- [ ] Create `CalendarFilterMenuHeader` for "All Calendars" option
-- [ ] Implement menu item selection/deselection logic
-- [ ] Add keyboard navigation support (arrow keys, enter, escape)
+- [x] Create `CalendarFilterDropdown` class for main dropdown
+- [x] Create `CalendarFilterMenuItem` class for individual menu items
+- [x] Create `CalendarFilterMenuHeader` for "All Calendars" option
+- [x] Implement menu item selection/deselection logic
+- [x] Add keyboard navigation support (arrow keys, enter, escape)
 
 #### 2.3 Dropdown Menu Styling and Behavior
-- [ ] Implement Material Design 3 dropdown menu appearance
-- [ ] Add calendar colors as menu item indicators
-- [ ] Implement hover and focus states for menu items
-- [ ] Add selected/unselected visual states with checkboxes
-- [ ] Implement smooth dropdown animations
-- [ ] Add ripple effects for touch interactions
+- [x] Implement Material Design 3 dropdown menu appearance
+- [x] Add calendar colors as menu item indicators
+- [x] Implement hover and focus states for menu items
+- [x] Add selected/unselected visual states with checkboxes
+- [x] Implement smooth dropdown animations
+- [x] Add ripple effects for touch interactions
 
 ### Phase 3: Frontend Integration
 **Duration**: 1-2 days

@@ -115,7 +115,7 @@ func (h *CalendarHandler) GetEventsHandler(w http.ResponseWriter, r *http.Reques
 
 	// Fetch events from Google Calendar (with caching)
 	var events []services.CalendarEvent
-	
+
 	if len(selectedCalendars) > 0 {
 		// Use filtered events if calendar IDs are provided
 		events, err = h.calendarCacheService.GetCalendarEventsFiltered(r.Context(), token, start, end, selectedCalendars)
@@ -123,7 +123,7 @@ func (h *CalendarHandler) GetEventsHandler(w http.ResponseWriter, r *http.Reques
 		// Use all events if no calendar filter is provided
 		events, err = h.calendarCacheService.GetCalendarEvents(r.Context(), token, start, end)
 	}
-	
+
 	if err != nil {
 		log.Printf("Failed to fetch calendar events: %v", err)
 		http.Error(w, "Failed to fetch events", http.StatusInternalServerError)
