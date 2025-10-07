@@ -301,6 +301,11 @@ func (s *CalendarService) getCalendarColor(colorID string) string {
 
 // GetCalendarEvents fetches events from Google Calendar
 func (s *CalendarService) GetCalendarEvents(ctx context.Context, token *oauth2.Token, start, end time.Time) ([]CalendarEvent, error) {
+	return s.GetCalendarEventsFiltered(ctx, token, start, end, nil)
+}
+
+// GetCalendarEventsFiltered fetches events from Google Calendar with optional calendar filtering
+func (s *CalendarService) GetCalendarEventsFiltered(ctx context.Context, token *oauth2.Token, start, end time.Time, selectedCalendars []string) ([]CalendarEvent, error) {
 	// Refresh token if expired
 	if token.Expiry.Before(time.Now()) {
 		tokenSource := s.oauthConfig.TokenSource(ctx, token)
@@ -333,6 +338,21 @@ func (s *CalendarService) GetCalendarEvents(ctx context.Context, token *oauth2.T
 		// Skip calendars that are not selected or are hidden
 		if cal.Selected == false || cal.Hidden == true {
 			continue
+		}
+
+		// Apply calendar filtering if specified
+		if selectedCalendars != nil && len(selectedCalendars) > 0 {
+			// Check if this calendar is in the selected list
+			calendarSelected := false
+			for _, selectedID := range selectedCalendars {
+				if cal.Id == selectedID {
+					calendarSelected = true
+					break
+				}
+			}
+			if !calendarSelected {
+				continue
+			}
 		}
 
 		events, err := srv.Events.List(cal.Id).

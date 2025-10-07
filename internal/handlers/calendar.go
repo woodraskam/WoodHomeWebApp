@@ -5,6 +5,7 @@ import (
 	"html/template"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"woodhome-webapp/internal/services"
@@ -100,8 +101,20 @@ func (h *CalendarHandler) GetEventsHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Fetch events from Google Calendar (with caching)
-	events, err := h.calendarCacheService.GetCalendarEvents(r.Context(), token, start, end)
+	// Parse calendar filter from query parameters
+	calendarFilter := r.URL.Query().Get("calendars")
+	var selectedCalendars []string
+	if calendarFilter != "" {
+		// Split comma-separated calendar IDs
+		selectedCalendars = strings.Split(calendarFilter, ",")
+		// Trim whitespace from each ID
+		for i, id := range selectedCalendars {
+			selectedCalendars[i] = strings.TrimSpace(id)
+		}
+	}
+
+	// Fetch events from Google Calendar (with caching and filtering)
+	events, err := h.calendarCacheService.GetCalendarEventsFiltered(r.Context(), token, start, end, selectedCalendars)
 	if err != nil {
 		log.Printf("Failed to fetch calendar events: %v", err)
 		http.Error(w, "Failed to fetch events", http.StatusInternalServerError)
