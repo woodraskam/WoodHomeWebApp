@@ -46,6 +46,9 @@ class CalendarSection extends AuthenticatedSection {
 
         // Google Calendar header navigation
         this.setupHeaderNavigation();
+        
+        // Keyboard navigation
+        this.setupKeyboardNavigation();
 
         // Listen for OAuth callback completion
         window.addEventListener('load', () => {
@@ -478,6 +481,59 @@ class CalendarSection extends AuthenticatedSection {
     toggleViewSelector() {
         // TODO: Implement view selector dropdown
         console.log('View selector clicked - implement dropdown');
+    }
+
+    showAllEventsForDay(events, dayElement) {
+        // Remove existing events and more indicator
+        const eventsContainer = dayElement.querySelector('.m3-calendar-day__events');
+        eventsContainer.innerHTML = '';
+
+        // Show all events
+        events.forEach(event => {
+            const eventElement = document.createElement('div');
+            eventElement.className = 'm3-calendar-day__event';
+            eventElement.textContent = event.title;
+            
+            // Apply Google Calendar API colors using the color manager
+            this.colorManager.applyEventColor(event, eventElement);
+
+            // Add click handler for viewing/editing events
+            eventElement.addEventListener('click', (e) => {
+                e.stopPropagation();
+                this.openEventModal('view', event, this.currentDate);
+            });
+
+            eventsContainer.appendChild(eventElement);
+        });
+    }
+
+    setupKeyboardNavigation() {
+        document.addEventListener('keydown', (e) => {
+            // Only handle keyboard navigation when calendar is active
+            if (!this.isActive) return;
+
+            switch(e.key) {
+                case 'ArrowLeft':
+                    e.preventDefault();
+                    this.previousMonth();
+                    break;
+                case 'ArrowRight':
+                    e.preventDefault();
+                    this.nextMonth();
+                    break;
+                case 'Home':
+                    e.preventDefault();
+                    this.goToToday();
+                    break;
+                case 'Escape':
+                    e.preventDefault();
+                    // Close any open modals
+                    if (window.calendarEventModalMD3) {
+                        window.calendarEventModalMD3.hide();
+                    }
+                    break;
+            }
+        });
     }
 
     async loadEvents() {
