@@ -3298,6 +3298,113 @@
     border-radius: 3px;
 }
 
+/* Google Calendar Responsive Design */
+@media (max-width: 768px) {
+    .m3-calendar-header {
+        padding: 12px 16px;
+        flex-wrap: wrap;
+        gap: 12px;
+    }
+
+    .m3-calendar-header__left {
+        order: 1;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .m3-calendar-header__right {
+        order: 2;
+        width: 100%;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .m3-calendar-header__title {
+        font-size: 18px;
+        min-width: auto;
+    }
+
+    .m3-calendar-day {
+        min-height: 80px;
+        padding: 4px;
+    }
+
+    .m3-calendar-day__event {
+        font-size: 10px;
+        padding: 1px 4px;
+    }
+
+    .m3-calendar-weekday {
+        padding: 8px 4px;
+        font-size: 10px;
+    }
+
+    .m3-calendar-header__navigation {
+        gap: 2px;
+    }
+
+    .m3-icon-button--nav {
+        width: 28px;
+        height: 28px;
+    }
+
+    .m3-button--today {
+        padding: 6px 12px;
+        font-size: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .m3-calendar-header__right {
+        display: none; /* Hide non-essential buttons on very small screens */
+    }
+
+    .m3-calendar-day {
+        min-height: 60px;
+    }
+
+    .m3-calendar-day__event {
+        font-size: 9px;
+        min-height: 12px;
+    }
+
+    .m3-calendar-weekday {
+        padding: 6px 2px;
+        font-size: 9px;
+    }
+
+    .m3-calendar-header__title {
+        font-size: 16px;
+    }
+
+    .m3-button--today {
+        padding: 4px 8px;
+        font-size: 11px;
+    }
+}
+
+@media (max-width: 360px) {
+    .m3-calendar-header {
+        padding: 8px 12px;
+    }
+
+    .m3-calendar-day {
+        min-height: 50px;
+        padding: 2px;
+    }
+
+    .m3-calendar-day__event {
+        font-size: 8px;
+        min-height: 10px;
+        padding: 1px 2px;
+    }
+
+    .m3-calendar-weekday {
+        padding: 4px 1px;
+        font-size: 8px;
+    }
+}
+
 /* Calendar Event Modal Styles - Moved to component file */
 .m3-modal {
     position: fixed;
