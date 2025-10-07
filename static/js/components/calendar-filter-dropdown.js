@@ -21,7 +21,7 @@ class CalendarFilterDropdown {
     init() {
         this.createDropdown();
         this.bindEvents();
-        this.loadCalendars();
+        // Don't load calendars automatically - wait for them to be provided
     }
 
     /**
@@ -105,10 +105,18 @@ class CalendarFilterDropdown {
     }
 
     /**
-     * Load calendars from the API
+     * Load calendars from the API or use provided calendars
      */
-    async loadCalendars() {
+    async loadCalendars(providedCalendars = null) {
         try {
+            if (providedCalendars && providedCalendars.length > 0) {
+                // Use calendars provided by the main calendar section
+                this.calendars = providedCalendars;
+                this.renderCalendars();
+                return;
+            }
+
+            // Fallback to API call if no calendars provided
             const response = await fetch('/api/calendar/calendars');
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}: ${response.statusText}`);

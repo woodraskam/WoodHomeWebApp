@@ -169,7 +169,7 @@ class CalendarSection extends AuthenticatedSection {
         calendarSection.innerHTML = this.getCalendarSectionHTML();
 
         contentArea.appendChild(calendarSection);
-        
+
         // Initialize the calendar filter dropdown
         this.initializeFilterDropdown();
     }
@@ -197,6 +197,7 @@ class CalendarSection extends AuthenticatedSection {
                     this.loadEvents();
                 });
                 
+                // Don't load calendars yet - wait for them to be loaded by the main section
                 console.log('Calendar filter dropdown initialized');
             } else {
                 console.error('CalendarFilterDropdown class not found');
@@ -629,7 +630,7 @@ class CalendarSection extends AuthenticatedSection {
             const end = this.getEndOfPeriod();
 
             console.log(`Loading calendar events from ${start} to ${end}`);
-            
+
             // Build API URL with calendar filter if calendars are selected
             let apiUrl = `/api/calendar/events?start=${start}&end=${end}`;
             if (this.selectedCalendars.size > 0 && this.selectedCalendars.size < this.calendars.length) {
@@ -637,7 +638,7 @@ class CalendarSection extends AuthenticatedSection {
                 apiUrl += `&calendars=${selectedIds.join(',')}`;
                 console.log(`Filtering events for calendars: ${selectedIds.join(', ')}`);
             }
-            
+
             const response = await fetch(apiUrl);
 
             if (response.ok) {
@@ -669,9 +670,10 @@ class CalendarSection extends AuthenticatedSection {
 
                 // Select all calendars by default
                 this.calendars.forEach(cal => this.selectedCalendars.add(cal.id));
-                
-                // Update dropdown with selected calendars
+
+                // Update dropdown with calendars and selected state
                 if (this.filterDropdown) {
+                    this.filterDropdown.loadCalendars(this.calendars);
                     this.filterDropdown.setSelectedCalendars(Array.from(this.selectedCalendars));
                 }
             } else {
