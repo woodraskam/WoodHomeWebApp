@@ -239,7 +239,18 @@ class CalendarSection extends AuthenticatedSection {
                         </div>
                         <div class="m3-card__content">
                             <div class="m3-calendar-grid" id="calendar-grid">
-                                <!-- Calendar content will be generated here -->
+                                <div class="m3-calendar-weekdays">
+                                    <div class="m3-calendar-weekday">SUN</div>
+                                    <div class="m3-calendar-weekday">MON</div>
+                                    <div class="m3-calendar-weekday">TUE</div>
+                                    <div class="m3-calendar-weekday">WED</div>
+                                    <div class="m3-calendar-weekday">THU</div>
+                                    <div class="m3-calendar-weekday">FRI</div>
+                                    <div class="m3-calendar-weekday">SAT</div>
+                                </div>
+                                <div class="m3-calendar-month" id="calendar-month">
+                                    <!-- Days will be populated by JavaScript -->
+                                </div>
                             </div>
                         </div>
                     </div>
