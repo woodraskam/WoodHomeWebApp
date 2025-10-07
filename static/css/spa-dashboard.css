@@ -2810,13 +2810,13 @@
         background: var(--m3-primary-container);
         border: 2px solid var(--m3-primary);
     }
-    
+
     .m3-calendar-splitter:hover,
     .m3-calendar-splitter:active {
         width: 20px;
         background: var(--m3-primary);
     }
-    
+
     /* Add visual touch indicator */
     .m3-calendar-splitter::after {
         content: '⋮⋮';

@@ -438,7 +438,7 @@ class CalendarSection extends AuthenticatedSection {
             const constrainedWidth = Math.max(20, Math.min(80, newLeftWidth));
 
             container.style.gridTemplateColumns = `${constrainedWidth}% 4px ${100 - constrainedWidth}%`;
-            
+
             e.preventDefault();
         }, { passive: false });
 
