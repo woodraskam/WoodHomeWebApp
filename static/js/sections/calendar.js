@@ -596,14 +596,14 @@ class CalendarSection extends AuthenticatedSection {
             const end = this.getEndOfPeriod();
 
             console.log(`Loading calendar events from ${start} to ${end}`);
-            
+
             // Build API URL with calendar filter
             let apiUrl = `/api/calendar/events?start=${start}&end=${end}`;
             if (this.selectedCalendars.size > 0) {
                 const calendarIds = Array.from(this.selectedCalendars);
                 apiUrl += `&calendars=${calendarIds.join(',')}`;
             }
-            
+
             const response = await fetch(apiUrl);
 
             if (response.ok) {

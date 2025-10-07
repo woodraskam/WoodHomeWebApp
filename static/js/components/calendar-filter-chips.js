@@ -15,6 +15,9 @@ class CalendarFilterChips {
             storageKey: 'calendar-filter-chips',
             onFilterChange: null,
             onError: null,
+            enableSearch: true,
+            enableGrouping: true,
+            showEventCounts: true,
             ...options
         };
         
@@ -22,6 +25,8 @@ class CalendarFilterChips {
         this.selectedCalendars = new Set();
         this.isLoading = false;
         this.error = null;
+        this.searchQuery = '';
+        this.filteredCalendars = [];
         
         this.init();
     }
@@ -64,6 +69,16 @@ class CalendarFilterChips {
     renderActions() {
         return `
             <div class="m3-calendar-filter-chips__actions">
+                ${this.options.enableSearch ? `
+                    <div class="m3-calendar-filter-chips__search">
+                        <input type="text" 
+                               id="calendar-search-input" 
+                               placeholder="Search calendars..." 
+                               class="m3-calendar-filter-chips__search-input"
+                               value="${this.searchQuery}">
+                        <span class="material-symbols-outlined m3-calendar-filter-chips__search-icon">search</span>
+                    </div>
+                ` : ''}
                 ${this.options.showSelectAll ? `
                     <button class="m3-calendar-filter-chips__action-button" id="select-all-btn">
                         Select All
@@ -133,7 +148,8 @@ class CalendarFilterChips {
             return this.renderEmptyState();
         }
         
-        return this.calendars.map(calendar => this.renderChip(calendar)).join('');
+        const calendarsToRender = this.filteredCalendars.length > 0 ? this.filteredCalendars : this.calendars;
+        return calendarsToRender.map(calendar => this.renderChip(calendar)).join('');
     }
     
     /**
@@ -243,6 +259,16 @@ class CalendarFilterChips {
                 return;
             }
         });
+
+        // Search input
+        const searchInput = document.getElementById('calendar-search-input');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                this.searchQuery = e.target.value.toLowerCase();
+                this.filterCalendars();
+                this.updateContainer();
+            });
+        }
         
         // Keyboard navigation
         this.container.addEventListener('keydown', (e) => {
@@ -437,6 +463,20 @@ class CalendarFilterChips {
         }
     }
     
+    /**
+     * Filter calendars based on search query
+     */
+    filterCalendars() {
+        if (!this.searchQuery.trim()) {
+            this.filteredCalendars = [];
+            return;
+        }
+
+        this.filteredCalendars = this.calendars.filter(calendar => 
+            calendar.name.toLowerCase().includes(this.searchQuery)
+        );
+    }
+
     /**
      * Escape HTML to prevent XSS
      */

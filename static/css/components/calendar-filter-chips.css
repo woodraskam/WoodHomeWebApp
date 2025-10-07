@@ -231,6 +231,49 @@
 .m3-calendar-filter-chips__actions {
     display: flex;
     gap: var(--m3-spacing-sm);
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.m3-calendar-filter-chips__search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 200px;
+}
+
+.m3-calendar-filter-chips__search-input {
+    width: 100%;
+    padding: 8px 12px 8px 40px;
+    border: 1px solid var(--m3-outline);
+    border-radius: var(--m3-shape-corner-medium);
+    background-color: var(--m3-surface-container);
+    color: var(--m3-on-surface);
+    font-size: var(--m3-font-size-body-medium);
+    font-family: var(--m3-font-family);
+    transition: all var(--m3-motion-duration-short4) var(--m3-motion-easing-standard);
+}
+
+.m3-calendar-filter-chips__search-input:focus {
+    outline: 2px solid var(--m3-primary);
+    outline-offset: 2px;
+    border-color: var(--m3-primary);
+}
+
+.m3-calendar-filter-chips__search-input::placeholder {
+    color: var(--m3-on-surface-variant);
+}
+
+.m3-calendar-filter-chips__search-icon {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 20px;
+    height: 20px;
+    color: var(--m3-on-surface-variant);
+    pointer-events: none;
 }
 
 .m3-calendar-filter-chips__action-button {
@@ -400,6 +443,13 @@
     .m3-calendar-filter-chips__actions {
         width: 100%;
         justify-content: flex-end;
+        flex-direction: column;
+        gap: var(--m3-spacing-sm);
+    }
+    
+    .m3-calendar-filter-chips__search {
+        min-width: 100%;
+        order: -1;
     }
     
     .m3-chip {
