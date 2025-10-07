@@ -461,13 +461,13 @@ class CalendarSection extends AuthenticatedSection {
     previousMonth() {
         this.currentDate.setMonth(this.currentDate.getMonth() - 1);
         this.updateHeaderTitle();
-        this.renderMonthView();
+        this.loadEvents(); // Reload events for the new month
     }
 
     nextMonth() {
         this.currentDate.setMonth(this.currentDate.getMonth() + 1);
         this.updateHeaderTitle();
-        this.renderMonthView();
+        this.loadEvents(); // Reload events for the new month
     }
 
     updateHeaderTitle() {
