@@ -1,25 +1,25 @@
-# Calendar Filter Chips - Implementation Checklist
+# Calendar Filter Dropdown Menu - Implementation Checklist
 
 ## Overview
-Implementation checklist for calendar filter chips feature, following the comprehensive design outlined in Calendar-Filter-Chips-ImplementationGuide.md.
+Implementation checklist for calendar filter dropdown menu feature, following the comprehensive design outlined in Calendar-Filter-Chips-ImplementationGuide.md.
 
 ## Current State Analysis
-- **Existing Components**: Calendar filter card with empty filter area
+- **Existing Components**: Calendar header with calendar icon, empty filter card at bottom
 - **Current Features**: Basic calendar view with event display, calendar color system
-- **Target**: Interactive chip-based calendar filtering with Material Design 3 styling
+- **Target**: Dropdown menu triggered by calendar icon for calendar filtering with Material Design 3 styling
 
 ## Implementation Progress
 
 ### Phase 1: Backend API Enhancement
 **Duration**: 1-2 days
-**Status**: ✅ Completed
+**Status**: ⏳ Pending
 
 #### 1.1 Enhanced Calendar Filtering API
 - [x] Update `/api/calendar/events` endpoint to accept `calendars` query parameter
 - [x] Add calendar filtering logic to event fetching
 - [x] Implement calendar selection state persistence
 - [x] Add error handling for invalid calendar IDs
-- [x] Test API endpoint with multiple calendar IDs
+- [ ] Test API endpoint with multiple calendar IDs
 
 #### 1.2 Calendar Filtering Service
 - [x] Add `GetCalendarEventsFiltered()` method to calendar service
@@ -29,118 +29,118 @@ Implementation checklist for calendar filter chips feature, following the compre
 - [x] Add calendar visibility state management
 
 #### 1.3 API Endpoint Testing
-- [x] Test calendar filtering with single calendar ID
-- [x] Test calendar filtering with multiple calendar IDs
-- [x] Test error handling for invalid calendar IDs
-- [x] Verify caching works with filtered results
-- [x] Test performance with large number of calendars
+- [ ] Test calendar filtering with single calendar ID
+- [ ] Test calendar filtering with multiple calendar IDs
+- [ ] Test error handling for invalid calendar IDs
+- [ ] Verify caching works with filtered results
+- [ ] Test performance with large number of calendars
 
-### Phase 2: Material Design 3 Chip Components
+### Phase 2: Material Design 3 Dropdown Menu Components
 **Duration**: 1-2 days
-**Status**: ✅ Completed
+**Status**: ⏳ Pending
 
-#### 2.1 Chip Component Files
-- [x] Create `static/css/components/calendar-filter-chips.css`
-- [x] Create `static/js/components/calendar-filter-chips.js`
-- [x] Add Material Design 3 chip base styles
-- [x] Implement calendar-specific chip styling
-- [x] Add responsive design for mobile devices
+#### 2.1 Dropdown Menu Component Files
+- [ ] Create `static/css/components/calendar-filter-dropdown.css`
+- [ ] Create `static/js/components/calendar-filter-dropdown.js`
+- [ ] Add Material Design 3 dropdown menu base styles
+- [ ] Implement calendar-specific menu item styling
+- [ ] Add responsive design for mobile devices
 
-#### 2.2 Chip Component Implementation
-- [x] Create `CalendarFilterChips` class for container
-- [x] Implement chip selection/deselection logic
-- [x] Add keyboard navigation support
-- [x] Add action buttons (Select All, Clear All)
-- [x] Implement state persistence
+#### 2.2 Dropdown Menu Component Implementation
+- [ ] Create `CalendarFilterDropdown` class for main dropdown
+- [ ] Create `CalendarFilterMenuItem` class for individual menu items
+- [ ] Create `CalendarFilterMenuHeader` for "All Calendars" option
+- [ ] Implement menu item selection/deselection logic
+- [ ] Add keyboard navigation support (arrow keys, enter, escape)
 
-#### 2.3 Chip Styling and Behavior
-- [x] Implement Material Design 3 chip appearance
-- [x] Add calendar colors as chip background colors
-- [x] Implement hover and focus states
-- [x] Add selected/unselected visual states
-- [x] Implement smooth transitions and animations
-- [x] Add ripple effects for touch interactions
+#### 2.3 Dropdown Menu Styling and Behavior
+- [ ] Implement Material Design 3 dropdown menu appearance
+- [ ] Add calendar colors as menu item indicators
+- [ ] Implement hover and focus states for menu items
+- [ ] Add selected/unselected visual states with checkboxes
+- [ ] Implement smooth dropdown animations
+- [ ] Add ripple effects for touch interactions
 
 ### Phase 3: Frontend Integration
 **Duration**: 1-2 days
-**Status**: ✅ Completed
+**Status**: ⏳ Pending
 
-#### 3.1 Calendar Filter Card Enhancement
-- [x] Update existing `calendar-filter-card` HTML structure
-- [x] Replace empty filter area with chip interface
-- [x] Add calendar chips for each available calendar
-- [x] Implement chip selection/deselection logic
-- [x] Add filter action buttons (Select All, Clear All)
+#### 3.1 Calendar Header Integration
+- [ ] Update existing calendar icon in header to trigger dropdown
+- [ ] Add dropdown positioning relative to calendar icon
+- [ ] Implement click-outside-to-close behavior
+- [ ] Add visual feedback for active filter state
+- [ ] Handle responsive behavior for mobile devices
 
 #### 3.2 Event Filtering Logic
-- [x] Update event loading to include calendar filter parameter
-- [x] Implement client-side event filtering as fallback
-- [x] Add filter state management
-- [x] Handle edge cases (no calendars selected, all calendars selected)
-- [x] Add real-time event filtering without page reload
+- [ ] Update event loading to include calendar filter parameter
+- [ ] Implement client-side event filtering as fallback
+- [ ] Add filter state management
+- [ ] Handle edge cases (no calendars selected, all calendars selected)
+- [ ] Add real-time event filtering without page reload
 
 #### 3.3 Integration Testing
-- [x] Test chip rendering with different numbers of calendars
-- [x] Test filter functionality with various calendar combinations
-- [x] Test responsive design on mobile devices
-- [x] Test keyboard navigation
-- [x] Verify accessibility compliance
+- [ ] Test dropdown rendering with different numbers of calendars
+- [ ] Test filter functionality with various calendar combinations
+- [ ] Test responsive design on mobile devices
+- [ ] Test keyboard navigation (arrow keys, enter, escape)
+- [ ] Verify accessibility compliance
 
 ### Phase 4: User Experience Enhancements
 **Duration**: 1-2 days
-**Status**: ✅ Completed
+**Status**: ⏳ Pending
 
 #### 4.1 Advanced Filter Features
-- [x] Add quick filter presets (Work, Personal, All)
-- [x] Implement calendar search within filter chips
-- [x] Add calendar grouping by type (primary, shared, etc.)
-- [x] Implement filter state persistence across sessions
-- [x] Add localStorage for filter persistence
+- [ ] Add quick filter presets (Work, Personal, All)
+- [ ] Implement calendar search within dropdown menu
+- [ ] Add calendar grouping by type (primary, shared, etc.)
+- [ ] Implement filter state persistence across sessions
+- [ ] Add localStorage for filter persistence
 
 #### 4.2 Visual Feedback and States
-- [x] Add loading states for calendar data
-- [x] Implement empty state when no calendars available
-- [x] Add error states for failed calendar loads
-- [x] Add success feedback for filter changes
-- [x] Handle network connectivity issues
+- [ ] Add loading states for calendar data
+- [ ] Implement empty state when no calendars available
+- [ ] Add error states for failed calendar loads
+- [ ] Add success feedback for filter changes
+- [ ] Handle network connectivity issues
 
 #### 4.3 Performance Optimization
-- [x] Implement lazy loading for calendar chips
-- [x] Add debouncing for filter changes
-- [x] Optimize rendering for large numbers of calendars
-- [x] Test performance with various calendar counts
-- [x] Implement efficient state management
+- [ ] Implement lazy loading for dropdown menu items
+- [ ] Add debouncing for filter changes
+- [ ] Optimize rendering for large numbers of calendars
+- [ ] Test performance with various calendar counts
+- [ ] Implement efficient state management
 
 ## Completion Criteria
 
 ### Functional Requirements
-- [x] All available calendars display as interactive chips
-- [x] Users can toggle individual calendars on/off
-- [x] Events filter in real-time based on chip selection
-- [x] Filter state persists across page navigation
-- [x] Calendar colors are properly displayed on chips
-- [x] Select All and Clear All buttons work correctly
+- [ ] Calendar filter accessible via dropdown menu from calendar icon
+- [ ] "All Calendars" option is selected by default
+- [ ] Users can select one or more calendars from dropdown menu
+- [ ] Events filter in real-time based on menu selection
+- [ ] Filter state persists across page navigation
+- [ ] Calendar colors are properly displayed as menu item indicators
 
 ### Technical Requirements
-- [x] Chips follow Material Design 3 specifications
-- [x] Filtering works with existing calendar caching
-- [x] Mobile-responsive design implemented
-- [x] Keyboard navigation support added
-- [x] Accessibility compliance (WCAG 2.1) achieved
-- [x] Performance optimized for large calendar lists
+- [ ] Dropdown menu follows Material Design 3 specifications
+- [ ] Filtering works with existing calendar caching
+- [ ] Mobile-responsive design implemented
+- [ ] Keyboard navigation support added (arrow keys, enter, escape)
+- [ ] Accessibility compliance (WCAG 2.1) achieved
+- [ ] Performance optimized for large calendar lists
 
 ### Integration Requirements
-- [x] Seamless integration with existing calendar filter card
-- [x] Compatible with existing calendar service
-- [x] Works with current event display system
-- [x] Maintains existing calendar color system
-- [x] Preserves current caching mechanisms
+- [ ] Seamless integration with existing calendar header icon
+- [ ] Compatible with existing calendar service
+- [ ] Works with current event display system
+- [ ] Maintains existing calendar color system
+- [ ] Preserves current caching mechanisms
 
 ## Testing Checklist
 
 ### Unit Testing
-- [ ] Test individual chip component functionality
-- [ ] Test chip selection/deselection logic
+- [ ] Test individual dropdown menu item functionality
+- [ ] Test menu item selection/deselection logic
 - [ ] Test filter state management
 - [ ] Test API integration with calendar filtering
 - [ ] Test error handling for various scenarios
@@ -153,21 +153,21 @@ Implementation checklist for calendar filter chips feature, following the compre
 - [ ] Test performance with large datasets
 
 ### User Acceptance Testing
-- [ ] Verify intuitive chip-based filtering
+- [ ] Verify intuitive dropdown-based filtering
 - [ ] Confirm visual design matches Material Design 3
 - [ ] Test user workflow efficiency
 - [ ] Verify filter state persistence
 - [ ] Confirm mobile usability
 
 ## Notes
-- **Material Design 3 Reference**: Follow GitHub chip documentation for proper styling
-- **Calendar Colors**: Use existing calendar color system for chip backgrounds
+- **Material Design 3 Reference**: Follow GitHub dropdown menu documentation for proper styling
+- **Calendar Colors**: Use existing calendar color system for menu item indicators
 - **Performance**: Consider virtualization for large numbers of calendars
 - **Accessibility**: Ensure proper contrast ratios and keyboard navigation
 - **Mobile**: Optimize touch interactions and responsive layout
 
 ## Dependencies
-- **Material Design 3 Chip Styles**: GitHub reference implementation
+- **Material Design 3 Menu Styles**: GitHub reference implementation
 - **Existing Calendar API**: Current calendar service endpoints
 - **Calendar Color System**: Existing color management implementation
 - **Event Display System**: Current calendar event rendering

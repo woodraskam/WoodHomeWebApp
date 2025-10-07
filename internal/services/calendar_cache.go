@@ -93,17 +93,12 @@ func (ccs *CalendarCacheService) GetCalendars(ctx context.Context, token *oauth2
 
 // GetCalendarEvents fetches calendar events with caching
 func (ccs *CalendarCacheService) GetCalendarEvents(ctx context.Context, token *oauth2.Token, start, end time.Time) ([]CalendarEvent, error) {
-	return ccs.GetCalendarEventsFiltered(ctx, token, start, end, nil)
-}
-
-// GetCalendarEventsFiltered fetches calendar events with caching and optional calendar filtering
-func (ccs *CalendarCacheService) GetCalendarEventsFiltered(ctx context.Context, token *oauth2.Token, start, end time.Time, selectedCalendars []string) ([]CalendarEvent, error) {
 	if !ccs.config.EnableCache {
-		return ccs.calendarService.GetCalendarEventsFiltered(ctx, token, start, end, selectedCalendars)
+		return ccs.calendarService.GetCalendarEvents(ctx, token, start, end)
 	}
 
-	// Create cache key that includes calendar filter
-	cacheKey := ccs.createEventsCacheKeyWithFilter(token, start, end, selectedCalendars)
+	// First, try to get from cache with the specific key
+	cacheKey := ccs.createEventsCacheKey(token, start, end)
 	if cached, found := ccs.cacheService.Get(cacheKey); found {
 		if events, ok := cached.([]CalendarEvent); ok {
 			// Filter events to the requested time range
@@ -112,13 +107,10 @@ func (ccs *CalendarCacheService) GetCalendarEventsFiltered(ctx context.Context, 
 		}
 	}
 
-	// Try to find overlapping cached data (without filter for broader cache hits)
+	// Try to find overlapping cached data
 	if overlappingEvents := ccs.findOverlappingCachedEvents(token, start, end); len(overlappingEvents) > 0 {
-		// We have some cached data, apply calendar filter and time range filter
+		// We have some cached data, filter it and return
 		filteredEvents := ccs.filterEventsByTimeRange(overlappingEvents, start, end)
-		if selectedCalendars != nil && len(selectedCalendars) > 0 {
-			filteredEvents = ccs.filterEventsByCalendars(filteredEvents, selectedCalendars)
-		}
 		if len(filteredEvents) > 0 {
 			// Store the filtered results in cache for future use
 			ccs.cacheService.Set(cacheKey, filteredEvents, ccs.config.EventsTTL)
@@ -127,7 +119,35 @@ func (ccs *CalendarCacheService) GetCalendarEventsFiltered(ctx context.Context, 
 	}
 
 	// Cache miss - fetch from API
-	events, err := ccs.calendarService.GetCalendarEventsFiltered(ctx, token, start, end, selectedCalendars)
+	events, err := ccs.calendarService.GetCalendarEvents(ctx, token, start, end)
+	if err != nil {
+		return nil, err
+	}
+
+	// Store in cache
+	ccs.cacheService.Set(cacheKey, events, ccs.config.EventsTTL)
+
+	return events, nil
+}
+
+// GetCalendarEventsFiltered fetches filtered calendar events with caching
+func (ccs *CalendarCacheService) GetCalendarEventsFiltered(ctx context.Context, token *oauth2.Token, start, end time.Time, calendarIDs []string) ([]CalendarEvent, error) {
+	if !ccs.config.EnableCache {
+		return ccs.calendarService.GetCalendarEventsFiltered(ctx, token, start, end, calendarIDs)
+	}
+
+	// Create cache key that includes calendar IDs
+	cacheKey := ccs.createFilteredEventsCacheKey(token, start, end, calendarIDs)
+	if cached, found := ccs.cacheService.Get(cacheKey); found {
+		if events, ok := cached.([]CalendarEvent); ok {
+			// Filter events to the requested time range
+			filteredEvents := ccs.filterEventsByTimeRange(events, start, end)
+			return filteredEvents, nil
+		}
+	}
+
+	// Cache miss - fetch from API
+	events, err := ccs.calendarService.GetCalendarEventsFiltered(ctx, token, start, end, calendarIDs)
 	if err != nil {
 		return nil, err
 	}
@@ -216,6 +236,34 @@ func (ccs *CalendarCacheService) createEventsCacheKey(token *oauth2.Token, start
 	}
 }
 
+// createFilteredEventsCacheKey creates a cache key for filtered events
+func (ccs *CalendarCacheService) createFilteredEventsCacheKey(token *oauth2.Token, start, end time.Time, calendarIDs []string) models.CacheKey {
+	// Create a hash of the token and time range for the cache key
+	tokenHash := ccs.hashToken(token)
+	
+	// Create a broader time range for better cache hit rates
+	// Round to the nearest month for monthly views
+	startMonth := start.Format("2006-01")
+	endMonth := end.Format("2006-01")
+	
+	// Sort calendar IDs for consistent cache keys
+	sort.Strings(calendarIDs)
+	calendarIDsStr := strings.Join(calendarIDs, ",")
+	
+	// If the range spans multiple months, use a broader key
+	if startMonth == endMonth {
+		// Same month - use month-based key
+		timeRange := startMonth
+		key := fmt.Sprintf("%s:filtered_events:%s:%s:%s", ccs.config.CacheKeyPrefix, tokenHash, timeRange, calendarIDsStr)
+		return models.NewCacheKey("", key)
+	} else {
+		// Multiple months - use a broader range
+		timeRange := fmt.Sprintf("%s_to_%s", startMonth, endMonth)
+		key := fmt.Sprintf("%s:filtered_events:%s:%s:%s", ccs.config.CacheKeyPrefix, tokenHash, timeRange, calendarIDsStr)
+		return models.NewCacheKey("", key)
+	}
+}
+
 // filterEventsByTimeRange filters events to the requested time range
 func (ccs *CalendarCacheService) filterEventsByTimeRange(events []CalendarEvent, start, end time.Time) []CalendarEvent {
 	var filteredEvents []CalendarEvent
@@ -233,57 +281,6 @@ func (ccs *CalendarCacheService) filterEventsByTimeRange(events []CalendarEvent,
 		
 		// Check if event is within the requested time range
 		if eventStart.After(start) && eventStart.Before(end) {
-			filteredEvents = append(filteredEvents, event)
-		}
-	}
-	
-	return filteredEvents
-}
-
-// createEventsCacheKeyWithFilter creates a cache key for events with calendar filtering
-func (ccs *CalendarCacheService) createEventsCacheKeyWithFilter(token *oauth2.Token, start, end time.Time, selectedCalendars []string) models.CacheKey {
-	// Create a hash of the token and time range for the cache key
-	tokenHash := ccs.hashToken(token)
-	
-	// Create a broader time range for better cache hit rates
-	// Round to the nearest month for monthly views
-	startMonth := start.Format("2006-01")
-	endMonth := end.Format("2006-01")
-	
-	var timeRange string
-	if startMonth == endMonth {
-		// Same month - use month-based key
-		timeRange = startMonth
-	} else {
-		// Multiple months - use a broader range
-		timeRange = fmt.Sprintf("%s_to_%s", startMonth, endMonth)
-	}
-	
-	// Add calendar filter to the key
-	var calendarFilter string
-	if selectedCalendars != nil && len(selectedCalendars) > 0 {
-		// Sort calendar IDs for consistent cache keys
-		sort.Strings(selectedCalendars)
-		calendarFilter = fmt.Sprintf(":calendars:%s", strings.Join(selectedCalendars, ","))
-	}
-	
-	key := fmt.Sprintf("%s:events:%s:%s%s", ccs.config.CacheKeyPrefix, tokenHash, timeRange, calendarFilter)
-	return models.NewCacheKey("", key)
-}
-
-// filterEventsByCalendars filters events by selected calendar IDs
-func (ccs *CalendarCacheService) filterEventsByCalendars(events []CalendarEvent, selectedCalendars []string) []CalendarEvent {
-	var filteredEvents []CalendarEvent
-	
-	// Create a map for faster lookup
-	selectedMap := make(map[string]bool)
-	for _, calID := range selectedCalendars {
-		selectedMap[calID] = true
-	}
-	
-	for _, event := range events {
-		// Check if event's calendar is in the selected list
-		if selectedMap[event.CalendarID] {
 			filteredEvents = append(filteredEvents, event)
 		}
 	}

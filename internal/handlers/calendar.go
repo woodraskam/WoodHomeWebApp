@@ -101,20 +101,29 @@ func (h *CalendarHandler) GetEventsHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	// Parse calendar filter from query parameters
-	calendarFilter := r.URL.Query().Get("calendars")
+	// Parse calendar filter from query parameters (optional)
+	calendarIDs := r.URL.Query().Get("calendars")
 	var selectedCalendars []string
-	if calendarFilter != "" {
+	if calendarIDs != "" {
 		// Split comma-separated calendar IDs
-		selectedCalendars = strings.Split(calendarFilter, ",")
+		selectedCalendars = strings.Split(calendarIDs, ",")
 		// Trim whitespace from each ID
 		for i, id := range selectedCalendars {
 			selectedCalendars[i] = strings.TrimSpace(id)
 		}
 	}
 
-	// Fetch events from Google Calendar (with caching and filtering)
-	events, err := h.calendarCacheService.GetCalendarEventsFiltered(r.Context(), token, start, end, selectedCalendars)
+	// Fetch events from Google Calendar (with caching)
+	var events []services.CalendarEvent
+	
+	if len(selectedCalendars) > 0 {
+		// Use filtered events if calendar IDs are provided
+		events, err = h.calendarCacheService.GetCalendarEventsFiltered(r.Context(), token, start, end, selectedCalendars)
+	} else {
+		// Use all events if no calendar filter is provided
+		events, err = h.calendarCacheService.GetCalendarEvents(r.Context(), token, start, end)
+	}
+	
 	if err != nil {
 		log.Printf("Failed to fetch calendar events: %v", err)
 		http.Error(w, "Failed to fetch events", http.StatusInternalServerError)

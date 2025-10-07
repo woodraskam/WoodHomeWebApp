@@ -301,11 +301,6 @@ func (s *CalendarService) getCalendarColor(colorID string) string {
 
 // GetCalendarEvents fetches events from Google Calendar
 func (s *CalendarService) GetCalendarEvents(ctx context.Context, token *oauth2.Token, start, end time.Time) ([]CalendarEvent, error) {
-	return s.GetCalendarEventsFiltered(ctx, token, start, end, nil)
-}
-
-// GetCalendarEventsFiltered fetches events from Google Calendar with optional calendar filtering
-func (s *CalendarService) GetCalendarEventsFiltered(ctx context.Context, token *oauth2.Token, start, end time.Time, selectedCalendars []string) ([]CalendarEvent, error) {
 	// Refresh token if expired
 	if token.Expiry.Before(time.Now()) {
 		tokenSource := s.oauthConfig.TokenSource(ctx, token)
@@ -338,21 +333,6 @@ func (s *CalendarService) GetCalendarEventsFiltered(ctx context.Context, token *
 		// Skip calendars that are not selected or are hidden
 		if cal.Selected == false || cal.Hidden == true {
 			continue
-		}
-
-		// Apply calendar filtering if specified
-		if selectedCalendars != nil && len(selectedCalendars) > 0 {
-			// Check if this calendar is in the selected list
-			calendarSelected := false
-			for _, selectedID := range selectedCalendars {
-				if cal.Id == selectedID {
-					calendarSelected = true
-					break
-				}
-			}
-			if !calendarSelected {
-				continue
-			}
 		}
 
 		events, err := srv.Events.List(cal.Id).
@@ -425,6 +405,147 @@ func (s *CalendarService) GetCalendarEventsFiltered(ctx context.Context, token *
 			event.Start = item.Start.DateTime
 			event.End = item.End.DateTime
 			event.AllDay = false
+		}
+
+		calEvents = append(calEvents, event)
+	}
+
+	return calEvents, nil
+}
+
+// GetCalendarEventsFiltered fetches events from specific calendars only
+func (s *CalendarService) GetCalendarEventsFiltered(ctx context.Context, token *oauth2.Token, start, end time.Time, calendarIDs []string) ([]CalendarEvent, error) {
+	// Refresh token if expired
+	if token.Expiry.Before(time.Now()) {
+		tokenSource := s.oauthConfig.TokenSource(ctx, token)
+		newToken, err := tokenSource.Token()
+		if err != nil {
+			return nil, err
+		}
+		*token = *newToken // Update token in-place
+	}
+
+	// Create authenticated HTTP client
+	client := s.oauthConfig.Client(ctx, token)
+
+	// Create Calendar service
+	srv, err := calendar.NewService(ctx, option.WithHTTPClient(client))
+	if err != nil {
+		return nil, err
+	}
+
+	// If no calendar IDs provided, return empty result
+	if len(calendarIDs) == 0 {
+		return []CalendarEvent{}, nil
+	}
+
+	// Create a map for quick lookup of selected calendar IDs
+	selectedCalendars := make(map[string]bool)
+	for _, id := range calendarIDs {
+		selectedCalendars[id] = true
+	}
+
+	// Get list of all calendars to get calendar info
+	calendarList, err := srv.CalendarList.List().Do()
+	if err != nil {
+		return nil, err
+	}
+
+	// Create a map of calendar info for selected calendars
+	calendarInfoMap := make(map[string]*calendar.CalendarListEntry)
+	for _, cal := range calendarList.Items {
+		if selectedCalendars[cal.Id] {
+			calendarInfoMap[cal.Id] = cal
+		}
+	}
+
+	// Fetch events from selected calendars only
+	var allEvents []*calendar.Event
+	for calendarID := range selectedCalendars {
+		cal, exists := calendarInfoMap[calendarID]
+		if !exists {
+			continue // Skip if calendar not found
+		}
+
+		// Skip calendars that are not selected or are hidden
+		if cal.Selected == false || cal.Hidden == true {
+			continue
+		}
+
+		events, err := srv.Events.List(calendarID).
+			TimeMin(start.Format(time.RFC3339)).
+			TimeMax(end.Format(time.RFC3339)).
+			SingleEvents(true).
+			OrderBy("startTime").
+			MaxResults(250). // Limit per calendar to avoid hitting API limits
+			Do()
+
+		if err != nil {
+			// Log error but continue with other calendars
+			continue
+		}
+
+		// Add calendar info to each event
+		for _, event := range events.Items {
+			// Add calendar name and color to event
+			if event.ExtendedProperties == nil {
+				event.ExtendedProperties = &calendar.EventExtendedProperties{}
+			}
+			if event.ExtendedProperties.Private == nil {
+				event.ExtendedProperties.Private = make(map[string]string)
+			}
+			event.ExtendedProperties.Private["calendarName"] = cal.Summary
+			// Use the actual background color from Google Calendar
+			if cal.BackgroundColor != "" {
+				event.ExtendedProperties.Private["calendarColor"] = cal.BackgroundColor
+			} else {
+				event.ExtendedProperties.Private["calendarColor"] = s.getCalendarColor(cal.ColorId)
+			}
+			event.ExtendedProperties.Private["calendarId"] = cal.Id
+			allEvents = append(allEvents, event)
+		}
+	}
+
+	// Transform to simplified format (same as GetCalendarEvents)
+	var calEvents []CalendarEvent
+	for _, item := range allEvents {
+		event := CalendarEvent{
+			ID:          item.Id,
+			Title:       item.Summary,
+			Description: item.Description,
+			Color:       getEventColor(item),
+		}
+
+		// Add calendar information
+		if item.ExtendedProperties != nil && item.ExtendedProperties.Private != nil {
+			if calendarName, exists := item.ExtendedProperties.Private["calendarName"]; exists && calendarName != "" {
+				event.Title = "[" + calendarName + "] " + event.Title
+			}
+			if calendarId, exists := item.ExtendedProperties.Private["calendarId"]; exists {
+				event.CalendarID = calendarId
+			}
+			if calendarColor, exists := item.ExtendedProperties.Private["calendarColor"]; exists {
+				event.CalendarColor = calendarColor
+				// Use calendar color as the primary color if no event-specific color
+				if event.Color == "" {
+					event.Color = calendarColor
+				}
+			}
+		}
+
+		// Handle all-day vs timed events
+		if item.Start.DateTime != "" {
+			// Timed event
+			startTime, _ := time.Parse(time.RFC3339, item.Start.DateTime)
+			endTime, _ := time.Parse(time.RFC3339, item.End.DateTime)
+			event.Start = startTime.Format(time.RFC3339)
+			event.End = endTime.Format(time.RFC3339)
+			event.AllDay = false
+		} else {
+			// All-day event
+			event.Start = item.Start.Date
+			event.End = item.End.Date
+			event.AllDay = true
 		}
 
 		calEvents = append(calEvents, event)
