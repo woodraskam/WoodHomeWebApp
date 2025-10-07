@@ -44,6 +44,9 @@ class CalendarSection extends AuthenticatedSection {
             this.loadEvents();
         });
 
+        // Google Calendar header navigation
+        this.setupHeaderNavigation();
+
         // Listen for OAuth callback completion
         window.addEventListener('load', () => {
             // Check if we're returning from OAuth callback
@@ -414,6 +417,69 @@ class CalendarSection extends AuthenticatedSection {
         });
     }
 
+    setupHeaderNavigation() {
+        // Today button
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'calendar-today-btn') {
+                this.goToToday();
+            }
+        });
+
+        // Navigation arrows
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'calendar-prev-btn' || e.target.closest('#calendar-prev-btn')) {
+                this.previousMonth();
+            }
+        });
+
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'calendar-next-btn' || e.target.closest('#calendar-next-btn')) {
+                this.nextMonth();
+            }
+        });
+
+        // View selector
+        document.addEventListener('click', (e) => {
+            if (e.target.id === 'calendar-view-selector' || e.target.closest('#calendar-view-selector')) {
+                this.toggleViewSelector();
+            }
+        });
+    }
+
+    goToToday() {
+        this.currentDate = new Date();
+        this.updateHeaderTitle();
+        this.renderMonthView();
+    }
+
+    previousMonth() {
+        this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+        this.updateHeaderTitle();
+        this.renderMonthView();
+    }
+
+    nextMonth() {
+        this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+        this.updateHeaderTitle();
+        this.renderMonthView();
+    }
+
+    updateHeaderTitle() {
+        const title = this.currentDate.toLocaleDateString('en-US', { 
+            month: 'long', 
+            year: 'numeric' 
+        });
+        const titleElement = document.getElementById('calendar-title');
+        if (titleElement) {
+            titleElement.textContent = title;
+        }
+    }
+
+    toggleViewSelector() {
+        // TODO: Implement view selector dropdown
+        console.log('View selector clicked - implement dropdown');
+    }
+
     async loadEvents() {
         if (!this.isAuthenticated) return;
 
@@ -423,6 +489,9 @@ class CalendarSection extends AuthenticatedSection {
                 await this.loadCalendars();
                 await this.loadColorPalette();
             }
+
+            // Update header title
+            this.updateHeaderTitle();
 
             const start = this.getStartOfPeriod();
             const end = this.getEndOfPeriod();
