@@ -45,18 +45,18 @@ This checklist tracks the implementation of a Google Calendar-style layout for t
 ### Color Palette
 - [x] Implement Google Calendar API color integration
 - [x] Create backend endpoint `/api/calendar/colors` to fetch calendar colors
-- [ ] Implement frontend color manager for API colors
-- [ ] Add event type styling (all-day, timed, multi-day)
-- [ ] Implement time display for timed events
-- [ ] Add proper event text formatting
-- [ ] Create dynamic color application system
-- [ ] Handle Google Calendar colorId mapping (1-11)
-- [ ] Implement fallback to calendar backgroundColor
+- [x] Implement frontend color manager for API colors
+- [x] Add event type styling (all-day, timed, multi-day)
+- [x] Implement time display for timed events
+- [x] Add proper event text formatting
+- [x] Create dynamic color application system
+- [x] Handle Google Calendar colorId mapping (1-11)
+- [x] Implement fallback to calendar backgroundColor
 
 ### Event Styling
-- [ ] Style all-day events as full-width gray blocks
-- [ ] Style timed events with time display and colored backgrounds
-- [ ] Style multi-day events with proper spanning
+- [x] Style all-day events as full-width gray blocks
+- [x] Style timed events with time display and colored backgrounds
+- [x] Style multi-day events with proper spanning
 - [ ] Add rounded corners to event blocks
 - [ ] Implement proper text overflow handling
 - [ ] Add hover effects for events

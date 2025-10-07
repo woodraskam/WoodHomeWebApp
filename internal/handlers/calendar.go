@@ -200,7 +200,7 @@ func (h *CalendarHandler) GetColorsHandler(w http.ResponseWriter, r *http.Reques
 
 	// Create OAuth2 client
 	client := oauth2.NewClient(r.Context(), oauth2.StaticTokenSource(token))
-	
+
 	// Create Google Calendar service
 	service, err := calendar.New(client)
 	if err != nil {
@@ -334,4 +334,3 @@ func (h *CalendarHandler) ClearCacheHandler(w http.ResponseWriter, r *http.Reque
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(response)
 }
-

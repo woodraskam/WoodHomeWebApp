@@ -11,6 +11,8 @@ class CalendarSection extends AuthenticatedSection {
         this.currentView = 'month';
         this.currentDate = new Date();
         this.colorPalette = [];
+        this.calendarColors = {}; // Store calendar colors from API
+        this.colorManager = new CalendarColorManager();
         this.init();
         this.setupModalEventListeners();
     }
@@ -467,15 +469,12 @@ class CalendarSection extends AuthenticatedSection {
 
     async loadColorPalette() {
         try {
-            const response = await fetch('/api/calendar/colors');
-            if (response.ok) {
-                this.colorPalette = await response.json();
-                console.log('CalendarSection: Loaded color palette:', this.colorPalette);
-            } else {
-                console.error('Failed to load color palette:', response.status, response.statusText);
-            }
+            // Load calendar colors using the color manager
+            this.calendarColors = await this.colorManager.loadCalendarColors();
+            this.colorPalette = this.calendarColors; // Keep for backward compatibility
+            console.log('CalendarSection: Loaded calendar colors:', this.calendarColors);
         } catch (error) {
-            console.error('CalendarSection: Error loading color palette:', error);
+            console.error('CalendarSection: Error loading calendar colors:', error);
         }
     }
 
@@ -627,9 +626,9 @@ class CalendarSection extends AuthenticatedSection {
                 const eventElement = document.createElement('div');
                 eventElement.className = 'm3-calendar-day__event';
                 eventElement.textContent = event.title;
-                // Use calendar color if available, otherwise use event color, otherwise default
-                const eventColor = event.calendarColor || event.color || '#3788d8';
-                eventElement.style.backgroundColor = eventColor;
+                
+                // Apply Google Calendar API colors using the color manager
+                this.colorManager.applyEventColor(event, eventElement);
 
                 // Add click handler for viewing/editing events
                 eventElement.addEventListener('click', (e) => {
@@ -1083,6 +1082,79 @@ class CalendarSection extends AuthenticatedSection {
         document.addEventListener('eventDeleted', () => {
             this.loadEvents();
         });
+    }
+}
+
+/**
+ * Calendar Color Manager
+ * Handles fetching and managing calendar colors from Google Calendar API
+ */
+class CalendarColorManager {
+    constructor() {
+        this.calendarColors = {};
+        this.googleColors = {
+            '1': { background: '#ea4335', foreground: '#ffffff' }, // Red
+            '2': { background: '#34a853', foreground: '#ffffff' }, // Green
+            '3': { background: '#4285f4', foreground: '#ffffff' }, // Blue
+            '4': { background: '#fbbc04', foreground: '#000000' }, // Yellow
+            '5': { background: '#ff6d01', foreground: '#ffffff' }, // Orange
+            '6': { background: '#9c27b0', foreground: '#ffffff' }, // Purple
+            '7': { background: '#5f6368', foreground: '#ffffff' }, // Gray
+            '8': { background: '#ff5722', foreground: '#ffffff' }, // Deep Orange
+            '9': { background: '#795548', foreground: '#ffffff' }, // Brown
+            '10': { background: '#607d8b', foreground: '#ffffff' }, // Blue Grey
+            '11': { background: '#e91e63', foreground: '#ffffff' }  // Pink
+        };
+    }
+
+    async loadCalendarColors() {
+        try {
+            const response = await fetch('/api/calendar/colors');
+            if (response.ok) {
+                this.calendarColors = await response.json();
+                console.log('Loaded calendar colors:', this.calendarColors);
+                return this.calendarColors;
+            } else {
+                console.error('Failed to load calendar colors:', response.status, response.statusText);
+                return {};
+            }
+        } catch (error) {
+            console.error('Error loading calendar colors:', error);
+            return {};
+        }
+    }
+
+    getCalendarColor(calendarId) {
+        return this.calendarColors[calendarId] || {
+            backgroundColor: '#4285f4',
+            foregroundColor: '#ffffff'
+        };
+    }
+
+    getGoogleCalendarColor(colorId) {
+        return this.googleColors[colorId] || this.googleColors['3']; // Default to blue
+    }
+
+    applyEventColor(event, eventElement) {
+        // Priority: event.colorId -> calendar.backgroundColor -> default
+        let backgroundColor = '#4285f4'; // Default blue
+        let foregroundColor = '#ffffff'; // Default white text
+
+        if (event.colorId) {
+            // Use Google Calendar's colorId mapping
+            const colorData = this.getGoogleCalendarColor(event.colorId);
+            backgroundColor = colorData.background;
+            foregroundColor = colorData.foreground;
+        } else if (event.calendarId && this.calendarColors[event.calendarId]) {
+            // Use calendar's background color
+            const calendarColor = this.calendarColors[event.calendarId];
+            backgroundColor = calendarColor.backgroundColor;
+            foregroundColor = calendarColor.foregroundColor;
+        }
+
+        // Apply colors via inline styles
+        eventElement.style.backgroundColor = backgroundColor;
+        eventElement.style.color = foregroundColor;
     }
 }
 
