@@ -10,6 +10,7 @@ let gameState = {
     playerCount: 0,
     board: [],
     animationInProgress: false,
+    theme: 'classic', // 'classic' or 'gerald-piggie'
     specialSquares: {
         sticky: [15, 25, 35, 45, 55, 65, 75, 85, 95, 105, 115, 125],
         shortcuts: {
@@ -37,6 +38,59 @@ const cardTypes = {
     double: ['red', 'blue', 'yellow', 'green', 'orange', 'purple'],
     special: ['Princess Lolly', 'Queen Frostine', 'King Candy', 'Gingerbread Man']
 };
+
+// Theme management functions
+function setTheme(theme) {
+    gameState.theme = theme;
+    console.log(`🎭 Theme set to: ${theme}`);
+}
+
+function getTheme() {
+    return gameState.theme;
+}
+
+// Get character mapping based on theme
+function getCharacterMapping() {
+    if (gameState.theme === 'gerald-piggie') {
+        return {
+            'Princess Lolly': {
+                image: '/static/games/CandyLand/assets/images/cards/Gerald.png',
+                name: 'Gerald'
+            },
+            'Queen Frostine': {
+                image: '/static/games/CandyLand/assets/images/cards/Piggie.png',
+                name: 'Piggie'
+            },
+            'King Candy': {
+                image: '/static/games/CandyLand/assets/images/cards/Unicorn.png',
+                name: 'Unicorn'
+            },
+            'Gingerbread Man': {
+                image: '/static/games/CandyLand/assets/images/cards/Yeti.png',
+                name: 'Yeti'
+            }
+        };
+    } else {
+        return {
+            'Princess Lolly': {
+                image: '/static/games/CandyLand/assets/images/cards/princess-lolly.png',
+                name: 'Princess Lolly'
+            },
+            'Queen Frostine': {
+                image: '/static/games/CandyLand/assets/images/cards/queen-frostline.png',
+                name: 'Queen Frostine'
+            },
+            'King Candy': {
+                image: '/static/games/CandyLand/assets/images/cards/king-candy.png',
+                name: 'King Candy'
+            },
+            'Gingerbread Man': {
+                image: '/static/games/CandyLand/assets/images/cards/gingerbread-man.png',
+                name: 'Gingerbread Man'
+            }
+        };
+    }
+}
 
 // Game configuration
 const gameConfig = {
@@ -215,17 +269,12 @@ function drawCardFromDeck() {
 
 function getCardEmoji(card) {
     if (card.type === 'special') {
-        // Try to load PNG asset, fallback to emoji
-        const characterMap = {
-            'Princess Lolly': 'princess-lolly',
-            'Queen Frostine': 'queen-frostline',
-            'King Candy': 'king-candy',
-            'Gingerbread Man': 'gingerbread-man'
-        };
+        // Use theme-based character mapping
+        const characterMapping = getCharacterMapping();
+        const character = characterMapping[card.character];
 
-        const assetName = characterMap[card.character];
-        if (assetName) {
-            return `<img src="/static/games/CandyLand/assets/images/cards/${assetName}.png" alt="${card.character}" class="card-asset" onerror="this.style.display='none'; this.nextSibling.style.display='inline';" /><span style="display:none;">👑</span>`;
+        if (character) {
+            return `<img src="${character.image}" alt="${character.name}" class="card-asset" onerror="this.style.display='none'; this.nextSibling.style.display='inline';" /><span style="display:none;">👑</span>`;
         }
         return '👑';
     }
@@ -244,7 +293,10 @@ function getCardEmoji(card) {
 
 function getCardText(card) {
     if (card.type === 'special') {
-        return card.character;
+        // Use theme-based character names
+        const characterMapping = getCharacterMapping();
+        const character = characterMapping[card.character];
+        return character ? character.name : card.character;
     }
 
     return `${card.color.toUpperCase()} ${card.value === 2 ? 'DOUBLE' : 'SINGLE'}`;
@@ -523,6 +575,9 @@ window.verifyBoardColors = verifyBoardColors;
 window.createWheelDeck = createWheelDeck;
 window.getAvailableWheelCards = getAvailableWheelCards;
 window.markCardAsUsed = markCardAsUsed;
+window.setTheme = setTheme;
+window.getTheme = getTheme;
+window.getCharacterMapping = getCharacterMapping;
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {

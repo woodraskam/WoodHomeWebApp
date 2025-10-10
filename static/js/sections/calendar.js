@@ -199,7 +199,7 @@ class CalendarSection extends AuthenticatedSection {
 
                 // Check if calendars are already loaded and populate dropdown
                 this.populateDropdownIfReady();
-                
+
                 console.log('Calendar filter dropdown initialized');
             } else {
                 console.error('CalendarFilterDropdown class not found');

@@ -59,6 +59,40 @@
             <!-- Start Screen -->
             <div id="start-screen" class="start-screen">
                 <h2 class="welcome-title">Welcome to the Magical Candy Kingdom!</h2>
+
+                <!-- Theme Selection -->
+                <div class="theme-selector">
+                    <p class="theme-title">Choose your magical theme:</p>
+                    <div class="theme-buttons">
+                        <button class="theme-btn selected" onclick="selectTheme('classic')" data-theme="classic">
+                            <div class="theme-preview">
+                                <img src="/static/games/CandyLand/assets/images/cards/princess-lolly.png"
+                                    alt="Princess Lolly" class="theme-character">
+                                <img src="/static/games/CandyLand/assets/images/cards/queen-frostline.png"
+                                    alt="Queen Frostine" class="theme-character">
+                                <img src="/static/games/CandyLand/assets/images/cards/king-candy.png" alt="King Candy"
+                                    class="theme-character">
+                                <img src="/static/games/CandyLand/assets/images/cards/gingerbread-man.png"
+                                    alt="Gingerbread Man" class="theme-character">
+                            </div>
+                            <span>Classic CandyLand</span>
+                        </button>
+                        <button class="theme-btn" onclick="selectTheme('gerald-piggie')" data-theme="gerald-piggie">
+                            <div class="theme-preview">
+                                <img src="/static/games/CandyLand/assets/images/cards/Gerald.png" alt="Gerald"
+                                    class="theme-character">
+                                <img src="/static/games/CandyLand/assets/images/cards/Piggie.png" alt="Piggie"
+                                    class="theme-character">
+                                <img src="/static/games/CandyLand/assets/images/cards/Unicorn.png" alt="Unicorn"
+                                    class="theme-character">
+                                <img src="/static/games/CandyLand/assets/images/cards/Yeti.png" alt="Yeti"
+                                    class="theme-character">
+                            </div>
+                            <span>Gerald & Piggie Adventure</span>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="player-selector">
                     <p class="player-count">How many brave candy explorers?</p>
                     <div class="player-buttons">

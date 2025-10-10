@@ -1,5 +1,86 @@
 // Candyland Adventure - Main Application Entry Point
 
+// Theme management
+let gameTheme = 'classic'; // Default theme
+
+function setTheme(theme) {
+    gameTheme = theme;
+    console.log(`🎭 Theme set to: ${theme}`);
+}
+
+function getTheme() {
+    return gameTheme;
+}
+
+// Get character mapping based on theme
+function getCharacterMapping() {
+    if (gameTheme === 'gerald-piggie') {
+        return {
+            'Princess Lolly': {
+                image: '/static/games/CandyLand/assets/images/cards/Gerald.png',
+                name: 'Gerald'
+            },
+            'Queen Frostine': {
+                image: '/static/games/CandyLand/assets/images/cards/Piggie.png',
+                name: 'Piggie'
+            },
+            'King Candy': {
+                image: '/static/games/CandyLand/assets/images/cards/Unicorn.png',
+                name: 'Unicorn'
+            },
+            'Gingerbread Man': {
+                image: '/static/games/CandyLand/assets/images/cards/Yeti.png',
+                name: 'Yeti'
+            }
+        };
+    } else {
+        return {
+            'Princess Lolly': {
+                image: '/static/games/CandyLand/assets/images/cards/princess-lolly.png',
+                name: 'Princess Lolly'
+            },
+            'Queen Frostine': {
+                image: '/static/games/CandyLand/assets/images/cards/queen-frostline.png',
+                name: 'Queen Frostine'
+            },
+            'King Candy': {
+                image: '/static/games/CandyLand/assets/images/cards/king-candy.png',
+                name: 'King Candy'
+            },
+            'Gingerbread Man': {
+                image: '/static/games/CandyLand/assets/images/cards/gingerbread-man.png',
+                name: 'Gingerbread Man'
+            }
+        };
+    }
+}
+
+// Theme selection function
+function selectTheme(theme) {
+    setTheme(theme);
+
+    // Update button styles with bounce effect
+    document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.remove('selected');
+        btn.style.transform = 'scale(1)';
+    });
+    event.target.classList.add('selected');
+    event.target.style.transform = 'scale(1.1)';
+
+    // Play selection sound if available
+    if (typeof playSound === 'function') {
+        playSound('select');
+    }
+
+    console.log(`🎭 Theme selected: ${theme}`);
+}
+
+// Make functions globally accessible
+window.setTheme = setTheme;
+window.getTheme = getTheme;
+window.getCharacterMapping = getCharacterMapping;
+window.selectTheme = selectTheme;
+
 // Initialize game when page loads
 window.addEventListener('load', () => {
     initializeApplication();
@@ -8,20 +89,20 @@ window.addEventListener('load', () => {
 // Main initialization function
 function initializeApplication() {
     console.log('🍭 Initializing Candyland Adventure...');
-    
+
     // Initialize all game systems
     initializeGame();
     initializeAudioOnInteraction();
     initializeKeyboardControls();
     initializeBoardEvents();
     initializeAnimationOptimizations();
-    
+
     // Add global event listeners
     setupGlobalEventListeners();
-    
+
     // Adjust board for current screen size
     adjustBoardForScreenSize();
-    
+
     console.log('🎮 Candyland Adventure ready to play!');
 }
 
@@ -31,14 +112,14 @@ function setupGlobalEventListeners() {
     window.addEventListener('resize', debounce(() => {
         adjustBoardForScreenSize();
     }, 250));
-    
+
     // Handle orientation change on mobile
     window.addEventListener('orientationchange', () => {
         setTimeout(() => {
             adjustBoardForScreenSize();
         }, 100);
     });
-    
+
     // Handle visibility change (pause/resume)
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
@@ -49,12 +130,12 @@ function setupGlobalEventListeners() {
             resumeGame();
         }
     });
-    
+
     // Handle page unload
     window.addEventListener('beforeunload', () => {
         cleanupAnimations();
     });
-    
+
     // Global error handling
     window.addEventListener('error', (event) => {
         console.error('Game error:', event.error);
@@ -97,31 +178,31 @@ function debounce(func, wait) {
 function monitorPerformance() {
     if (window.performance && window.performance.mark) {
         window.performance.mark('game-start');
-        
+
         // Monitor frame rate
         let frameCount = 0;
         let lastTime = performance.now();
-        
+
         function countFrames() {
             frameCount++;
             const currentTime = performance.now();
-            
+
             if (currentTime - lastTime >= 1000) {
                 const fps = Math.round(frameCount * 1000 / (currentTime - lastTime));
                 console.log(`FPS: ${fps}`);
-                
+
                 // If FPS is too low, could reduce animation quality
                 if (fps < 30) {
                     console.warn('Low FPS detected, consider reducing animation quality');
                 }
-                
+
                 frameCount = 0;
                 lastTime = currentTime;
             }
-            
+
             requestAnimationFrame(countFrames);
         }
-        
+
         requestAnimationFrame(countFrames);
     }
 }
@@ -136,24 +217,24 @@ function detectFeatures() {
         gamepad: 'getGamepads' in navigator,
         fullscreen: !!(document.fullscreenEnabled || document.webkitFullscreenEnabled)
     };
-    
+
     console.log('🔍 Feature detection:', features);
-    
+
     // Adjust game based on available features
     if (!features.webAudio) {
         console.warn('Web Audio API not supported - sounds disabled');
     }
-    
+
     if (!features.transforms3d) {
         console.warn('3D transforms not supported - falling back to 2D');
         // Could disable 3D animations here
     }
-    
+
     if (features.touch) {
         console.log('Touch device detected - enabling touch-friendly features');
         document.body.classList.add('touch-device');
     }
-    
+
     return features;
 }
 
@@ -166,24 +247,24 @@ function enhanceAccessibility() {
             button.setAttribute('aria-label', 'Game button');
         }
     });
-    
+
     // Add keyboard navigation hints
     const interactiveElements = document.querySelectorAll('button, .square');
     interactiveElements.forEach((element, index) => {
         element.setAttribute('tabindex', index === 0 ? '0' : '-1');
     });
-    
+
     // Handle focus management
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Tab') {
             document.body.classList.add('keyboard-navigation');
         }
     });
-    
+
     document.addEventListener('mousedown', () => {
         document.body.classList.remove('keyboard-navigation');
     });
-    
+
     // Add reduced motion support
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         document.body.classList.add('reduced-motion');
@@ -195,7 +276,7 @@ function enhanceAccessibility() {
 function initializeDevMode() {
     if (window.location.search.includes('dev=true') || window.location.hostname === 'localhost') {
         console.log('🛠️ Development mode enabled');
-        
+
         // Add dev tools
         window.candylandDev = {
             gameState,
@@ -220,9 +301,9 @@ function initializeDevMode() {
             resetGame: () => newGame(),
             toggleMute: () => toggleMute()
         };
-        
+
         console.log('Dev tools available at window.candylandDev');
-        
+
         // Enable performance monitoring
         monitorPerformance();
     }
@@ -276,34 +357,34 @@ function loadGameState() {
 // Initialize application with all features
 function initializeApplication() {
     console.log('🍭 Initializing Candyland Adventure...');
-    
+
     // Core initialization
     initializeGame();
     initializeAudioOnInteraction();
     initializeKeyboardControls();
     initializeBoardEvents();
     initializeAnimationOptimizations();
-    
+
     // Enhanced features
     const features = detectFeatures();
     enhanceAccessibility();
     setupGlobalEventListeners();
     initializeDevMode();
-    
+
     // Optional features
     if (features.serviceWorker) {
         registerServiceWorker();
     }
-    
+
     // Adjust for current screen
     adjustBoardForScreenSize();
-    
+
     // Try to load saved game (but don't show alert since continue doesn't work)
     const savedGame = loadGameState();
     if (savedGame) {
         console.log('Saved game found but continue functionality not implemented');
     }
-    
+
     console.log('🎮 Candyland Adventure ready to play!');
 }
 

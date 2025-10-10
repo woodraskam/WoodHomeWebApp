@@ -8,56 +8,59 @@ window.addEventListener('load', () => {
 // Main initialization function
 function initializeApplication() {
     console.log('🎯 Initializing Tic Tac Toe...');
-    
+
     // Initialize all game systems
     initializeGameState();
     initializeGameLogic();
     initializeAnimations();
     initializeUI();
-    
+
     // Setup global event listeners
     setupGlobalEventListeners();
-    
+
     // Initialize floating pieces
     initializeFloatingPieces();
-    
+
+    // Initialize character selection
+    updateFloatingPieces();
+
     console.log('✅ Tic Tac Toe ready to play!');
 }
 
 // Initialize UI elements
 function initializeUI() {
     console.log('🎨 Initializing UI...');
-    
+
     // Setup game mode selection
     setupGameModeSelection();
-    
+
     // Setup button animations
     setupButtonAnimations();
-    
+
     // Initialize stats display
     updateStatsDisplay();
-    
+
     console.log('✅ UI initialized');
 }
 
 // Setup game mode selection
 function setupGameModeSelection() {
     const modeButtons = document.querySelectorAll('.mode-btn');
-    
+
     modeButtons.forEach(button => {
         button.addEventListener('click', () => {
             // Remove selected class from all buttons
             modeButtons.forEach(btn => btn.classList.remove('selected'));
-            
+
             // Add selected class to clicked button
             button.classList.add('selected');
-            
+
             // Enable start button
             const startBtn = document.getElementById('start-game-btn');
             if (startBtn) {
                 startBtn.disabled = false;
             }
-            
+
             // Add selection animation
             button.style.animation = 'modeSelected 0.5s ease';
             setTimeout(() => {
@@ -70,7 +73,7 @@ function setupGameModeSelection() {
 // Setup button animations
 function setupButtonAnimations() {
     const buttons = document.querySelectorAll('.btn, .mode-btn, .start-btn');
-    
+
     buttons.forEach(button => {
         addButtonHoverAnimation(button);
     });
@@ -91,14 +94,14 @@ function setupGlobalEventListeners() {
     window.addEventListener('resize', debounce(() => {
         adjustForScreenSize();
     }, 250));
-    
+
     // Handle orientation change on mobile
     window.addEventListener('orientationchange', () => {
         setTimeout(() => {
             adjustForScreenSize();
         }, 100);
     });
-    
+
     // Handle visibility change (pause/resume)
     document.addEventListener('visibilitychange', () => {
         if (document.hidden) {
@@ -107,12 +110,12 @@ function setupGlobalEventListeners() {
             resumeGame();
         }
     });
-    
+
     // Handle page unload
     window.addEventListener('beforeunload', () => {
         cleanupAnimations();
     });
-    
+
     // Global error handling
     window.addEventListener('error', (event) => {
         console.error('Game error:', event.error);
@@ -123,9 +126,9 @@ function setupGlobalEventListeners() {
 function adjustForScreenSize() {
     const board = document.getElementById('tic-tac-toe-board');
     if (!board) return;
-    
+
     const screenWidth = window.innerWidth;
-    
+
     if (screenWidth < 480) {
         // Small screens
         board.style.width = '250px';
@@ -182,7 +185,7 @@ function debounce(func, wait) {
 function selectGameMode(mode) {
     console.log(`🎮 Game mode selected: ${mode}`);
     setGameMode(mode);
-    
+
     // Update UI
     const modeButtons = document.querySelectorAll('.mode-btn');
     modeButtons.forEach(btn => {
@@ -191,7 +194,7 @@ function selectGameMode(mode) {
             btn.classList.add('selected');
         }
     });
-    
+
     // Enable start button
     const startBtn = document.getElementById('start-game-btn');
     if (startBtn) {
@@ -199,8 +202,75 @@ function selectGameMode(mode) {
     }
 }
 
+// Character set selection functions
+function selectCharacterSet(characterSet) {
+    console.log(`🎭 Character set selected: ${characterSet}`);
+    setCharacterSet(characterSet);
+
+    // Update UI
+    const characterButtons = document.querySelectorAll('.character-btn');
+    characterButtons.forEach(btn => {
+        btn.classList.remove('selected');
+        if (btn.dataset.characters === characterSet) {
+            btn.classList.add('selected');
+        }
+    });
+
+    // Update floating pieces
+    updateFloatingPieces();
+}
+
+// Update floating pieces based on character selection
+function updateFloatingPieces() {
+    const container = document.getElementById('floating-pieces-container');
+    if (!container) return;
+
+    // Clear existing pieces
+    container.innerHTML = '';
+
+    const characterImages = getCharacterImages();
+    const positions = [
+        { top: '5%', left: '10%', delay: '0s' },
+        { top: '15%', left: '85%', delay: '1s' },
+        { top: '25%', left: '5%', delay: '2s' },
+        { top: '35%', left: '90%', delay: '3s' },
+        { top: '45%', left: '15%', delay: '4s' },
+        { top: '55%', left: '80%', delay: '5s' },
+        { top: '65%', left: '10%', delay: '0.5s' },
+        { top: '75%', left: '85%', delay: '1.5s' },
+        { top: '85%', left: '20%', delay: '2.5s' },
+        { top: '95%', left: '75%', delay: '3.5s' }
+    ];
+
+    positions.forEach((pos, index) => {
+        const piece = document.createElement('div');
+        piece.className = 'floating-piece';
+        piece.style.top = pos.top;
+        piece.style.left = pos.left;
+        piece.style.animationDelay = pos.delay;
+
+        const img = document.createElement('img');
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'contain';
+
+        // Alternate between X and O characters
+        if (index % 2 === 0) {
+            img.src = characterImages.X;
+            img.alt = characterImages.XName;
+        } else {
+            img.src = characterImages.O;
+            img.alt = characterImages.OName;
+        }
+
+        piece.appendChild(img);
+        container.appendChild(piece);
+    });
+}
+
 // Make functions globally accessible
 window.selectGameMode = selectGameMode;
+window.selectCharacterSet = selectCharacterSet;
 
 // Feature detection
 function detectFeatures() {
@@ -211,24 +281,24 @@ function detectFeatures() {
         touch: 'ontouchstart' in window,
         localStorage: typeof Storage !== 'undefined'
     };
-    
+
     console.log('🔍 Feature detection:', features);
-    
+
     // Adjust game based on available features
     if (!features.webAudio) {
         console.warn('Web Audio API not supported - sounds disabled');
         gameState.settings.soundEnabled = false;
     }
-    
+
     if (!features.localStorage) {
         console.warn('LocalStorage not supported - statistics will not be saved');
     }
-    
+
     if (features.touch) {
         console.log('Touch device detected - enabling touch-friendly features');
         document.body.classList.add('touch-device');
     }
-    
+
     return features;
 }
 
@@ -241,24 +311,24 @@ function enhanceAccessibility() {
             button.setAttribute('aria-label', 'Game button');
         }
     });
-    
+
     // Add keyboard navigation hints
     const interactiveElements = document.querySelectorAll('button, .board-cell');
     interactiveElements.forEach((element, index) => {
         element.setAttribute('tabindex', index === 0 ? '0' : '-1');
     });
-    
+
     // Handle focus management
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Tab') {
             document.body.classList.add('keyboard-navigation');
         }
     });
-    
+
     document.addEventListener('mousedown', () => {
         document.body.classList.remove('keyboard-navigation');
     });
-    
+
     // Add reduced motion support
     if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
         document.body.classList.add('reduced-motion');
@@ -271,7 +341,7 @@ function enhanceAccessibility() {
 function initializeDevMode() {
     if (window.location.search.includes('dev=true') || window.location.hostname === 'localhost') {
         console.log('🛠️ Development mode enabled');
-        
+
         // Add dev tools
         window.tictactoeDev = {
             gameState,
@@ -291,7 +361,7 @@ function initializeDevMode() {
             },
             addConfetti: () => createConfettiEffect()
         };
-        
+
         console.log('Dev tools available at window.tictactoeDev');
     }
 }
@@ -299,16 +369,37 @@ function initializeDevMode() {
 // Update board display
 function updateBoardDisplay() {
     const board = getGameBoard();
-    
+
     for (let i = 0; i < board.length; i++) {
         const cell = document.getElementById(`cell-${i}`);
         if (cell) {
             if (board[i]) {
-                cell.textContent = board[i];
+                // Clear existing content
+                cell.textContent = '';
+                cell.innerHTML = '';
+
+                // Create image element
+                const img = document.createElement('img');
+                img.style.width = '80%';
+                img.style.height = '80%';
+                img.style.objectFit = 'contain';
+
+                // Set image source based on player and character set
+                const characterImages = getCharacterImages();
+                if (board[i] === 'X') {
+                    img.src = characterImages.X;
+                    img.alt = characterImages.XName;
+                } else {
+                    img.src = characterImages.O;
+                    img.alt = characterImages.OName;
+                }
+
+                cell.appendChild(img);
                 cell.className = `board-cell ${board[i].toLowerCase()}`;
                 cell.disabled = true;
             } else {
                 cell.textContent = '';
+                cell.innerHTML = '';
                 cell.className = 'board-cell';
                 cell.disabled = false;
             }
@@ -319,22 +410,22 @@ function updateBoardDisplay() {
 // Initialize application with all features
 function initializeApplication() {
     console.log('🎯 Initializing Tic Tac Toe...');
-    
+
     // Core initialization
     initializeGameState();
     initializeGameLogic();
     initializeAnimations();
     initializeUI();
-    
+
     // Enhanced features
     const features = detectFeatures();
     enhanceAccessibility();
     setupGlobalEventListeners();
     initializeDevMode();
-    
+
     // Adjust for current screen
     adjustForScreenSize();
-    
+
     console.log('✅ Tic Tac Toe ready to play!');
 }
 

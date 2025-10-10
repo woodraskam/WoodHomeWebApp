@@ -42,16 +42,9 @@
         <a href="/" class="nav-back">← Back to Dashboard</a>
 
         <!-- Floating game pieces -->
-        <div class="floating-piece" style="top: 5%; left: 10%; animation-delay: 0s;">❌</div>
-        <div class="floating-piece" style="top: 15%; left: 85%; animation-delay: 1s;">⭕</div>
-        <div class="floating-piece" style="top: 25%; left: 5%; animation-delay: 2s;">❌</div>
-        <div class="floating-piece" style="top: 35%; left: 90%; animation-delay: 3s;">⭕</div>
-        <div class="floating-piece" style="top: 45%; left: 15%; animation-delay: 4s;">❌</div>
-        <div class="floating-piece" style="top: 55%; left: 80%; animation-delay: 5s;">⭕</div>
-        <div class="floating-piece" style="top: 65%; left: 10%; animation-delay: 0.5s;">❌</div>
-        <div class="floating-piece" style="top: 75%; left: 85%; animation-delay: 1.5s;">⭕</div>
-        <div class="floating-piece" style="top: 85%; left: 20%; animation-delay: 2.5s;">❌</div>
-        <div class="floating-piece" style="top: 95%; left: 75%; animation-delay: 3.5s;">⭕</div>
+        <div id="floating-pieces-container">
+            <!-- Floating pieces will be dynamically generated based on character selection -->
+        </div>
 
         <div id="game-container">
             <h1 class="game-title">🎯 Tic Tac Toe 🎯</h1>
@@ -59,6 +52,30 @@
             <!-- Start Screen -->
             <div id="start-screen" class="start-screen">
                 <h2 class="welcome-title">Welcome to Tic Tac Toe!</h2>
+
+                <!-- Character Set Selection -->
+                <div class="character-selector">
+                    <p class="character-title">Choose your characters:</p>
+                    <div class="character-buttons">
+                        <button class="character-btn selected" onclick="selectCharacterSet('unicorn-yeti')"
+                            data-characters="unicorn-yeti">
+                            <img src="/static/games/TicTacToe/assets/images/Unicorn.png" alt="Unicorn"
+                                class="character-preview">
+                            <img src="/static/games/TicTacToe/assets/images/Yeti.png" alt="Yeti"
+                                class="character-preview">
+                            <span>Unicorn vs Yeti</span>
+                        </button>
+                        <button class="character-btn" onclick="selectCharacterSet('gerald-piggie')"
+                            data-characters="gerald-piggie">
+                            <img src="/static/games/TicTacToe/assets/images/Gerald.png" alt="Gerald"
+                                class="character-preview">
+                            <img src="/static/games/TicTacToe/assets/images/Piggie.png" alt="Piggie"
+                                class="character-preview">
+                            <span>Gerald vs Piggie</span>
+                        </button>
+                    </div>
+                </div>
+
                 <div class="game-mode-selector">
                     <p class="mode-count">Choose your game mode:</p>
                     <div class="mode-buttons">

@@ -11,6 +11,9 @@ let gameState = {
     winner: null,
     winningLine: null,
 
+    // Character set selection
+    characterSet: 'unicorn-yeti', // 'unicorn-yeti' or 'gerald-piggie'
+
     // Statistics
     stats: {
         xWins: 0,
@@ -302,6 +305,36 @@ function getGameMode() {
     return gameState.gameMode;
 }
 
+// Set character set
+function setCharacterSet(characterSet) {
+    gameState.characterSet = characterSet;
+    console.log(`🎭 Character set set to: ${characterSet}`);
+}
+
+// Get character set
+function getCharacterSet() {
+    return gameState.characterSet;
+}
+
+// Get character images based on current character set
+function getCharacterImages() {
+    if (gameState.characterSet === 'gerald-piggie') {
+        return {
+            X: '/static/games/TicTacToe/assets/images/Gerald.png',
+            O: '/static/games/TicTacToe/assets/images/Piggie.png',
+            XName: 'Gerald',
+            OName: 'Piggie'
+        };
+    } else {
+        return {
+            X: '/static/games/TicTacToe/assets/images/Unicorn.png',
+            O: '/static/games/TicTacToe/assets/images/Yeti.png',
+            XName: 'Unicorn',
+            OName: 'Yeti'
+        };
+    }
+}
+
 // Check if it's AI's turn
 function isAITurn() {
     return gameState.gameMode !== 'vs-human' &&
@@ -322,6 +355,9 @@ window.isGameActive = isGameActive;
 window.getGameMode = getGameMode;
 window.isAITurn = isAITurn;
 window.updateStatsDisplay = updateStatsDisplay;
+window.setCharacterSet = setCharacterSet;
+window.getCharacterSet = getCharacterSet;
+window.getCharacterImages = getCharacterImages;
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {

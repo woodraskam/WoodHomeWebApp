@@ -1,1242 +1,843 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🍭 Candyland Adventure 🍭</title>
-    <style>
-        :root {
-            --hot-pink: #FF1493;
-            --electric-blue: #00BFFF;
-            --sunshine-yellow: #FFD700;
-            --lime-green: #32CD32;
-            --orange: #FF6347;
-            --purple: #9370DB;
-            --candy-red: #FF6B6B;
-            --candy-purple: #A8E6CF;
-            --candy-blue: #88D8C0;
-            --candy-yellow: #FFD93D;
-            --candy-orange: #FF8C42;
-            --candy-pink: #FFB6C1;
-        }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Comic Sans MS', cursive, sans-serif;
-            background: linear-gradient(45deg, var(--hot-pink), var(--electric-blue), var(--sunshine-yellow), var(--lime-green));
-            background-size: 400% 400%;
-            animation: gradientShift 8s ease infinite;
-            min-height: 100vh;
-            overflow-x: auto;
-        }
-
-        @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-        }
-
-        .floating-candy {
-            position: fixed;
-            font-size: 3rem;
-            animation: float 6s ease-in-out infinite;
-            pointer-events: none;
-            z-index: 1;
-            will-change: transform;
-        }
-
-        @keyframes float {
-            0%, 100% { 
-                transform: translateY(0px) rotate(0deg) scale(1); 
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>🍭 Candyland Adventure 🍭</title>
+        <style>
+            :root {
+                --hot-pink: #FF1493;
+                --electric-blue: #00BFFF;
+                --sunshine-yellow: #FFD700;
+                --lime-green: #32CD32;
+                --orange: #FF6347;
+                --purple: #9370DB;
+                --candy-red: #FF6B6B;
+                --candy-purple: #A8E6CF;
+                --candy-blue: #88D8C0;
+                --candy-yellow: #FFD93D;
+                --candy-orange: #FF8C42;
+                --candy-pink: #FFB6C1;
             }
-            25% { 
-                transform: translateY(-30px) rotate(90deg) scale(1.1); 
+
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
             }
-            50% { 
-                transform: translateY(-20px) rotate(180deg) scale(1.2); 
+
+            body {
+                font-family: 'Comic Sans MS', cursive, sans-serif;
+                background: linear-gradient(45deg, var(--hot-pink), var(--electric-blue), var(--sunshine-yellow), var(--lime-green));
+                background-size: 400% 400%;
+                animation: gradientShift 8s ease infinite;
+                min-height: 100vh;
+                overflow-x: auto;
             }
-            75% { 
-                transform: translateY(-35px) rotate(270deg) scale(1.1); 
+
+            @keyframes gradientShift {
+                0% {
+                    background-position: 0% 50%;
+                }
+
+                50% {
+                    background-position: 100% 50%;
+                }
+
+                100% {
+                    background-position: 0% 50%;
+                }
             }
-        }
 
-        #game-container {
-            position: relative;
-            z-index: 10;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 20px;
-        }
-
-        .game-title {
-            font-size: 5rem;
-            color: white;
-            text-shadow: 
-                4px 4px 0px var(--purple), 
-                8px 8px 0px var(--hot-pink),
-                12px 12px 0px var(--electric-blue);
-            margin-bottom: 30px;
-            animation: bounce 2s ease-in-out infinite;
-            will-change: transform;
-        }
-
-        @keyframes bounce {
-            0%, 20%, 50%, 80%, 100% { transform: translateY(0) scale(1); }
-            40% { transform: translateY(-15px) scale(1.05); }
-            60% { transform: translateY(-8px) scale(1.02); }
-        }
-
-        .start-screen {
-            text-align: center;
-            background: rgba(255, 255, 255, 0.95);
-            padding: 50px;
-            border-radius: 30px;
-            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
-            margin-bottom: 30px;
-            border: 5px solid var(--sunshine-yellow);
-        }
-
-        .player-selector {
-            margin: 30px 0;
-        }
-
-        .player-count {
-            font-size: 2rem;
-            margin: 20px;
-            color: var(--purple);
-            text-shadow: 2px 2px 0px white;
-        }
-
-        .player-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .player-btn {
-            padding: 20px 30px;
-            font-size: 1.5rem;
-            border: none;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: inherit;
-            font-weight: bold;
-            text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
-            will-change: transform;
-        }
-
-        .player-btn:hover {
-            transform: scale(1.15);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-            filter: brightness(1.1);
-        }
-
-        .start-btn {
-            background: linear-gradient(45deg, var(--hot-pink), var(--electric-blue));
-            color: white;
-            font-size: 2.5rem;
-            padding: 25px 50px;
-            border-radius: 30px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-family: inherit;
-            font-weight: bold;
-            text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.4);
-            will-change: transform;
-        }
-
-        .start-btn:hover:not(:disabled) {
-            transform: scale(1.1);
-            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-            filter: brightness(1.2);
-        }
-
-        .start-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .game-board {
-            display: none;
-            background: rgba(255, 255, 255, 0.98);
-            border-radius: 25px;
-            padding: 40px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
-            max-width: 1400px;
-            width: 100%;
-            border: 5px solid var(--sunshine-yellow);
-        }
-
-        .board-path {
-            display: flex;
-            flex-wrap: wrap;
-            width: 100%;
-            max-width: 1200px;
-            margin: 30px auto;
-            padding: 20px;
-            background: var(--candy-purple);
-            border-radius: 20px;
-            position: relative;
-        }
-        
-        .board-row {
-            display: flex;
-            width: 100%;
-            margin-bottom: 3px;
-        }
-        
-        .board-row.reverse {
-            flex-direction: row-reverse;
-        }
-
-        .square {
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            cursor: pointer;
-            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            position: relative;
-            border: 3px solid rgba(255, 255, 255, 0.9);
-            will-change: transform;
-        }
-
-        .square:hover {
-            transform: scale(1.2) rotate(5deg);
-            box-shadow: 0 0 25px rgba(255, 255, 255, 0.9);
-            filter: brightness(1.2);
-        }
-
-        .square.red { 
-            background: var(--hot-pink); 
-            box-shadow: 0 0 15px rgba(255, 20, 147, 0.5);
-        }
-        .square.blue { 
-            background: var(--electric-blue); 
-            box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
-        }
-        .square.yellow { 
-            background: var(--sunshine-yellow); 
-            box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
-        }
-        .square.green { 
-            background: var(--lime-green); 
-            box-shadow: 0 0 15px rgba(50, 205, 50, 0.5);
-        }
-        .square.orange { 
-            background: var(--orange); 
-            box-shadow: 0 0 15px rgba(255, 99, 71, 0.5);
-        }
-        .square.purple { 
-            background: var(--purple); 
-            box-shadow: 0 0 15px rgba(147, 112, 219, 0.5);
-        }
-
-        .square.start {
-            background: linear-gradient(45deg, var(--sunshine-yellow), var(--candy-orange));
-            font-size: 2.5rem;
-            animation: pulse 2s ease-in-out infinite;
-            will-change: transform;
-        }
-
-        .square.finish {
-            background: linear-gradient(45deg, var(--hot-pink), var(--purple));
-            font-size: 2.5rem;
-            animation: sparkle 1.5s ease-in-out infinite;
-            will-change: filter, transform;
-        }
-
-        .square.special {
-            background: linear-gradient(45deg, var(--candy-purple), var(--candy-blue));
-            animation: glow 2s ease-in-out infinite;
-            will-change: box-shadow;
-        }
-
-        .square.sticky {
-            background: linear-gradient(45deg, #8B4513, #A0522D);
-            animation: sticky 1s ease-in-out infinite;
-            will-change: transform;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.15) rotate(5deg); }
-        }
-
-        @keyframes sparkle {
-            0%, 100% { 
-                filter: brightness(1) hue-rotate(0deg); 
-                transform: scale(1);
+            .floating-candy {
+                position: fixed;
+                font-size: 3rem;
+                animation: float 6s ease-in-out infinite;
+                pointer-events: none;
+                z-index: 1;
+                will-change: transform;
             }
-            25% { 
-                filter: brightness(1.3) hue-rotate(90deg); 
+
+            @keyframes float {
+
+                0%,
+                100% {
+                    transform: translateY(0px) rotate(0deg) scale(1);
+                }
+
+                25% {
+                    transform: translateY(-30px) rotate(90deg) scale(1.1);
+                }
+
+                50% {
+                    transform: translateY(-20px) rotate(180deg) scale(1.2);
+                }
+
+                75% {
+                    transform: translateY(-35px) rotate(270deg) scale(1.1);
+                }
+            }
+
+            #game-container {
+                position: relative;
+                z-index: 10;
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+            }
+
+            .game-title {
+                font-size: 5rem;
+                color: white;
+                text-shadow:
+                    4px 4px 0px var(--purple),
+                    8px 8px 0px var(--hot-pink),
+                    12px 12px 0px var(--electric-blue);
+                margin-bottom: 30px;
+                animation: bounce 2s ease-in-out infinite;
+                will-change: transform;
+            }
+
+            @keyframes bounce {
+
+                0%,
+                20%,
+                50%,
+                80%,
+                100% {
+                    transform: translateY(0) scale(1);
+                }
+
+                40% {
+                    transform: translateY(-15px) scale(1.05);
+                }
+
+                60% {
+                    transform: translateY(-8px) scale(1.02);
+                }
+            }
+
+            .start-screen {
+                text-align: center;
+                background: rgba(255, 255, 255, 0.95);
+                padding: 50px;
+                border-radius: 30px;
+                box-shadow: 0 15px 40px rgba(0, 0, 0, 0.4);
+                margin-bottom: 30px;
+                border: 5px solid var(--sunshine-yellow);
+                max-width: 700px;
+                width: 100%;
+            }
+
+            /* Theme Selection Styles */
+            .theme-selector {
+                margin: 30px 0;
+            }
+
+            .theme-title {
+                font-size: 1.8rem;
+                margin: 20px;
+                color: var(--purple);
+                text-shadow: 2px 2px 0px white;
+            }
+
+            .theme-buttons {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                flex-wrap: wrap;
+                margin-bottom: 20px;
+            }
+
+            .theme-btn {
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+                border: none;
+                border-radius: 20px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-family: inherit;
+                font-weight: bold;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+                will-change: transform;
+                min-width: 250px;
+                background: linear-gradient(135deg, #f0f0f0, #ffffff);
+                border: 3px solid transparent;
+            }
+
+            .theme-btn:hover {
+                transform: scale(1.05);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+                filter: brightness(1.1);
+            }
+
+            .theme-btn.selected {
+                border-color: var(--purple);
+                background: linear-gradient(135deg, var(--purple), var(--candy-purple));
+                color: white;
                 transform: scale(1.05);
             }
-            50% { 
-                filter: brightness(1.6) hue-rotate(180deg); 
+
+            .theme-preview {
+                display: flex;
+                gap: 5px;
+                margin-bottom: 10px;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .theme-character {
+                width: 30px;
+                height: 30px;
+                object-fit: contain;
+                border-radius: 8px;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            }
+
+            .theme-btn span {
+                font-size: 1.1rem;
+            }
+
+            .player-selector {
+                margin: 30px 0;
+            }
+
+            .player-count {
+                font-size: 2rem;
+                margin: 20px;
+                color: var(--purple);
+                text-shadow: 2px 2px 0px white;
+            }
+
+            .player-buttons {
+                display: flex;
+                gap: 20px;
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .player-btn {
+                padding: 20px 30px;
+                font-size: 1.5rem;
+                border: none;
+                border-radius: 20px;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-family: inherit;
+                font-weight: bold;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+                will-change: transform;
+            }
+
+            .player-btn:hover {
+                transform: scale(1.15);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+                filter: brightness(1.1);
+            }
+
+            .start-btn {
+                background: linear-gradient(45deg, var(--hot-pink), var(--electric-blue));
+                color: white;
+                font-size: 2.5rem;
+                padding: 25px 50px;
+                border-radius: 30px;
+                border: none;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                font-family: inherit;
+                font-weight: bold;
+                text-shadow: 3px 3px 0px rgba(0, 0, 0, 0.4);
+                will-change: transform;
+            }
+
+            .start-btn:hover:not(:disabled) {
                 transform: scale(1.1);
+                box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+                filter: brightness(1.2);
             }
-            75% { 
-                filter: brightness(1.3) hue-rotate(270deg); 
-                transform: scale(1.05);
+
+            .start-btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
             }
-        }
 
-        @keyframes glow {
-            0%, 100% { box-shadow: 0 0 20px rgba(168, 230, 207, 0.6); }
-            50% { box-shadow: 0 0 40px rgba(168, 230, 207, 1); }
-        }
-
-        @keyframes sticky {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(0.9) rotate(-2deg); }
-        }
-
-        .game-piece {
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            position: absolute;
-            font-size: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.5s ease-in-out;
-            z-index: 20;
-            border: 4px solid white;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-            will-change: transform;
-            transform: translate3d(0, 0, 0);
-        }
-
-        .game-piece.moving {
-            animation: bounce-move 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-
-        @keyframes bounce-move {
-            0% { transform: scale(1) rotate(0deg); }
-            50% { transform: scale(1.3) rotate(180deg); }
-            100% { transform: scale(1) rotate(360deg); }
-        }
-
-        .game-controls {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin: 30px 0;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-
-        .current-player {
-            font-size: 2rem;
-            font-weight: bold;
-            color: var(--purple);
-            text-shadow: 2px 2px 0px white;
-        }
-
-        .card-display {
-            background: linear-gradient(45deg, var(--sunshine-yellow), var(--candy-orange));
-            padding: 30px;
-            border-radius: 20px;
-            text-align: center;
-            min-width: 200px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            border: 4px solid white;
-        }
-
-        .drawn-card {
-            font-size: 4rem;
-            margin-bottom: 15px;
-            animation: card-flip 0.5s ease-in-out;
-            will-change: transform;
-        }
-
-        @keyframes card-flip {
-            0% { transform: rotateY(0deg) scale(1); }
-            50% { transform: rotateY(90deg) scale(1.2); }
-            100% { transform: rotateY(0deg) scale(1); }
-        }
-
-        .card-text {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: white;
-            text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4);
-        }
-
-        .control-buttons {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-
-        .btn {
-            padding: 20px 30px;
-            font-size: 1.3rem;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            font-family: inherit;
-            font-weight: bold;
-            min-width: 150px;
-            text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
-            will-change: transform;
-        }
-
-        .btn:hover:not(:disabled) {
-            transform: scale(1.1) rotate(2deg);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
-            filter: brightness(1.1);
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, var(--hot-pink), var(--electric-blue));
-            color: white;
-        }
-
-        .btn-secondary {
-            background: linear-gradient(45deg, var(--lime-green), var(--candy-yellow));
-            color: white;
-        }
-
-        .btn-danger {
-            background: linear-gradient(45deg, var(--candy-red), var(--candy-orange));
-            color: white;
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .victory-screen {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .victory-content {
-            background: linear-gradient(45deg, var(--sunshine-yellow), var(--candy-orange));
-            padding: 60px;
-            border-radius: 30px;
-            text-align: center;
-            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
-            animation: victory-bounce 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            border: 5px solid white;
-            will-change: transform;
-        }
-
-        @keyframes victory-bounce {
-            0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
-            50% { transform: scale(1.2) rotate(5deg); opacity: 0.8; }
-            100% { transform: scale(1) rotate(0deg); opacity: 1; }
-        }
-
-        .victory-title {
-            font-size: 4rem;
-            color: white;
-            text-shadow: 4px 4px 0px var(--purple);
-            margin-bottom: 30px;
-            animation: celebration-pulse 1s ease-in-out infinite;
-        }
-
-        @keyframes celebration-pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-
-        .confetti {
-            position: absolute;
-            width: 15px;
-            height: 15px;
-            border-radius: 50%;
-            animation: confetti-fall 3s linear infinite;
-            will-change: transform;
-        }
-
-        @keyframes confetti-fall {
-            0% {
-                transform: translateY(-100vh) rotate(0deg) scale(1);
-                opacity: 1;
+            .game-board {
+                display: none;
+                background: rgba(255, 255, 255, 0.98);
+                border-radius: 25px;
+                padding: 40px;
+                box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
+                max-width: 1400px;
+                width: 100%;
+                border: 5px solid var(--sunshine-yellow);
             }
-            100% {
-                transform: translateY(100vh) rotate(720deg) scale(0.5);
-                opacity: 0;
+
+            .board-path {
+                display: flex;
+                flex-wrap: wrap;
+                width: 100%;
+                max-width: 1200px;
+                margin: 30px auto;
+                padding: 20px;
+                background: var(--candy-purple);
+                border-radius: 20px;
+                position: relative;
             }
-        }
 
-        .player-info {
-            display: flex;
-            gap: 25px;
-            margin: 30px 0;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .player-card {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 20px;
-            border-radius: 20px;
-            text-align: center;
-            min-width: 150px;
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-            border: 3px solid transparent;
-            transition: all 0.3s ease;
-            will-change: transform;
-        }
-
-        .player-card.active {
-            background: linear-gradient(45deg, var(--candy-yellow), var(--candy-orange));
-            transform: scale(1.1);
-            box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
-            border: 3px solid white;
-        }
-
-        .player-name {
-            font-size: 1.4rem;
-            font-weight: bold;
-            margin-bottom: 15px;
-            text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
-        }
-
-        .player-piece-preview {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            margin: 0 auto;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            border: 3px solid white;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .game-title { font-size: 3rem; }
-            .board-path { 
-                grid-template-columns: repeat(15, 1fr); 
-                min-height: 350px;
+            .board-row {
+                display: flex;
+                width: 100%;
+                margin-bottom: 3px;
             }
-            .square { width: 35px; height: 35px; font-size: 1.4rem; }
-            .game-piece { width: 45px; height: 45px; font-size: 1.5rem; }
-            .game-controls { flex-direction: column; }
-            .control-buttons { justify-content: center; }
-        }
-    </style>
-</head>
-<body>
-    <!-- Floating candy particles -->
-    <div class="floating-candy" style="top: 5%; left: 10%; animation-delay: 0s;">🍭</div>
-    <div class="floating-candy" style="top: 15%; left: 85%; animation-delay: 1s;">🍬</div>
-    <div class="floating-candy" style="top: 25%; left: 5%; animation-delay: 2s;">🍫</div>
-    <div class="floating-candy" style="top: 35%; left: 90%; animation-delay: 3s;">🍪</div>
-    <div class="floating-candy" style="top: 45%; left: 15%; animation-delay: 4s;">🍩</div>
-    <div class="floating-candy" style="top: 55%; left: 80%; animation-delay: 5s;">🧁</div>
-    <div class="floating-candy" style="top: 65%; left: 10%; animation-delay: 0.5s;">🍰</div>
-    <div class="floating-candy" style="top: 75%; left: 85%; animation-delay: 1.5s;">🎂</div>
-    <div class="floating-candy" style="top: 85%; left: 20%; animation-delay: 2.5s;">🍯</div>
-    <div class="floating-candy" style="top: 95%; left: 75%; animation-delay: 3.5s;">🍊</div>
 
-    <div id="game-container">
-        <h1 class="game-title">🍭 Candyland Adventure 🍭</h1>
-        
-        <!-- Start Screen -->
-        <div id="start-screen" class="start-screen">
-            <h2 style="font-size: 2.5rem; color: var(--purple); margin-bottom: 30px; text-shadow: 2px 2px 0px white;">Welcome to the Magical Candy Kingdom!</h2>
-            <div class="player-selector">
-                <p class="player-count">How many brave candy explorers?</p>
-                <div class="player-buttons">
-                    <button class="player-btn" onclick="selectPlayers(1)" style="background: var(--candy-red); color: white;">1 Player (vs AI)</button>
-                    <button class="player-btn" onclick="selectPlayers(2)" style="background: var(--electric-blue); color: white;">2 Players</button>
-                    <button class="player-btn" onclick="selectPlayers(3)" style="background: var(--lime-green); color: white;">3 Players</button>
-                    <button class="player-btn" onclick="selectPlayers(4)" style="background: var(--candy-yellow); color: white;">4 Players</button>
-                </div>
-            </div>
-            <button id="start-game-btn" class="start-btn" onclick="startGame()" disabled>🎮 START MAGICAL ADVENTURE 🎮</button>
+            .board-row.reverse {
+                flex-direction: row-reverse;
+            }
+
+            .square {
+                width: 45px;
+                height: 45px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 1.8rem;
+                cursor: pointer;
+                transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                position: relative;
+                border: 3px solid rgba(255, 255, 255, 0.9);
+                will-change: transform;
+            }
+
+            .square:hover {
+                transform: scale(1.2) rotate(5deg);
+                box-shadow: 0 0 25px rgba(255, 255, 255, 0.9);
+                filter: brightness(1.2);
+            }
+
+            .square.red {
+                background: var(--hot-pink);
+                box-shadow: 0 0 15px rgba(255, 20, 147, 0.5);
+            }
+
+            .square.blue {
+                background: var(--electric-blue);
+                box-shadow: 0 0 15px rgba(0, 191, 255, 0.5);
+            }
+
+            .square.yellow {
+                background: var(--sunshine-yellow);
+                box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+            }
+
+            .square.green {
+                background: var(--lime-green);
+                box-shadow: 0 0 15px rgba(50, 205, 50, 0.5);
+            }
+
+            .square.orange {
+                background: var(--orange);
+                box-shadow: 0 0 15px rgba(255, 99, 71, 0.5);
+            }
+
+            .square.purple {
+                background: var(--purple);
+                box-shadow: 0 0 15px rgba(147, 112, 219, 0.5);
+            }
+
+            .square.start {
+                background: linear-gradient(45deg, var(--sunshine-yellow), var(--candy-orange));
+                font-size: 2.5rem;
+                animation: pulse 2s ease-in-out infinite;
+                will-change: transform;
+            }
+
+            .square.finish {
+                background: linear-gradient(45deg, var(--hot-pink), var(--purple));
+                font-size: 2.5rem;
+                animation: sparkle 1.5s ease-in-out infinite;
+                will-change: filter, transform;
+            }
+
+            .square.special {
+                background: linear-gradient(45deg, var(--candy-purple), var(--candy-blue));
+                animation: glow 2s ease-in-out infinite;
+                will-change: box-shadow;
+            }
+
+            .square.sticky {
+                background: linear-gradient(45deg, #8B4513, #A0522D);
+                animation: sticky 1s ease-in-out infinite;
+                will-change: transform;
+            }
+
+            @keyframes pulse {
+
+                0%,
+                100% {
+                    transform: scale(1) rotate(0deg);
+                }
+
+                50% {
+                    transform: scale(1.15) rotate(5deg);
+                }
+            }
+
+            @keyframes sparkle {
+
+                0%,
+                100% {
+                    filter: brightness(1) hue-rotate(0deg);
+                    transform: scale(1);
+                }
+
+                25% {
+                    filter: brightness(1.3) hue-rotate(90deg);
+                    transform: scale(1.05);
+                }
+
+                50% {
+                    filter: brightness(1.6) hue-rotate(180deg);
+                    transform: scale(1.1);
+                }
+
+                75% {
+                    filter: brightness(1.3) hue-rotate(270deg);
+                    transform: scale(1.05);
+                }
+            }
+
+            @keyframes glow {
+
+                0%,
+                100% {
+                    box-shadow: 0 0 20px rgba(168, 230, 207, 0.6);
+                }
+
+                50% {
+                    box-shadow: 0 0 40px rgba(168, 230, 207, 1);
+                }
+            }
+
+            @keyframes sticky {
+
+                0%,
+                100% {
+                    transform: scale(1);
+                }
+
+                50% {
+                    transform: scale(0.9) rotate(-2deg);
+                }
+            }
+
+            .game-piece {
+                width: 60px;
+                height: 60px;
+                border-radius: 50%;
+                position: absolute;
+                font-size: 2rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: all 0.5s ease-in-out;
+                z-index: 20;
+                border: 4px solid white;
+                box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
+                will-change: transform;
+                transform: translate3d(0, 0, 0);
+            }
+
+            .game-piece.moving {
+                animation: bounce-move 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            }
+
+            @keyframes bounce-move {
+                0% {
+                    transform: scale(1) rotate(0deg);
+                }
+
+                50% {
+                    transform: scale(1.3) rotate(180deg);
+                }
+
+                100% {
+                    transform: scale(1) rotate(360deg);
+                }
+            }
+
+            .game-controls {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin: 30px 0;
+                flex-wrap: wrap;
+                gap: 20px;
+            }
+
+            .current-player {
+                font-size: 2rem;
+                font-weight: bold;
+                color: var(--purple);
+                text-shadow: 2px 2px 0px white;
+            }
+
+            .card-display {
+                background: linear-gradient(45deg, var(--sunshine-yellow), var(--candy-orange));
+                padding: 30px;
+                border-radius: 20px;
+                text-align: center;
+                min-width: 200px;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+                border: 4px solid white;
+            }
+
+            .drawn-card {
+                font-size: 4rem;
+                margin-bottom: 15px;
+                animation: card-flip 0.5s ease-in-out;
+                will-change: transform;
+            }
+
+            @keyframes card-flip {
+                0% {
+                    transform: rotateY(0deg) scale(1);
+                }
+
+                50% {
+                    transform: rotateY(90deg) scale(1.2);
+                }
+
+                100% {
+                    transform: rotateY(0deg) scale(1);
+                }
+            }
+
+            .card-text {
+                font-size: 1.5rem;
+                font-weight: bold;
+                color: white;
+                text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.4);
+            }
+
+            .control-buttons {
+                display: flex;
+                gap: 20px;
+                flex-wrap: wrap;
+            }
+
+            .btn {
+                padding: 20px 30px;
+                font-size: 1.3rem;
+                border: none;
+                border-radius: 15px;
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                font-family: inherit;
+                font-weight: bold;
+                min-width: 150px;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.3);
+                will-change: transform;
+            }
+
+            .btn:hover:not(:disabled) {
+                transform: scale(1.1) rotate(2deg);
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+                filter: brightness(1.1);
+            }
+
+            .btn-primary {
+                background: linear-gradient(45deg, var(--hot-pink), var(--electric-blue));
+                color: white;
+            }
+
+            .btn-secondary {
+                background: linear-gradient(45deg, var(--lime-green), var(--candy-yellow));
+                color: white;
+            }
+
+            .btn-danger {
+                background: linear-gradient(45deg, var(--candy-red), var(--candy-orange));
+                color: white;
+            }
+
+            .btn:disabled {
+                opacity: 0.5;
+                cursor: not-allowed;
+            }
+
+            .victory-screen {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.9);
+                z-index: 1000;
+                justify-content: center;
+                align-items: center;
+            }
+
+            .victory-content {
+                background: linear-gradient(45deg, var(--sunshine-yellow), var(--candy-orange));
+                padding: 60px;
+                border-radius: 30px;
+                text-align: center;
+                box-shadow: 0 25px 60px rgba(0, 0, 0, 0.6);
+                animation: victory-bounce 1s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                border: 5px solid white;
+                will-change: transform;
+            }
+
+            @keyframes victory-bounce {
+                0% {
+                    transform: scale(0.3) rotate(-10deg);
+                    opacity: 0;
+                }
+
+                50% {
+                    transform: scale(1.2) rotate(5deg);
+                    opacity: 0.8;
+                }
+
+                100% {
+                    transform: scale(1) rotate(0deg);
+                    opacity: 1;
+                }
+            }
+
+            .victory-title {
+                font-size: 4rem;
+                color: white;
+                text-shadow: 4px 4px 0px var(--purple);
+                margin-bottom: 30px;
+                animation: celebration-pulse 1s ease-in-out infinite;
+            }
+
+            @keyframes celebration-pulse {
+
+                0%,
+                100% {
+                    transform: scale(1);
+                }
+
+                50% {
+                    transform: scale(1.05);
+                }
+            }
+
+            .confetti {
+                position: absolute;
+                width: 15px;
+                height: 15px;
+                border-radius: 50%;
+                animation: confetti-fall 3s linear infinite;
+                will-change: transform;
+            }
+
+            @keyframes confetti-fall {
+                0% {
+                    transform: translateY(-100vh) rotate(0deg) scale(1);
+                    opacity: 1;
+                }
+
+                100% {
+                    transform: translateY(100vh) rotate(720deg) scale(0.5);
+                    opacity: 0;
+                }
+            }
+
+            .player-info {
+                display: flex;
+                gap: 25px;
+                margin: 30px 0;
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .player-card {
+                background: rgba(255, 255, 255, 0.95);
+                padding: 20px;
+                border-radius: 20px;
+                text-align: center;
+                min-width: 150px;
+                box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+                border: 3px solid transparent;
+                transition: all 0.3s ease;
+                will-change: transform;
+            }
+
+            .player-card.active {
+                background: linear-gradient(45deg, var(--candy-yellow), var(--candy-orange));
+                transform: scale(1.1);
+                box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
+                border: 3px solid white;
+            }
+
+            .player-name {
+                font-size: 1.4rem;
+                font-weight: bold;
+                margin-bottom: 15px;
+                text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.1);
+            }
+
+            .player-piece-preview {
+                width: 50px;
+                height: 50px;
+                border-radius: 50%;
+                margin: 0 auto;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 2rem;
+                border: 3px solid white;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            }
+
+            /* Responsive design */
+            @media (max-width: 768px) {
+                .game-title {
+                    font-size: 3rem;
+                }
+
+                .board-path {
+                    grid-template-columns: repeat(15, 1fr);
+                    min-height: 350px;
+                }
+
+                .square {
+                    width: 35px;
+                    height: 35px;
+                    font-size: 1.4rem;
+                }
+
+                .game-piece {
+                    width: 45px;
+                    height: 45px;
+                    font-size: 1.5rem;
+                }
+
+                .game-controls {
+                    flex-direction: column;
+                }
+
+                .control-buttons {
+                    justify-content: center;
+                }
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- Floating candy particles -->
+        <div id="floating-candy-container">
+            <!-- Floating elements will be dynamically generated based on theme -->
         </div>
 
-        <!-- Game Board -->
-        <div id="game-board" class="game-board">
-            <div class="player-info" id="player-info"></div>
-            
-            <div class="game-controls">
-                <div class="current-player" id="current-player">Player 1's Magical Turn ✨</div>
-                <div class="card-display">
-                    <div class="drawn-card" id="drawn-card">🎴</div>
-                    <div class="card-text" id="card-text">Draw a magical card!</div>
+        <div id="game-container">
+            <h1 class="game-title">🍭 Candyland Adventure 🍭</h1>
+
+            <!-- Start Screen -->
+            <div id="start-screen" class="start-screen">
+                <h2
+                    style="font-size: 2.5rem; color: var(--purple); margin-bottom: 30px; text-shadow: 2px 2px 0px white;">
+                    Welcome to the Magical Candy Kingdom!</h2>
+
+                <!-- Theme Selection -->
+                <div class="theme-selector">
+                    <p class="theme-title">Choose your magical theme:</p>
+                    <div class="theme-buttons">
+                        <button class="theme-btn selected" onclick="selectTheme('classic')" data-theme="classic">
+                            <div class="theme-preview">
+                                <img src="/static/games/CandyLand/assets/images/cards/princess-lolly.png"
+                                    alt="Princess Lolly" class="theme-character">
+                                <img src="/static/games/CandyLand/assets/images/cards/queen-frostline.png"
+                                    alt="Queen Frostine" class="theme-character">
+                                <img src="/static/games/CandyLand/assets/images/cards/king-candy.png" alt="King Candy"
+                                    class="theme-character">
+                                <img src="/static/games/CandyLand/assets/images/cards/gingerbread-man.png"
+                                    alt="Gingerbread Man" class="theme-character">
+                            </div>
+                            <span>Classic CandyLand</span>
+                        </button>
+                        <button class="theme-btn" onclick="selectTheme('gerald-piggie')" data-theme="gerald-piggie">
+                            <div class="theme-preview">
+                                <img src="/static/games/CandyLand/assets/images/cards/Gerald.png" alt="Gerald"
+                                    class="theme-character">
+                                <img src="/static/games/CandyLand/assets/images/cards/Piggie.png" alt="Piggie"
+                                    class="theme-character">
+                                <img src="/static/games/CandyLand/assets/images/cards/Unicorn.png" alt="Unicorn"
+                                    class="theme-character">
+                                <img src="/static/games/CandyLand/assets/images/cards/Yeti.png" alt="Yeti"
+                                    class="theme-character">
+                            </div>
+                            <span>Gerald & Piggie Adventure</span>
+                        </button>
+                    </div>
                 </div>
-                <div class="control-buttons">
-                    <button class="btn btn-primary" id="draw-card-btn" onclick="drawCard()">🎴 Draw Magic Card</button>
-                    <button class="btn btn-secondary" id="end-turn-btn" onclick="endTurn()" disabled>✨ End Turn</button>
-                    <button class="btn btn-danger" onclick="newGame()">🔄 New Adventure</button>
+
+                <div class="player-selector">
+                    <p class="player-count">How many brave candy explorers?</p>
+                    <div class="player-buttons">
+                        <button class="player-btn" onclick="selectPlayers(1)"
+                            style="background: var(--candy-red); color: white;">1 Player (vs AI)</button>
+                        <button class="player-btn" onclick="selectPlayers(2)"
+                            style="background: var(--electric-blue); color: white;">2 Players</button>
+                        <button class="player-btn" onclick="selectPlayers(3)"
+                            style="background: var(--lime-green); color: white;">3 Players</button>
+                        <button class="player-btn" onclick="selectPlayers(4)"
+                            style="background: var(--candy-yellow); color: white;">4 Players</button>
+                    </div>
+                </div>
+                <button id="start-game-btn" class="start-btn" onclick="startGame()" disabled>🎮 START MAGICAL ADVENTURE
+                    🎮</button>
+            </div>
+
+            <!-- Game Board -->
+            <div id="game-board" class="game-board">
+                <div class="player-info" id="player-info"></div>
+
+                <div class="game-controls">
+                    <div class="current-player" id="current-player">Player 1's Magical Turn ✨</div>
+                    <div class="card-display">
+                        <div class="drawn-card" id="drawn-card">🎴</div>
+                        <div class="card-text" id="card-text">Draw a magical card!</div>
+                    </div>
+                    <div class="control-buttons">
+                        <button class="btn btn-primary" id="draw-card-btn" onclick="drawCard()">🎴 Draw Magic
+                            Card</button>
+                        <button class="btn btn-secondary" id="end-turn-btn" onclick="endTurn()" disabled>✨ End
+                            Turn</button>
+                        <button class="btn btn-danger" onclick="newGame()">🔄 New Adventure</button>
+                    </div>
+                </div>
+
+                <div class="board-path" id="board-path">
+                    <!-- Board squares will be generated by JavaScript -->
                 </div>
             </div>
 
-            <div class="board-path" id="board-path">
-                <!-- Board squares will be generated by JavaScript -->
+            <!-- Victory Screen -->
+            <div id="victory-screen" class="victory-screen">
+                <div class="victory-content">
+                    <h2 class="victory-title" id="victory-title">🎉 MAGICAL VICTORY! 🎉</h2>
+                    <p id="victory-message"
+                        style="font-size: 2rem; color: white; margin-bottom: 40px; text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);">
+                    </p>
+                    <button class="start-btn" onclick="newGame()">🎮 Another Magical Adventure 🎮</button>
+                </div>
             </div>
         </div>
 
-        <!-- Victory Screen -->
-        <div id="victory-screen" class="victory-screen">
-            <div class="victory-content">
-                <h2 class="victory-title" id="victory-title">🎉 MAGICAL VICTORY! 🎉</h2>
-                <p id="victory-message" style="font-size: 2rem; color: white; margin-bottom: 40px; text-shadow: 2px 2px 0px rgba(0, 0, 0, 0.3);"></p>
-                <button class="start-btn" onclick="newGame()">🎮 Another Magical Adventure 🎮</button>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Game state
-        let gameState = {
-            players: [],
-            currentPlayer: 0,
-            deck: [],
-            drawnCard: null,
-            gameStarted: false,
-            playerCount: 0,
-            board: [],
-            specialSquares: {
-                sticky: [15, 25, 35, 45, 55, 65, 75, 85, 95, 105, 115, 125],
-                shortcuts: {
-                    20: 40,  // Rainbow trail
-                    50: 70,  // Gumdrop mountain
-                    80: 100, // Peppermint forest
-                    110: 130 // Candy castle shortcut
-                },
-                landmarks: {
-                    30: '🍭 Peppermint Forest',
-                    60: '🏔️ Gumdrop Mountain', 
-                    90: '🌲 Licorice Forest',
-                    120: '🏰 Candy Castle'
-                }
-            }
-        };
-
-        // Player colors and emojis
-        const playerColors = ['#FF1493', '#00BFFF', '#32CD32', '#FF6347'];
-        const playerEmojis = ['😊', '😄', '🤗', '😃'];
-
-        // Card types with vibrant colors
-        const cardTypes = {
-            single: ['red', 'blue', 'yellow', 'green', 'orange', 'purple'],
-            double: ['red', 'blue', 'yellow', 'green', 'orange', 'purple'],
-            special: ['Princess Lolly', 'Queen Frostine', 'King Candy', 'Gingerbread Man']
-        };
-
-        // Initialize game
-        function initGame() {
-            createBoard();
-            createDeck();
-            shuffleDeck();
-        }
-
-        // Create the game board with 134 squares in winding S-pattern
-        function createBoard() {
-            const boardPath = document.getElementById('board-path');
-            boardPath.innerHTML = '';
-            
-            const colors = ['red', 'blue', 'yellow', 'green', 'orange', 'purple'];
-            let colorIndex = 0;
-            const squaresPerRow = 10;
-            const totalRows = Math.ceil(134 / squaresPerRow);
-            
-            for (let row = 0; row < totalRows; row++) {
-                const rowDiv = document.createElement('div');
-                rowDiv.className = 'board-row';
-                
-                // Alternate direction for S-pattern (even rows go left-to-right, odd rows go right-to-left)
-                if (row % 2 === 1) {
-                    rowDiv.className += ' reverse';
-                }
-                
-                const startSquare = row * squaresPerRow;
-                const endSquare = Math.min(startSquare + squaresPerRow, 134);
-                
-                for (let i = startSquare; i < endSquare; i++) {
-                    const square = document.createElement('div');
-                    square.className = 'square';
-                    square.id = `square-${i}`;
-                    square.style.flex = '1';
-                    square.style.margin = '1px';
-                    square.style.minWidth = '40px';  // Minimum 40px as specified in prompt
-                    square.style.minHeight = '40px';
-                    
-                    if (i === 0) {
-                        square.className += ' start';
-                        square.innerHTML = '🏁';
-                    } else if (i === 133) {
-                        square.className += ' finish';
-                        square.innerHTML = '🏰';
-                    } else {
-                        square.className += ` ${colors[colorIndex % colors.length]}`;
-                        colorIndex++;
-                        
-                        // Add special square indicators
-                        if (gameState.specialSquares.sticky.includes(i)) {
-                            square.className += ' sticky';
-                            square.innerHTML = '🍯';
-                        } else if (Object.keys(gameState.specialSquares.shortcuts).includes(i.toString())) {
-                            square.className += ' special';
-                            square.innerHTML = '🌈';
-                        } else if (Object.keys(gameState.specialSquares.landmarks).includes(i.toString())) {
-                            square.className += ' special';
-                            square.innerHTML = '⭐';
-                        }
-                    }
-                    
-                    rowDiv.appendChild(square);
-                }
-                
-                boardPath.appendChild(rowDiv);
-            }
-            
-            gameState.board = Array(134).fill(null);
-        }
-
-        // Create and shuffle deck
-        function createDeck() {
-            gameState.deck = [];
-            
-            // Add single color cards (2 of each color)
-            cardTypes.single.forEach(color => {
-                gameState.deck.push({ type: 'single', color: color, value: 1 });
-                gameState.deck.push({ type: 'single', color: color, value: 1 });
-            });
-            
-            // Add double color cards (2 of each color)
-            cardTypes.double.forEach(color => {
-                gameState.deck.push({ type: 'double', color: color, value: 2 });
-                gameState.deck.push({ type: 'double', color: color, value: 2 });
-            });
-            
-            // Add special character cards
-            cardTypes.special.forEach(character => {
-                gameState.deck.push({ type: 'special', character: character, value: 0 });
-            });
-        }
-
-        function shuffleDeck() {
-            for (let i = gameState.deck.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [gameState.deck[i], gameState.deck[j]] = [gameState.deck[j], gameState.deck[i]];
-            }
-        }
-
-        // Player selection with visual feedback
-        function selectPlayers(count) {
-            gameState.playerCount = count;
-            document.getElementById('start-game-btn').disabled = false;
-            
-            // Update button styles with bounce effect
-            document.querySelectorAll('.player-btn').forEach(btn => {
-                btn.style.opacity = '0.6';
-                btn.style.transform = 'scale(1)';
-            });
-            event.target.style.opacity = '1';
-            event.target.style.transform = 'scale(1.2)';
-            
-            // Play selection sound
-            playSound('select');
-        }
-
-        // Start game with celebration
-        function startGame() {
-            if (gameState.playerCount === 0) return;
-            
-            // Initialize players with vibrant colors
-            gameState.players = [];
-            for (let i = 0; i < gameState.playerCount; i++) {
-                const isAI = gameState.playerCount === 1 && i === 1; // Second player is AI in single player mode
-                gameState.players.push({
-                    id: i,
-                    name: isAI ? 'AI Player' : `Player ${i + 1}`,
-                    position: 0,
-                    color: playerColors[i],
-                    emoji: playerEmojis[i],
-                    skipTurn: false,
-                    isAI: isAI
-                });
-            }
-            
-            // Add AI player for single player mode
-            if (gameState.playerCount === 1) {
-                gameState.players.push({
-                    id: 1,
-                    name: 'AI Player',
-                    position: 0,
-                    color: playerColors[1],
-                    emoji: playerEmojis[1],
-                    skipTurn: false,
-                    isAI: true
-                });
-                gameState.playerCount = 2; // Now we have 2 players (human + AI)
-            }
-            
-            // Hide start screen with fade effect
-            const startScreen = document.getElementById('start-screen');
-            startScreen.style.transition = 'all 0.5s ease';
-            startScreen.style.opacity = '0';
-            startScreen.style.transform = 'scale(0.8)';
-            
-            setTimeout(() => {
-                startScreen.style.display = 'none';
-                document.getElementById('game-board').style.display = 'block';
-                
-                // Animate game board entrance
-                const gameBoard = document.getElementById('game-board');
-                gameBoard.style.opacity = '0';
-                gameBoard.style.transform = 'scale(0.8)';
-                setTimeout(() => {
-                    gameBoard.style.transition = 'all 0.5s ease';
-                    gameBoard.style.opacity = '1';
-                    gameBoard.style.transform = 'scale(1)';
-                }, 50);
-            }, 500);
-            
-            gameState.gameStarted = true;
-            gameState.currentPlayer = 0;
-            
-            updatePlayerInfo();
-            updateCurrentPlayer();
-            placeGamePieces();
-            playSound('start');
-        }
-
-        // Update player information with animations
-        function updatePlayerInfo() {
-            const playerInfo = document.getElementById('player-info');
-            playerInfo.innerHTML = '';
-            
-            gameState.players.forEach((player, index) => {
-                const playerCard = document.createElement('div');
-                playerCard.className = 'player-card';
-                if (index === gameState.currentPlayer) {
-                    playerCard.className += ' active';
-                }
-                
-                playerCard.innerHTML = `
-                    <div class="player-name">${player.name}</div>
-                    <div class="player-piece-preview" style="background: ${player.color};">${player.emoji}</div>
-                `;
-                
-                playerInfo.appendChild(playerCard);
-                
-                // Animate card entrance
-                setTimeout(() => {
-                    playerCard.style.transform = 'translateY(-20px)';
-                    playerCard.style.opacity = '0';
-                    setTimeout(() => {
-                        playerCard.style.transition = 'all 0.5s ease';
-                        playerCard.style.transform = 'translateY(0)';
-                        playerCard.style.opacity = '1';
-                    }, index * 100);
-                }, 100);
-            });
-        }
-
-        // Update current player with animation
-        function updateCurrentPlayer() {
-            const currentPlayer = gameState.players[gameState.currentPlayer];
-            const currentPlayerEl = document.getElementById('current-player');
-            currentPlayerEl.textContent = `${currentPlayer.name}'s Magical Turn ✨`;
-            
-            // Add pulse animation
-            currentPlayerEl.style.animation = 'none';
-            setTimeout(() => {
-                currentPlayerEl.style.animation = 'pulse 1s ease-in-out';
-            }, 50);
-        }
-
-        // Place game pieces with entrance animation
-        function placeGamePieces() {
-            // Remove existing pieces
-            document.querySelectorAll('.game-piece').forEach(piece => piece.remove());
-            
-            // Place pieces at start with staggered animation
-            gameState.players.forEach((player, index) => {
-                setTimeout(() => {
-                    const piece = document.createElement('div');
-                    piece.className = 'game-piece';
-                    piece.id = `piece-${player.id}`;
-                    piece.style.background = player.color;
-                    piece.innerHTML = player.emoji;
-                    
-                    const startSquare = document.getElementById('square-0');
-                    startSquare.appendChild(piece);
-                    
-                    // Position pieces around the start square using transform3d
-                    const angle = (index * 90) * (Math.PI / 180);
-                    const radius = 35;
-                    const x = Math.cos(angle) * radius;
-                    const y = Math.sin(angle) * radius;
-                    piece.style.transform = `translate3d(${x}px, ${y}px, 0)`;
-                    
-                    // Entrance animation
-                    piece.style.transform = `translate3d(${x}px, ${y}px, 0) scale(0) rotate(180deg)`;
-                    piece.style.opacity = '0';
-                    setTimeout(() => {
-                        piece.style.transition = 'all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
-                        piece.style.transform = `translate3d(${x}px, ${y}px, 0) scale(1) rotate(0deg)`;
-                        piece.style.opacity = '1';
-                    }, 100);
-                }, index * 200);
-            });
-        }
-
-        // Draw a card with enhanced animation
-        function drawCard() {
-            if (!gameState.gameStarted || gameState.drawnCard) return;
-            
-            // Check if current player is AI
-            const currentPlayer = gameState.players[gameState.currentPlayer];
-            if (currentPlayer.isAI) {
-                // AI automatically draws after a short delay
-                setTimeout(() => {
-                    performCardDraw();
-                }, 1000);
-                return;
-            }
-            
-            performCardDraw();
-        }
-        
-        function performCardDraw() {
-            // Check if deck is empty, reshuffle if needed
-            if (gameState.deck.length === 0) {
-                createDeck();
-                shuffleDeck();
-            }
-            
-            // Draw card with animation
-            gameState.drawnCard = gameState.deck.pop();
-            
-            // Update display with enhanced card flip
-            const drawnCardEl = document.getElementById('drawn-card');
-            const cardTextEl = document.getElementById('card-text');
-            
-            // Card flip animation
-            drawnCardEl.style.transform = 'rotateY(90deg) scale(0.8)';
-            
-            setTimeout(() => {
-                if (gameState.drawnCard.type === 'special') {
-                    drawnCardEl.innerHTML = '👑';
-                    cardTextEl.textContent = gameState.drawnCard.character;
-                } else {
-                    const colorEmojis = {
-                        red: '🔴', blue: '🔵', yellow: '🟡', 
-                        green: '🟢', orange: '🟠', purple: '🟣'
-                    };
-                    drawnCardEl.innerHTML = colorEmojis[gameState.drawnCard.color];
-                    cardTextEl.textContent = `${gameState.drawnCard.color.toUpperCase()} ${gameState.drawnCard.value === 2 ? 'DOUBLE' : 'SINGLE'}`;
-                }
-                
-                drawnCardEl.style.transform = 'rotateY(0deg) scale(1)';
-            }, 250);
-            
-            // Enable end turn button with animation
-            const endTurnBtn = document.getElementById('end-turn-btn');
-            const drawCardBtn = document.getElementById('draw-card-btn');
-            
-            endTurnBtn.disabled = false;
-            drawCardBtn.disabled = true;
-            
-            endTurnBtn.style.transform = 'scale(1.1)';
-            setTimeout(() => {
-                endTurnBtn.style.transform = 'scale(1)';
-            }, 200);
-            
-            // Play card draw sound and move player
-            playSound('card');
-            setTimeout(() => movePlayer(), 500);
-            
-            // If current player is AI, automatically end turn after movement
-            const currentPlayer = gameState.players[gameState.currentPlayer];
-            if (currentPlayer.isAI) {
-                setTimeout(() => {
-                    endTurn();
-                }, 2000);
-            }
-        }
-
-        // Move player with enhanced animation
-        function movePlayer() {
-            const player = gameState.players[gameState.currentPlayer];
-            const card = gameState.drawnCard;
-            
-            let targetPosition = player.position;
-            
-            if (card.type === 'special') {
-                // Special character cards move to specific locations
-                const specialPositions = {
-                    'Princess Lolly': 30,
-                    'Queen Frostine': 60,
-                    'King Candy': 90,
-                    'Gingerbread Man': 120
-                };
-                targetPosition = specialPositions[card.character];
-            } else {
-                // Color cards - find next matching color square
-                let steps = card.value;
-                
-                for (let i = player.position + 1; i < 134 && steps > 0; i++) {
-                    const square = document.getElementById(`square-${i}`);
-                    if (square.classList.contains(card.color)) {
-                        steps--;
-                        if (steps === 0) {
-                            targetPosition = i;
-                            break;
-                        }
-                    }
-                }
-                
-                // If we can't find enough matching squares, move as far as possible
-                if (steps > 0 && targetPosition === player.position) {
-                    // Find the last matching color square we can reach
-                    for (let i = player.position + 1; i < 134; i++) {
-                        const square = document.getElementById(`square-${i}`);
-                        if (square.classList.contains(card.color)) {
-                            targetPosition = i;
-                        }
-                    }
-                }
-            }
-            
-            // Check for shortcuts
-            if (gameState.specialSquares.shortcuts[targetPosition]) {
-                targetPosition = gameState.specialSquares.shortcuts[targetPosition];
-            }
-            
-            // Special rule: If player is within 5 squares of the castle and draws any card,
-            // they can reach the castle (makes the game more fun for 3-year-olds)
-            if (player.position >= 134 - 6 && targetPosition === player.position) {
-                targetPosition = 133; // Go to castle
-            }
-            
-            // Animate movement with enhanced effects
-            animateMovement(player, targetPosition);
-        }
-
-        // Movement animation with 100ms delays between squares as specified
-        function animateMovement(player, targetPosition) {
-            const piece = document.getElementById(`piece-${player.id}`);
-            const currentPos = player.position;
-            
-            let currentStep = currentPos;
-            const moveInterval = setInterval(() => {
-                if (currentStep >= targetPosition) {
-                    clearInterval(moveInterval);
-                    player.position = targetPosition;
-                    gameState.board[targetPosition] = player.id;
-                    
-                    // Check for special squares with celebration
-                    checkSpecialSquare(targetPosition);
-                    
-                    // Check for win condition - player wins when reaching square 133 (the castle)
-                    if (targetPosition >= 133) {
-                        setTimeout(() => showVictory(player), 1000);
-                        return;
-                    }
-                    
-                    // Check if player should skip turn
-                    if (gameState.specialSquares.sticky.includes(targetPosition)) {
-                        player.skipTurn = true;
-                    }
-                    
-                    return;
-                }
-                
-                currentStep++;
-                const nextSquare = document.getElementById(`square-${currentStep}`);
-                if (nextSquare) {
-                    // Use transform3d for 60fps performance as specified
-                    const rect = nextSquare.getBoundingClientRect();
-                    const boardRect = nextSquare.parentElement.getBoundingClientRect();
-                    
-                    piece.style.transform = `translate3d(${nextSquare.offsetLeft + 10}px, ${nextSquare.offsetTop + 10}px, 0)`;
-                    piece.classList.add('moving');
-                    
-                    // Add trail effect
-                    createTrailEffect(nextSquare, player.color);
-                    
-                    setTimeout(() => piece.classList.remove('moving'), 80);
-                    playSound('move');
-                }
-            }, 100); // 100ms delays between squares as specified in prompt
-        }
-
-        // Create trail effect for movement
-        function createTrailEffect(square, color) {
-            const trail = document.createElement('div');
-            trail.style.position = 'absolute';
-            trail.style.width = '20px';
-            trail.style.height = '20px';
-            trail.style.background = color;
-            trail.style.borderRadius = '50%';
-            trail.style.opacity = '0.6';
-            trail.style.left = square.offsetLeft + 12 + 'px';
-            trail.style.top = square.offsetTop + 12 + 'px';
-            trail.style.pointerEvents = 'none';
-            trail.style.zIndex = '15';
-            trail.style.transition = 'all 0.5s ease-out';
-            
-            square.parentElement.appendChild(trail);
-            
-            setTimeout(() => {
-                trail.style.opacity = '0';
-                trail.style.transform = 'scale(2)';
-                setTimeout(() => trail.remove(), 500);
-            }, 100);
-        }
-
-        // Check special square effects with celebrations
-        function checkSpecialSquare(position) {
-            const square = document.getElementById(`square-${position}`);
-            
-            if (gameState.specialSquares.landmarks[position]) {
-                // Enhanced celebration for reaching landmark
-                square.style.animation = 'sparkle 2s ease-in-out 3';
-                createCelebrationBurst(square);
-                playSound('special');
-                
-                setTimeout(() => {
-                    square.style.animation = '';
-                }, 6000);
-            }
-        }
-
-        // Create celebration burst effect
-        function createCelebrationBurst(element) {
-            const colors = ['#FF1493', '#00BFFF', '#FFD700', '#32CD32', '#FF6347', '#9370DB'];
-            
-            for (let i = 0; i < 8; i++) {
-                setTimeout(() => {
-                    const particle = document.createElement('div');
-                    particle.style.position = 'absolute';
-                    particle.style.width = '8px';
-                    particle.style.height = '8px';
-                    particle.style.background = colors[Math.floor(Math.random() * colors.length)];
-                    particle.style.borderRadius = '50%';
-                    particle.style.left = element.offsetLeft + 20 + 'px';
-                    particle.style.top = element.offsetTop + 20 + 'px';
-                    particle.style.pointerEvents = 'none';
-                    particle.style.zIndex = '25';
-                    
-                    const angle = (i * 45) * (Math.PI / 180);
-                    const distance = 50 + Math.random() * 30;
-                    
-                    element.parentElement.appendChild(particle);
-                    
-                    setTimeout(() => {
-                        particle.style.transition = 'all 1s ease-out';
-                        particle.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) scale(0)`;
-                        particle.style.opacity = '0';
-                        
-                        setTimeout(() => particle.remove(), 1000);
-                    }, 50);
-                }, i * 50);
-            }
-        }
-
-        // End turn with smooth transition
-        function endTurn() {
-            if (!gameState.drawnCard) return;
-            
-            // Reset card display with animation
-            gameState.drawnCard = null;
-            const drawnCardEl = document.getElementById('drawn-card');
-            const cardTextEl = document.getElementById('card-text');
-            
-            drawnCardEl.style.transform = 'rotateY(90deg) scale(0.8)';
-            setTimeout(() => {
-                drawnCardEl.innerHTML = '🎴';
-                cardTextEl.textContent = 'Draw a magical card!';
-                drawnCardEl.style.transform = 'rotateY(0deg) scale(1)';
-            }, 250);
-            
-            // Disable buttons
-            document.getElementById('end-turn-btn').disabled = true;
-            document.getElementById('draw-card-btn').disabled = false;
-            
-            // Move to next player
-            do {
-                gameState.currentPlayer = (gameState.currentPlayer + 1) % gameState.players.length;
-            } while (gameState.players[gameState.currentPlayer].skipTurn && gameState.players.some(p => !p.skipTurn));
-            
-            // Reset skip turn flag
-            gameState.players[gameState.currentPlayer].skipTurn = false;
-            
-            updatePlayerInfo();
-            updateCurrentPlayer();
-            
-            // If next player is AI, automatically draw card
-            const nextPlayer = gameState.players[gameState.currentPlayer];
-            if (nextPlayer.isAI) {
-                setTimeout(() => {
-                    drawCard();
-                }, 1500);
-            }
-        }
-
-        // Enhanced victory screen with massive celebration
-        function showVictory(player) {
-            document.getElementById('victory-title').textContent = `🎉 ${player.name} WINS! 🎉`;
-            document.getElementById('victory-message').textContent = `Congratulations! You reached the magical Candy Castle first!`;
-            document.getElementById('victory-screen').style.display = 'flex';
-            
-            // Create massive confetti explosion
-            createMassiveConfetti();
-            playSound('victory');
-        }
-
-        // Create massive confetti effect
-        function createMassiveConfetti() {
-            const colors = ['#FF1493', '#00BFFF', '#FFD700', '#32CD32', '#FF6347', '#9370DB'];
-            
-            for (let i = 0; i < 100; i++) {
-                setTimeout(() => {
-                    const confetti = document.createElement('div');
-                    confetti.className = 'confetti';
-                    confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
-                    confetti.style.left = Math.random() * 100 + '%';
-                    confetti.style.animationDelay = Math.random() * 3 + 's';
-                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
-                    document.body.appendChild(confetti);
-                    
-                    setTimeout(() => confetti.remove(), 6000);
-                }, i * 50);
-            }
-        }
-
-        // New game with reset animation
-        function newGame() {
-            // Reset game state
-            gameState = {
+        <script>
+            // Game state
+            let gameState = {
                 players: [],
                 currentPlayer: 0,
                 deck: [],
@@ -1247,10 +848,10 @@
                 specialSquares: {
                     sticky: [15, 25, 35, 45, 55, 65, 75, 85, 95, 105, 115, 125],
                     shortcuts: {
-                        20: 40,
-                        50: 70,
-                        80: 100,
-                        110: 130
+                        20: 40,  // Rainbow trail
+                        50: 70,  // Gumdrop mountain
+                        80: 100, // Peppermint forest
+                        110: 130 // Candy castle shortcut
                     },
                     landmarks: {
                         30: '🍭 Peppermint Forest',
@@ -1260,133 +861,858 @@
                     }
                 }
             };
-            
-            // Animate transition back to start screen
-            const gameBoard = document.getElementById('game-board');
-            const startScreen = document.getElementById('start-screen');
-            const victoryScreen = document.getElementById('victory-screen');
-            
-            if (gameBoard.style.display !== 'none') {
-                gameBoard.style.transition = 'all 0.5s ease';
-                gameBoard.style.opacity = '0';
-                gameBoard.style.transform = 'scale(0.8)';
+
+            // Player colors and emojis
+            const playerColors = ['#FF1493', '#00BFFF', '#32CD32', '#FF6347'];
+            const playerEmojis = ['😊', '😄', '🤗', '😃'];
+
+            // Card types with vibrant colors
+            const cardTypes = {
+                single: ['red', 'blue', 'yellow', 'green', 'orange', 'purple'],
+                double: ['red', 'blue', 'yellow', 'green', 'orange', 'purple'],
+                special: ['Princess Lolly', 'Queen Frostine', 'King Candy', 'Gingerbread Man']
+            };
+
+            // Initialize game
+            function initGame() {
+                createBoard();
+                createDeck();
+                shuffleDeck();
+                updateFloatingElements();
             }
-            
-            victoryScreen.style.display = 'none';
-            
-            setTimeout(() => {
-                gameBoard.style.display = 'none';
-                startScreen.style.display = 'block';
+
+            // Create the game board with 134 squares in winding S-pattern
+            function createBoard() {
+                const boardPath = document.getElementById('board-path');
+                boardPath.innerHTML = '';
+
+                const colors = ['red', 'blue', 'yellow', 'green', 'orange', 'purple'];
+                let colorIndex = 0;
+                const squaresPerRow = 10;
+                const totalRows = Math.ceil(134 / squaresPerRow);
+
+                for (let row = 0; row < totalRows; row++) {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = 'board-row';
+
+                    // Alternate direction for S-pattern (even rows go left-to-right, odd rows go right-to-left)
+                    if (row % 2 === 1) {
+                        rowDiv.className += ' reverse';
+                    }
+
+                    const startSquare = row * squaresPerRow;
+                    const endSquare = Math.min(startSquare + squaresPerRow, 134);
+
+                    for (let i = startSquare; i < endSquare; i++) {
+                        const square = document.createElement('div');
+                        square.className = 'square';
+                        square.id = `square-${i}`;
+                        square.style.flex = '1';
+                        square.style.margin = '1px';
+                        square.style.minWidth = '40px';  // Minimum 40px as specified in prompt
+                        square.style.minHeight = '40px';
+
+                        if (i === 0) {
+                            square.className += ' start';
+                            square.innerHTML = '🏁';
+                        } else if (i === 133) {
+                            square.className += ' finish';
+                            square.innerHTML = '🏰';
+                        } else {
+                            square.className += ` ${colors[colorIndex % colors.length]}`;
+                            colorIndex++;
+
+                            // Add special square indicators
+                            if (gameState.specialSquares.sticky.includes(i)) {
+                                square.className += ' sticky';
+                                square.innerHTML = '🍯';
+                            } else if (Object.keys(gameState.specialSquares.shortcuts).includes(i.toString())) {
+                                square.className += ' special';
+                                square.innerHTML = '🌈';
+                            } else if (Object.keys(gameState.specialSquares.landmarks).includes(i.toString())) {
+                                square.className += ' special';
+                                square.innerHTML = '⭐';
+                            }
+                        }
+
+                        rowDiv.appendChild(square);
+                    }
+
+                    boardPath.appendChild(rowDiv);
+                }
+
+                gameState.board = Array(134).fill(null);
+            }
+
+            // Create and shuffle deck
+            function createDeck() {
+                gameState.deck = [];
+
+                // Add single color cards (2 of each color)
+                cardTypes.single.forEach(color => {
+                    gameState.deck.push({ type: 'single', color: color, value: 1 });
+                    gameState.deck.push({ type: 'single', color: color, value: 1 });
+                });
+
+                // Add double color cards (2 of each color)
+                cardTypes.double.forEach(color => {
+                    gameState.deck.push({ type: 'double', color: color, value: 2 });
+                    gameState.deck.push({ type: 'double', color: color, value: 2 });
+                });
+
+                // Add special character cards
+                cardTypes.special.forEach(character => {
+                    gameState.deck.push({ type: 'special', character: character, value: 0 });
+                });
+            }
+
+            function shuffleDeck() {
+                for (let i = gameState.deck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [gameState.deck[i], gameState.deck[j]] = [gameState.deck[j], gameState.deck[i]];
+                }
+            }
+
+            // Player selection with visual feedback
+            function selectPlayers(count) {
+                gameState.playerCount = count;
+                document.getElementById('start-game-btn').disabled = false;
+
+                // Update button styles with bounce effect
+                document.querySelectorAll('.player-btn').forEach(btn => {
+                    btn.style.opacity = '0.6';
+                    btn.style.transform = 'scale(1)';
+                });
+                event.target.style.opacity = '1';
+                event.target.style.transform = 'scale(1.2)';
+
+                // Play selection sound
+                playSound('select');
+            }
+
+            // Theme selection with visual feedback
+            function selectTheme(theme) {
+                setTheme(theme);
+
+                // Update button styles with bounce effect
+                document.querySelectorAll('.theme-btn').forEach(btn => {
+                    btn.classList.remove('selected');
+                    btn.style.transform = 'scale(1)';
+                });
+                event.target.classList.add('selected');
+                event.target.style.transform = 'scale(1.1)';
+
+                // Update floating elements
+                updateFloatingElements();
+
+                // Play selection sound
+                playSound('select');
+
+                console.log(`🎭 Theme selected: ${theme}`);
+            }
+
+            // Update floating elements based on theme
+            function updateFloatingElements() {
+                const container = document.getElementById('floating-candy-container');
+                if (!container) return;
+
+                // Clear existing elements
+                container.innerHTML = '';
+
+                const positions = [
+                    { top: '5%', left: '10%', delay: '0s' },
+                    { top: '15%', left: '85%', delay: '1s' },
+                    { top: '25%', left: '5%', delay: '2s' },
+                    { top: '35%', left: '90%', delay: '3s' },
+                    { top: '45%', left: '15%', delay: '4s' },
+                    { top: '55%', left: '80%', delay: '5s' },
+                    { top: '65%', left: '10%', delay: '0.5s' },
+                    { top: '75%', left: '85%', delay: '1.5s' },
+                    { top: '85%', left: '20%', delay: '2.5s' },
+                    { top: '95%', left: '75%', delay: '3.5s' }
+                ];
+
+                if (getTheme() === 'gerald-piggie') {
+                    // Use character images for Gerald/Piggie theme
+                    const characterImages = [
+                        '/static/games/CandyLand/assets/images/cards/Gerald.png',
+                        '/static/games/CandyLand/assets/images/cards/Piggie.png',
+                        '/static/games/CandyLand/assets/images/cards/Unicorn.png',
+                        '/static/games/CandyLand/assets/images/cards/Yeti.png'
+                    ];
+
+                    positions.forEach((pos, index) => {
+                        const element = document.createElement('div');
+                        element.className = 'floating-candy';
+                        element.style.top = pos.top;
+                        element.style.left = pos.left;
+                        element.style.animationDelay = pos.delay;
+                        element.style.width = '60px';
+                        element.style.height = '60px';
+
+                        const img = document.createElement('img');
+                        img.src = characterImages[index % characterImages.length];
+                        img.alt = 'Character';
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'contain';
+                        img.style.borderRadius = '50%';
+
+                        element.appendChild(img);
+                        container.appendChild(element);
+                    });
+                } else {
+                    // Use classic candy emojis
+                    const candyEmojis = ['🍭', '🍬', '🍫', '🍪', '🍩', '🧁', '🍰', '🎂', '🍯', '🍊'];
+
+                    positions.forEach((pos, index) => {
+                        const element = document.createElement('div');
+                        element.className = 'floating-candy';
+                        element.style.top = pos.top;
+                        element.style.left = pos.left;
+                        element.style.animationDelay = pos.delay;
+                        element.textContent = candyEmojis[index];
+                        container.appendChild(element);
+                    });
+                }
+            }
+
+            // Start game with celebration
+            function startGame() {
+                if (gameState.playerCount === 0) return;
+
+                // Initialize players with vibrant colors
+                gameState.players = [];
+                for (let i = 0; i < gameState.playerCount; i++) {
+                    const isAI = gameState.playerCount === 1 && i === 1; // Second player is AI in single player mode
+                    gameState.players.push({
+                        id: i,
+                        name: isAI ? 'AI Player' : `Player ${i + 1}`,
+                        position: 0,
+                        color: playerColors[i],
+                        emoji: playerEmojis[i],
+                        skipTurn: false,
+                        isAI: isAI
+                    });
+                }
+
+                // Add AI player for single player mode
+                if (gameState.playerCount === 1) {
+                    gameState.players.push({
+                        id: 1,
+                        name: 'AI Player',
+                        position: 0,
+                        color: playerColors[1],
+                        emoji: playerEmojis[1],
+                        skipTurn: false,
+                        isAI: true
+                    });
+                    gameState.playerCount = 2; // Now we have 2 players (human + AI)
+                }
+
+                // Hide start screen with fade effect
+                const startScreen = document.getElementById('start-screen');
+                startScreen.style.transition = 'all 0.5s ease';
                 startScreen.style.opacity = '0';
                 startScreen.style.transform = 'scale(0.8)';
-                
+
                 setTimeout(() => {
-                    startScreen.style.transition = 'all 0.5s ease';
-                    startScreen.style.opacity = '1';
-                    startScreen.style.transform = 'scale(1)';
-                }, 50);
-            }, 500);
-            
-            // Reset buttons
-            document.getElementById('start-game-btn').disabled = true;
-            document.querySelectorAll('.player-btn').forEach(btn => {
-                btn.style.opacity = '1';
-                btn.style.transform = 'scale(1)';
-            });
-            
-            // Clear confetti
-            document.querySelectorAll('.confetti').forEach(confetti => confetti.remove());
-        }
+                    startScreen.style.display = 'none';
+                    document.getElementById('game-board').style.display = 'block';
 
-        // Enhanced sound effects using Web Audio API
-        function playSound(type) {
-            try {
-                const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                const oscillator = audioContext.createOscillator();
-                const gainNode = audioContext.createGain();
-                
-                oscillator.connect(gainNode);
-                gainNode.connect(audioContext.destination);
-                
-                switch(type) {
-                    case 'select':
-                        oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
-                        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-                        oscillator.start(audioContext.currentTime);
-                        oscillator.stop(audioContext.currentTime + 0.1);
-                        break;
-                    case 'start':
-                        oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
-                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-                        oscillator.start(audioContext.currentTime);
-                        oscillator.stop(audioContext.currentTime + 0.5);
-                        break;
-                    case 'card':
-                        oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
-                        gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
-                        oscillator.start(audioContext.currentTime);
-                        oscillator.stop(audioContext.currentTime + 0.2);
-                        break;
-                    case 'move':
-                        oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
-                        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
-                        oscillator.start(audioContext.currentTime);
-                        oscillator.stop(audioContext.currentTime + 0.1);
-                        break;
-                    case 'special':
-                        oscillator.frequency.setValueAtTime(1200, audioContext.currentTime);
-                        gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
-                        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
-                        oscillator.start(audioContext.currentTime);
-                        oscillator.stop(audioContext.currentTime + 0.8);
-                        break;
-                    case 'victory':
-                        // Victory fanfare
-                        [800, 1000, 1200, 1500].forEach((freq, i) => {
-                            setTimeout(() => {
-                                const osc = audioContext.createOscillator();
-                                const gain = audioContext.createGain();
-                                osc.connect(gain);
-                                gain.connect(audioContext.destination);
-                                osc.frequency.setValueAtTime(freq, audioContext.currentTime);
-                                gain.gain.setValueAtTime(0.2, audioContext.currentTime);
-                                gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
-                                osc.start(audioContext.currentTime);
-                                osc.stop(audioContext.currentTime + 0.5);
-                            }, i * 200);
-                        });
-                        break;
-                }
-            } catch (e) {
-                console.log('Audio not supported');
+                    // Animate game board entrance
+                    const gameBoard = document.getElementById('game-board');
+                    gameBoard.style.opacity = '0';
+                    gameBoard.style.transform = 'scale(0.8)';
+                    setTimeout(() => {
+                        gameBoard.style.transition = 'all 0.5s ease';
+                        gameBoard.style.opacity = '1';
+                        gameBoard.style.transform = 'scale(1)';
+                    }, 50);
+                }, 500);
+
+                gameState.gameStarted = true;
+                gameState.currentPlayer = 0;
+
+                updatePlayerInfo();
+                updateCurrentPlayer();
+                placeGamePieces();
+                playSound('start');
             }
-        }
 
-        // Initialize game when page loads
-        window.addEventListener('load', () => {
-            initGame();
-        });
+            // Update player information with animations
+            function updatePlayerInfo() {
+                const playerInfo = document.getElementById('player-info');
+                playerInfo.innerHTML = '';
 
-        // Add keyboard shortcuts for accessibility
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-                if (!gameState.gameStarted) {
-                    const startBtn = document.getElementById('start-game-btn');
-                    if (!startBtn.disabled) {
-                        startGame();
+                gameState.players.forEach((player, index) => {
+                    const playerCard = document.createElement('div');
+                    playerCard.className = 'player-card';
+                    if (index === gameState.currentPlayer) {
+                        playerCard.className += ' active';
                     }
-                } else if (gameState.drawnCard === null) {
-                    drawCard();
-                } else {
-                    endTurn();
-                }
-                e.preventDefault();
+
+                    playerCard.innerHTML = `
+                    <div class="player-name">${player.name}</div>
+                    <div class="player-piece-preview" style="background: ${player.color};">${player.emoji}</div>
+                `;
+
+                    playerInfo.appendChild(playerCard);
+
+                    // Animate card entrance
+                    setTimeout(() => {
+                        playerCard.style.transform = 'translateY(-20px)';
+                        playerCard.style.opacity = '0';
+                        setTimeout(() => {
+                            playerCard.style.transition = 'all 0.5s ease';
+                            playerCard.style.transform = 'translateY(0)';
+                            playerCard.style.opacity = '1';
+                        }, index * 100);
+                    }, 100);
+                });
             }
-        });
-    </script>
-</body>
+
+            // Update current player with animation
+            function updateCurrentPlayer() {
+                const currentPlayer = gameState.players[gameState.currentPlayer];
+                const currentPlayerEl = document.getElementById('current-player');
+                currentPlayerEl.textContent = `${currentPlayer.name}'s Magical Turn ✨`;
+
+                // Add pulse animation
+                currentPlayerEl.style.animation = 'none';
+                setTimeout(() => {
+                    currentPlayerEl.style.animation = 'pulse 1s ease-in-out';
+                }, 50);
+            }
+
+            // Place game pieces with entrance animation
+            function placeGamePieces() {
+                // Remove existing pieces
+                document.querySelectorAll('.game-piece').forEach(piece => piece.remove());
+
+                // Place pieces at start with staggered animation
+                gameState.players.forEach((player, index) => {
+                    setTimeout(() => {
+                        const piece = document.createElement('div');
+                        piece.className = 'game-piece';
+                        piece.id = `piece-${player.id}`;
+                        piece.style.background = player.color;
+                        piece.innerHTML = player.emoji;
+
+                        const startSquare = document.getElementById('square-0');
+                        startSquare.appendChild(piece);
+
+                        // Position pieces around the start square using transform3d
+                        const angle = (index * 90) * (Math.PI / 180);
+                        const radius = 35;
+                        const x = Math.cos(angle) * radius;
+                        const y = Math.sin(angle) * radius;
+                        piece.style.transform = `translate3d(${x}px, ${y}px, 0)`;
+
+                        // Entrance animation
+                        piece.style.transform = `translate3d(${x}px, ${y}px, 0) scale(0) rotate(180deg)`;
+                        piece.style.opacity = '0';
+                        setTimeout(() => {
+                            piece.style.transition = 'all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)';
+                            piece.style.transform = `translate3d(${x}px, ${y}px, 0) scale(1) rotate(0deg)`;
+                            piece.style.opacity = '1';
+                        }, 100);
+                    }, index * 200);
+                });
+            }
+
+            // Draw a card with enhanced animation
+            function drawCard() {
+                if (!gameState.gameStarted || gameState.drawnCard) return;
+
+                // Check if current player is AI
+                const currentPlayer = gameState.players[gameState.currentPlayer];
+                if (currentPlayer.isAI) {
+                    // AI automatically draws after a short delay
+                    setTimeout(() => {
+                        performCardDraw();
+                    }, 1000);
+                    return;
+                }
+
+                performCardDraw();
+            }
+
+            function performCardDraw() {
+                // Check if deck is empty, reshuffle if needed
+                if (gameState.deck.length === 0) {
+                    createDeck();
+                    shuffleDeck();
+                }
+
+                // Draw card with animation
+                gameState.drawnCard = gameState.deck.pop();
+
+                // Update display with enhanced card flip
+                const drawnCardEl = document.getElementById('drawn-card');
+                const cardTextEl = document.getElementById('card-text');
+
+                // Card flip animation
+                drawnCardEl.style.transform = 'rotateY(90deg) scale(0.8)';
+
+                setTimeout(() => {
+                    if (gameState.drawnCard.type === 'special') {
+                        const characterMapping = getCharacterMapping();
+                        const character = characterMapping[gameState.drawnCard.character];
+
+                        // Create image element for character
+                        const img = document.createElement('img');
+                        img.src = character.image;
+                        img.alt = character.name;
+                        img.style.width = '100%';
+                        img.style.height = '100%';
+                        img.style.objectFit = 'contain';
+                        img.style.borderRadius = '10px';
+
+                        drawnCardEl.innerHTML = '';
+                        drawnCardEl.appendChild(img);
+                        cardTextEl.textContent = character.name;
+                    } else {
+                        const colorEmojis = {
+                            red: '🔴', blue: '🔵', yellow: '🟡',
+                            green: '🟢', orange: '🟠', purple: '🟣'
+                        };
+                        drawnCardEl.innerHTML = colorEmojis[gameState.drawnCard.color];
+                        cardTextEl.textContent = `${gameState.drawnCard.color.toUpperCase()} ${gameState.drawnCard.value === 2 ? 'DOUBLE' : 'SINGLE'}`;
+                    }
+
+                    drawnCardEl.style.transform = 'rotateY(0deg) scale(1)';
+                }, 250);
+
+                // Enable end turn button with animation
+                const endTurnBtn = document.getElementById('end-turn-btn');
+                const drawCardBtn = document.getElementById('draw-card-btn');
+
+                endTurnBtn.disabled = false;
+                drawCardBtn.disabled = true;
+
+                endTurnBtn.style.transform = 'scale(1.1)';
+                setTimeout(() => {
+                    endTurnBtn.style.transform = 'scale(1)';
+                }, 200);
+
+                // Play card draw sound and move player
+                playSound('card');
+                setTimeout(() => movePlayer(), 500);
+
+                // If current player is AI, automatically end turn after movement
+                const currentPlayer = gameState.players[gameState.currentPlayer];
+                if (currentPlayer.isAI) {
+                    setTimeout(() => {
+                        endTurn();
+                    }, 2000);
+                }
+            }
+
+            // Move player with enhanced animation
+            function movePlayer() {
+                const player = gameState.players[gameState.currentPlayer];
+                const card = gameState.drawnCard;
+
+                let targetPosition = player.position;
+
+                if (card.type === 'special') {
+                    // Special character cards move to specific locations
+                    const specialPositions = {
+                        'Princess Lolly': 30,
+                        'Queen Frostine': 60,
+                        'King Candy': 90,
+                        'Gingerbread Man': 120
+                    };
+                    targetPosition = specialPositions[card.character];
+                } else {
+                    // Color cards - find next matching color square
+                    let steps = card.value;
+
+                    for (let i = player.position + 1; i < 134 && steps > 0; i++) {
+                        const square = document.getElementById(`square-${i}`);
+                        if (square.classList.contains(card.color)) {
+                            steps--;
+                            if (steps === 0) {
+                                targetPosition = i;
+                                break;
+                            }
+                        }
+                    }
+
+                    // If we can't find enough matching squares, move as far as possible
+                    if (steps > 0 && targetPosition === player.position) {
+                        // Find the last matching color square we can reach
+                        for (let i = player.position + 1; i < 134; i++) {
+                            const square = document.getElementById(`square-${i}`);
+                            if (square.classList.contains(card.color)) {
+                                targetPosition = i;
+                            }
+                        }
+                    }
+                }
+
+                // Check for shortcuts
+                if (gameState.specialSquares.shortcuts[targetPosition]) {
+                    targetPosition = gameState.specialSquares.shortcuts[targetPosition];
+                }
+
+                // Special rule: If player is within 5 squares of the castle and draws any card,
+                // they can reach the castle (makes the game more fun for 3-year-olds)
+                if (player.position >= 134 - 6 && targetPosition === player.position) {
+                    targetPosition = 133; // Go to castle
+                }
+
+                // Animate movement with enhanced effects
+                animateMovement(player, targetPosition);
+            }
+
+            // Movement animation with 100ms delays between squares as specified
+            function animateMovement(player, targetPosition) {
+                const piece = document.getElementById(`piece-${player.id}`);
+                const currentPos = player.position;
+
+                let currentStep = currentPos;
+                const moveInterval = setInterval(() => {
+                    if (currentStep >= targetPosition) {
+                        clearInterval(moveInterval);
+                        player.position = targetPosition;
+                        gameState.board[targetPosition] = player.id;
+
+                        // Check for special squares with celebration
+                        checkSpecialSquare(targetPosition);
+
+                        // Check for win condition - player wins when reaching square 133 (the castle)
+                        if (targetPosition >= 133) {
+                            setTimeout(() => showVictory(player), 1000);
+                            return;
+                        }
+
+                        // Check if player should skip turn
+                        if (gameState.specialSquares.sticky.includes(targetPosition)) {
+                            player.skipTurn = true;
+                        }
+
+                        return;
+                    }
+
+                    currentStep++;
+                    const nextSquare = document.getElementById(`square-${currentStep}`);
+                    if (nextSquare) {
+                        // Use transform3d for 60fps performance as specified
+                        const rect = nextSquare.getBoundingClientRect();
+                        const boardRect = nextSquare.parentElement.getBoundingClientRect();
+
+                        piece.style.transform = `translate3d(${nextSquare.offsetLeft + 10}px, ${nextSquare.offsetTop + 10}px, 0)`;
+                        piece.classList.add('moving');
+
+                        // Add trail effect
+                        createTrailEffect(nextSquare, player.color);
+
+                        setTimeout(() => piece.classList.remove('moving'), 80);
+                        playSound('move');
+                    }
+                }, 100); // 100ms delays between squares as specified in prompt
+            }
+
+            // Create trail effect for movement
+            function createTrailEffect(square, color) {
+                const trail = document.createElement('div');
+                trail.style.position = 'absolute';
+                trail.style.width = '20px';
+                trail.style.height = '20px';
+                trail.style.background = color;
+                trail.style.borderRadius = '50%';
+                trail.style.opacity = '0.6';
+                trail.style.left = square.offsetLeft + 12 + 'px';
+                trail.style.top = square.offsetTop + 12 + 'px';
+                trail.style.pointerEvents = 'none';
+                trail.style.zIndex = '15';
+                trail.style.transition = 'all 0.5s ease-out';
+
+                square.parentElement.appendChild(trail);
+
+                setTimeout(() => {
+                    trail.style.opacity = '0';
+                    trail.style.transform = 'scale(2)';
+                    setTimeout(() => trail.remove(), 500);
+                }, 100);
+            }
+
+            // Check special square effects with celebrations
+            function checkSpecialSquare(position) {
+                const square = document.getElementById(`square-${position}`);
+
+                if (gameState.specialSquares.landmarks[position]) {
+                    // Enhanced celebration for reaching landmark
+                    square.style.animation = 'sparkle 2s ease-in-out 3';
+                    createCelebrationBurst(square);
+                    playSound('special');
+
+                    setTimeout(() => {
+                        square.style.animation = '';
+                    }, 6000);
+                }
+            }
+
+            // Create celebration burst effect
+            function createCelebrationBurst(element) {
+                const colors = ['#FF1493', '#00BFFF', '#FFD700', '#32CD32', '#FF6347', '#9370DB'];
+
+                for (let i = 0; i < 8; i++) {
+                    setTimeout(() => {
+                        const particle = document.createElement('div');
+                        particle.style.position = 'absolute';
+                        particle.style.width = '8px';
+                        particle.style.height = '8px';
+                        particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        particle.style.borderRadius = '50%';
+                        particle.style.left = element.offsetLeft + 20 + 'px';
+                        particle.style.top = element.offsetTop + 20 + 'px';
+                        particle.style.pointerEvents = 'none';
+                        particle.style.zIndex = '25';
+
+                        const angle = (i * 45) * (Math.PI / 180);
+                        const distance = 50 + Math.random() * 30;
+
+                        element.parentElement.appendChild(particle);
+
+                        setTimeout(() => {
+                            particle.style.transition = 'all 1s ease-out';
+                            particle.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px) scale(0)`;
+                            particle.style.opacity = '0';
+
+                            setTimeout(() => particle.remove(), 1000);
+                        }, 50);
+                    }, i * 50);
+                }
+            }
+
+            // End turn with smooth transition
+            function endTurn() {
+                if (!gameState.drawnCard) return;
+
+                // Reset card display with animation
+                gameState.drawnCard = null;
+                const drawnCardEl = document.getElementById('drawn-card');
+                const cardTextEl = document.getElementById('card-text');
+
+                drawnCardEl.style.transform = 'rotateY(90deg) scale(0.8)';
+                setTimeout(() => {
+                    drawnCardEl.innerHTML = '🎴';
+                    cardTextEl.textContent = 'Draw a magical card!';
+                    drawnCardEl.style.transform = 'rotateY(0deg) scale(1)';
+                }, 250);
+
+                // Disable buttons
+                document.getElementById('end-turn-btn').disabled = true;
+                document.getElementById('draw-card-btn').disabled = false;
+
+                // Move to next player
+                do {
+                    gameState.currentPlayer = (gameState.currentPlayer + 1) % gameState.players.length;
+                } while (gameState.players[gameState.currentPlayer].skipTurn && gameState.players.some(p => !p.skipTurn));
+
+                // Reset skip turn flag
+                gameState.players[gameState.currentPlayer].skipTurn = false;
+
+                updatePlayerInfo();
+                updateCurrentPlayer();
+
+                // If next player is AI, automatically draw card
+                const nextPlayer = gameState.players[gameState.currentPlayer];
+                if (nextPlayer.isAI) {
+                    setTimeout(() => {
+                        drawCard();
+                    }, 1500);
+                }
+            }
+
+            // Enhanced victory screen with massive celebration
+            function showVictory(player) {
+                document.getElementById('victory-title').textContent = `🎉 ${player.name} WINS! 🎉`;
+                document.getElementById('victory-message').textContent = `Congratulations! You reached the magical Candy Castle first!`;
+                document.getElementById('victory-screen').style.display = 'flex';
+
+                // Create massive confetti explosion
+                createMassiveConfetti();
+                playSound('victory');
+            }
+
+            // Create massive confetti effect
+            function createMassiveConfetti() {
+                const colors = ['#FF1493', '#00BFFF', '#FFD700', '#32CD32', '#FF6347', '#9370DB'];
+
+                for (let i = 0; i < 100; i++) {
+                    setTimeout(() => {
+                        const confetti = document.createElement('div');
+                        confetti.className = 'confetti';
+                        confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+                        confetti.style.left = Math.random() * 100 + '%';
+                        confetti.style.animationDelay = Math.random() * 3 + 's';
+                        confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                        document.body.appendChild(confetti);
+
+                        setTimeout(() => confetti.remove(), 6000);
+                    }, i * 50);
+                }
+            }
+
+            // New game with reset animation
+            function newGame() {
+                // Reset game state
+                gameState = {
+                    players: [],
+                    currentPlayer: 0,
+                    deck: [],
+                    drawnCard: null,
+                    gameStarted: false,
+                    playerCount: 0,
+                    board: [],
+                    specialSquares: {
+                        sticky: [15, 25, 35, 45, 55, 65, 75, 85, 95, 105, 115, 125],
+                        shortcuts: {
+                            20: 40,
+                            50: 70,
+                            80: 100,
+                            110: 130
+                        },
+                        landmarks: {
+                            30: '🍭 Peppermint Forest',
+                            60: '🏔️ Gumdrop Mountain',
+                            90: '🌲 Licorice Forest',
+                            120: '🏰 Candy Castle'
+                        }
+                    }
+                };
+
+                // Animate transition back to start screen
+                const gameBoard = document.getElementById('game-board');
+                const startScreen = document.getElementById('start-screen');
+                const victoryScreen = document.getElementById('victory-screen');
+
+                if (gameBoard.style.display !== 'none') {
+                    gameBoard.style.transition = 'all 0.5s ease';
+                    gameBoard.style.opacity = '0';
+                    gameBoard.style.transform = 'scale(0.8)';
+                }
+
+                victoryScreen.style.display = 'none';
+
+                setTimeout(() => {
+                    gameBoard.style.display = 'none';
+                    startScreen.style.display = 'block';
+                    startScreen.style.opacity = '0';
+                    startScreen.style.transform = 'scale(0.8)';
+
+                    setTimeout(() => {
+                        startScreen.style.transition = 'all 0.5s ease';
+                        startScreen.style.opacity = '1';
+                        startScreen.style.transform = 'scale(1)';
+                    }, 50);
+                }, 500);
+
+                // Reset buttons
+                document.getElementById('start-game-btn').disabled = true;
+                document.querySelectorAll('.player-btn').forEach(btn => {
+                    btn.style.opacity = '1';
+                    btn.style.transform = 'scale(1)';
+                });
+
+                // Clear confetti
+                document.querySelectorAll('.confetti').forEach(confetti => confetti.remove());
+            }
+
+            // Enhanced sound effects using Web Audio API
+            function playSound(type) {
+                try {
+                    const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+
+                    switch (type) {
+                        case 'select':
+                            oscillator.frequency.setValueAtTime(600, audioContext.currentTime);
+                            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                            oscillator.start(audioContext.currentTime);
+                            oscillator.stop(audioContext.currentTime + 0.1);
+                            break;
+                        case 'start':
+                            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+                            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                            oscillator.start(audioContext.currentTime);
+                            oscillator.stop(audioContext.currentTime + 0.5);
+                            break;
+                        case 'card':
+                            oscillator.frequency.setValueAtTime(1000, audioContext.currentTime);
+                            gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                            oscillator.start(audioContext.currentTime);
+                            oscillator.stop(audioContext.currentTime + 0.2);
+                            break;
+                        case 'move':
+                            oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+                            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+                            oscillator.start(audioContext.currentTime);
+                            oscillator.stop(audioContext.currentTime + 0.1);
+                            break;
+                        case 'special':
+                            oscillator.frequency.setValueAtTime(1200, audioContext.currentTime);
+                            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.8);
+                            oscillator.start(audioContext.currentTime);
+                            oscillator.stop(audioContext.currentTime + 0.8);
+                            break;
+                        case 'victory':
+                            // Victory fanfare
+                            [800, 1000, 1200, 1500].forEach((freq, i) => {
+                                setTimeout(() => {
+                                    const osc = audioContext.createOscillator();
+                                    const gain = audioContext.createGain();
+                                    osc.connect(gain);
+                                    gain.connect(audioContext.destination);
+                                    osc.frequency.setValueAtTime(freq, audioContext.currentTime);
+                                    gain.gain.setValueAtTime(0.2, audioContext.currentTime);
+                                    gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                                    osc.start(audioContext.currentTime);
+                                    osc.stop(audioContext.currentTime + 0.5);
+                                }, i * 200);
+                            });
+                            break;
+                    }
+                } catch (e) {
+                    console.log('Audio not supported');
+                }
+            }
+
+            // Initialize game when page loads
+            window.addEventListener('load', () => {
+                initGame();
+            });
+
+            // Add keyboard shortcuts for accessibility
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    if (!gameState.gameStarted) {
+                        const startBtn = document.getElementById('start-game-btn');
+                        if (!startBtn.disabled) {
+                            startGame();
+                        }
+                    } else if (gameState.drawnCard === null) {
+                        drawCard();
+                    } else {
+                        endTurn();
+                    }
+                    e.preventDefault();
+                }
+            });
+        </script>
+    </body>
+
 </html>

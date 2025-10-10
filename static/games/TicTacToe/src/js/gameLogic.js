@@ -92,7 +92,28 @@ function updateCellDisplay(cellIndex) {
     if (!cell) return;
 
     const currentPlayer = getCurrentPlayer();
-    cell.textContent = currentPlayer;
+
+    // Clear any existing content
+    cell.textContent = '';
+    cell.innerHTML = '';
+
+    // Create image element
+    const img = document.createElement('img');
+    img.style.width = '80%';
+    img.style.height = '80%';
+    img.style.objectFit = 'contain';
+
+    // Set image source based on player and character set
+    const characterImages = getCharacterImages();
+    if (currentPlayer === 'X') {
+        img.src = characterImages.X;
+        img.alt = characterImages.XName;
+    } else {
+        img.src = characterImages.O;
+        img.alt = characterImages.OName;
+    }
+
+    cell.appendChild(img);
     cell.className = `board-cell ${currentPlayer.toLowerCase()}`;
     cell.disabled = true;
 
@@ -182,6 +203,7 @@ function resetBoardDisplay() {
     const cells = document.querySelectorAll('.board-cell');
     cells.forEach(cell => {
         cell.textContent = '';
+        cell.innerHTML = '';
         cell.className = 'board-cell';
         cell.disabled = false;
         cell.style.animation = '';
@@ -261,9 +283,25 @@ function showVictoryScreen(winner, winningLine) {
 
     // Set victory content
     if (winner) {
-        victoryIcon.textContent = winner === 'X' ? '❌' : '⭕';
-        victoryTitle.textContent = `${winner} WINS!`;
-        victoryMessage.textContent = `Congratulations! ${winner} has won the game!`;
+        // Clear existing content and add image
+        victoryIcon.innerHTML = '';
+        const img = document.createElement('img');
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'contain';
+
+        const characterImages = getCharacterImages();
+        if (winner === 'X') {
+            img.src = characterImages.X;
+            img.alt = characterImages.XName;
+        } else {
+            img.src = characterImages.O;
+            img.alt = characterImages.OName;
+        }
+        victoryIcon.appendChild(img);
+
+        victoryTitle.textContent = `${winner === 'X' ? characterImages.XName : characterImages.OName} WINS!`;
+        victoryMessage.textContent = `Congratulations! ${winner === 'X' ? characterImages.XName : characterImages.OName} has won the game!`;
     } else {
         victoryIcon.textContent = '🤝';
         victoryTitle.textContent = 'DRAW!';
