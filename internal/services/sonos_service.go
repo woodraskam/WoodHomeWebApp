@@ -137,6 +137,56 @@ func (s *SonosService) GetGroups() []*models.SonosGroup {
 	return groups
 }
 
+// RefreshGroups forces a refresh of group data from the Sonos service
+func (s *SonosService) RefreshGroups(ctx context.Context) error {
+	logrus.Info("Refreshing Sonos groups from live data...")
+
+	// Get fresh zones data from Sonos service
+	zones, err := s.getZones(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get fresh zones data: %w", err)
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Clear existing groups
+	s.groups = make(map[string]*models.SonosGroup)
+
+	// Process zones to extract groups
+	for _, zone := range zones {
+		s.processZone(zone)
+	}
+
+	logrus.Infof("Refreshed %d groups from live Sonos data", len(s.groups))
+	return nil
+}
+
+// RefreshDevices forces a refresh of device data from the Sonos service
+func (s *SonosService) RefreshDevices(ctx context.Context) error {
+	logrus.Info("Refreshing Sonos devices from live data...")
+
+	// Get fresh zones data from Sonos service
+	zones, err := s.getZones(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to get fresh zones data: %w", err)
+	}
+
+	s.mu.Lock()
+	defer s.mu.Unlock()
+
+	// Clear existing devices
+	s.devices = make(map[string]*models.SonosDevice)
+
+	// Process zones to extract devices
+	for _, zone := range zones {
+		s.processZone(zone)
+	}
+
+	logrus.Infof("Refreshed %d devices from live Sonos data", len(s.devices))
+	return nil
+}
+
 // GetDevice returns a specific device by UUID
 func (s *SonosService) GetDevice(uuid string) (*models.SonosDevice, bool) {
 	s.mu.RLock()
@@ -161,20 +211,20 @@ func (s *SonosService) DiscoverDevices(ctx context.Context) error {
 	if err := s.testJishiConnection(ctx); err != nil {
 		logrus.Warnf("Jishi API not available: %v", err)
 		logrus.Info("Attempting to start Jishi server automatically...")
-		
+
 		// Try to start Jishi server automatically
 		if startErr := s.StartJishiServer(); startErr != nil {
 			return fmt.Errorf("Jishi API not available and failed to start server: %w (original error: %v)", startErr, err)
 		}
-		
+
 		// Wait a moment for the server to start up
 		time.Sleep(2 * time.Second)
-		
+
 		// Test connection again after starting
 		if err := s.testJishiConnection(ctx); err != nil {
 			return fmt.Errorf("Jishi API still not available after auto-start: %w", err)
 		}
-		
+
 		logrus.Info("Jishi server started successfully, continuing with device discovery...")
 	}
 
@@ -238,22 +288,22 @@ func (s *SonosService) getZones(ctx context.Context) ([]map[string]interface{}, 
 		// Check if this is a connection error that might indicate Jishi server is not running
 		if strings.Contains(err.Error(), "connection refused") || strings.Contains(err.Error(), "no such host") {
 			logrus.Warnf("Connection error detected in getZones, attempting to start Jishi server automatically...")
-			
+
 			// Try to start Jishi server automatically
 			if startErr := s.StartJishiServer(); startErr != nil {
 				return nil, fmt.Errorf("failed to get zones and failed to start server: %w (original error: %v)", startErr, err)
 			}
-			
+
 			// Wait a moment for the server to start up
 			time.Sleep(2 * time.Second)
-			
+
 			// Retry the request
 			logrus.Info("Retrying getZones after starting Jishi server...")
 			req, err = http.NewRequestWithContext(ctx, "GET", url, nil)
 			if err != nil {
 				return nil, err
 			}
-			
+
 			resp, err = s.httpClient.Do(req)
 			if err != nil {
 				return nil, fmt.Errorf("failed to get zones even after starting server: %w", err)
@@ -424,11 +474,19 @@ func (s *SonosService) createDeviceFromZoneData(data map[string]interface{}, gro
 			} else if art, ok := currentTrack["absoluteAlbumArtUri"].(string); ok {
 				device.CurrentTrack.Art = art
 			}
+			// Extract URI for SPDIF/TV detection
+			if uri, ok := currentTrack["uri"].(string); ok {
+				device.CurrentTrack.URI = uri
+			}
+			// Extract track type for SPDIF/TV detection
+			if trackType, ok := currentTrack["type"].(string); ok {
+				device.CurrentTrack.Type = trackType
+			}
 
 			// Debug logging for track information
-			logrus.Debugf("Device %s current track: Artist=%s, Title=%s, Album=%s, Art=%s",
+			logrus.Debugf("Device %s current track: Artist=%s, Title=%s, Album=%s, Art=%s, URI=%s, Type=%s",
 				device.Name, device.CurrentTrack.Artist, device.CurrentTrack.Title,
-				device.CurrentTrack.Album, device.CurrentTrack.Art)
+				device.CurrentTrack.Album, device.CurrentTrack.Art, device.CurrentTrack.URI, device.CurrentTrack.Type)
 		} else {
 			logrus.Debugf("Device %s has no current track information", device.Name)
 		}
@@ -505,12 +563,6 @@ func (s *SonosService) isValidGroup(group *models.SonosGroup) bool {
 	}
 
 	return true
-}
-
-// RefreshDevices forces a refresh of all devices and groups
-func (s *SonosService) RefreshDevices() error {
-	ctx := context.Background()
-	return s.DiscoverDevices(ctx)
 }
 
 // monitorDevices monitors device status in the background
@@ -627,8 +679,13 @@ func (s *SonosService) CreateGroup(ctx context.Context, coordinatorName string, 
 	}
 
 	// First, ensure the coordinator is not in any group
-	if err := s.LeaveGroup(ctx, coordinatorName); err != nil {
-		logrus.Debugf("Coordinator %s was not in a group or error occurred: %v", coordinatorName, err)
+	// But be gentle if it's playing TV audio - don't interrupt it
+	if wasPlayingTVAudio {
+		logrus.Debugf("Coordinator is playing TV audio, skipping leave group to preserve connection")
+	} else {
+		if err := s.LeaveGroup(ctx, coordinatorName); err != nil {
+			logrus.Debugf("Coordinator %s was not in a group or error occurred: %v", coordinatorName, err)
+		}
 	}
 
 	// Join each member room to the coordinator
@@ -657,6 +714,13 @@ func (s *SonosService) CreateGroup(ctx context.Context, coordinatorName string, 
 			if err := s.SetGroupVolume(ctx, coordinatorName, currentVolume); err != nil {
 				logrus.Debugf("Could not restore volume after group creation: %v", err)
 			}
+		}
+
+		// Try to explicitly set the input back to SPDIF/HDMI ARC
+		// This helps ensure the TV audio connection is maintained
+		spdifURL := fmt.Sprintf("%s/%s/linein", s.jishiURL, coordinatorName)
+		if err := s.executeJishiCommand(ctx, spdifURL, "set_linein", coordinatorName); err != nil {
+			logrus.Debugf("Could not restore SPDIF input after group creation: %v", err)
 		}
 
 		// Note: The TV audio should automatically resume if the TV is still outputting
@@ -753,26 +817,26 @@ func (s *SonosService) executeJishiCommand(ctx context.Context, url, action, dev
 	resp, err := s.httpClient.Do(req)
 	if err != nil {
 		logrus.Errorf("Failed to execute %s command on %s: %v", action, deviceName, err)
-		
+
 		// Check if this is a connection error that might indicate Jishi server is not running
 		if strings.Contains(err.Error(), "connection refused") || strings.Contains(err.Error(), "no such host") {
 			logrus.Warnf("Connection error detected, attempting to start Jishi server automatically...")
-			
+
 			// Try to start Jishi server automatically
 			if startErr := s.StartJishiServer(); startErr != nil {
 				return fmt.Errorf("failed to execute %s command and failed to start server: %w (original error: %v)", action, startErr, err)
 			}
-			
+
 			// Wait a moment for the server to start up
 			time.Sleep(2 * time.Second)
-			
+
 			// Retry the command
 			logrus.Info("Retrying command after starting Jishi server...")
 			req, err = http.NewRequestWithContext(ctx, "GET", url, nil)
 			if err != nil {
 				return fmt.Errorf("failed to create retry request: %w", err)
 			}
-			
+
 			resp, err = s.httpClient.Do(req)
 			if err != nil {
 				return fmt.Errorf("failed to execute %s command even after starting server: %w", action, err)

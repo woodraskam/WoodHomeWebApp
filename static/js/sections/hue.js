@@ -126,9 +126,10 @@ class HueSection extends AuthenticatedSection {
 
         contentArea.appendChild(hueSection);
 
-        // Add Material Design 3 popup dialog
-        this.createStatusPopup();
         this.setupHueEventListeners();
+
+        // Make hueSection globally accessible
+        window.hueSection = this;
     }
 
 
@@ -142,13 +143,6 @@ class HueSection extends AuthenticatedSection {
             });
         }
 
-        // Popup close button
-        const closeBtn = document.getElementById('hue-popup-close');
-        if (closeBtn) {
-            closeBtn.addEventListener('click', () => {
-                this.hideStatusPopup();
-            });
-        }
 
 
 
@@ -176,6 +170,7 @@ class HueSection extends AuthenticatedSection {
             });
         }
     }
+
 
     /**
      * Override base class initialize method

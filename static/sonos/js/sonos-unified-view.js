@@ -1,12 +1,11 @@
 /**
  * Sonos Unified View - Manages the unified display of devices and groups
- * with drag-and-drop functionality for group management
+ * with group management functionality
  */
 class SonosUnifiedView {
     constructor() {
         this.devices = new Map();
         this.groups = new Map();
-        this.dragState = null;
         this.container = null;
         this.init();
     }
@@ -18,306 +17,11 @@ class SonosUnifiedView {
             return;
         }
 
-        this.setupDragAndDrop();
         this.loadInitialData();
         this.setupWebSocket();
         this.setupPeriodicRefresh();
     }
 
-    setupDragAndDrop() {
-        this.container.addEventListener('dragstart', (e) => {
-            this.handleDragStart(e);
-        });
-
-        this.container.addEventListener('dragover', (e) => {
-            this.handleDragOver(e);
-        });
-
-        this.container.addEventListener('drop', (e) => {
-            this.handleDrop(e);
-        });
-
-        this.container.addEventListener('dragend', (e) => {
-            this.handleDragEnd(e);
-        });
-
-        // Touch support for mobile
-        this.container.addEventListener('touchstart', (e) => {
-            this.handleTouchStart(e);
-        });
-
-        this.container.addEventListener('touchmove', (e) => {
-            this.handleTouchMove(e);
-        });
-
-        this.container.addEventListener('touchend', (e) => {
-            this.handleTouchEnd(e);
-        });
-    }
-
-    handleDragStart(e) {
-        const card = e.target.closest('.sonos-card');
-        if (!card) {
-            e.preventDefault();
-            return;
-        }
-
-        this.dragState = {
-            element: card,
-            type: card.classList.contains('group-card') ? 'group' : 'device',
-            id: card.dataset.groupId || card.dataset.deviceId
-        };
-
-        card.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', this.dragState.id);
-
-        // Create drag preview
-        this.createDragPreview(card);
-    }
-
-    handleDragOver(e) {
-        e.preventDefault();
-        const targetCard = e.target.closest('.sonos-card');
-        if (!targetCard || targetCard === this.dragState?.element) return;
-
-        // Highlight valid drop targets
-        if (this.isValidDropTarget(targetCard)) {
-            targetCard.classList.add('drop-highlight');
-        }
-    }
-
-    handleDrop(e) {
-        e.preventDefault();
-        const targetCard = e.target.closest('.sonos-card');
-
-        if (!targetCard) {
-            return;
-        }
-
-        if (!this.isValidDropTarget(targetCard)) {
-            return;
-        }
-
-        this.performGroupOperation(targetCard);
-    }
-
-    handleDragEnd(e) {
-        const card = e.target.closest('.sonos-card');
-        if (card) {
-            card.classList.remove('dragging');
-        }
-
-        // Remove all drop highlights
-        document.querySelectorAll('.drop-highlight').forEach(el => {
-            el.classList.remove('drop-highlight');
-        });
-
-        // Remove drag preview
-        this.removeDragPreview();
-
-        this.dragState = null;
-    }
-
-    handleTouchStart(e) {
-        const card = e.target.closest('.sonos-card');
-        if (!card) return;
-
-        this.touchState = {
-            element: card,
-            startX: e.touches[0].clientX,
-            startY: e.touches[0].clientY,
-            type: card.classList.contains('group-card') ? 'group' : 'device',
-            id: card.dataset.groupId || card.dataset.deviceId
-        };
-    }
-
-    handleTouchMove(e) {
-        if (!this.touchState) return;
-
-        const touch = e.touches[0];
-        const deltaX = touch.clientX - this.touchState.startX;
-        const deltaY = touch.clientY - this.touchState.startY;
-
-        // Start drag if moved more than 10px
-        if (Math.abs(deltaX) > 10 || Math.abs(deltaY) > 10) {
-            this.touchState.element.classList.add('dragging');
-            this.createDragPreview(this.touchState.element);
-        }
-    }
-
-    handleTouchEnd(e) {
-        if (!this.touchState) return;
-
-        const touch = e.changedTouches[0];
-        const targetElement = document.elementFromPoint(touch.clientX, touch.clientY);
-        const targetCard = targetElement?.closest('.sonos-card');
-
-        if (targetCard && this.isValidDropTarget(targetCard)) {
-            this.performGroupOperation(targetCard);
-        }
-
-        this.touchState.element.classList.remove('dragging');
-        this.removeDragPreview();
-        this.touchState = null;
-    }
-
-    isValidDropTarget(targetCard) {
-        if (!this.dragState && !this.touchState) {
-            return false;
-        }
-
-        const dragState = this.dragState || this.touchState;
-
-        // Can't drop on self
-        if (targetCard === dragState.element) {
-            return false;
-        }
-
-        // Can drop individual devices on groups or other devices
-        if (dragState.type === 'device') {
-            return true;
-        }
-
-        // Can drop groups on other groups (merge groups) OR on individual devices (create new group)
-        if (dragState.type === 'group') {
-            const isGroupCard = targetCard.classList.contains('group-card');
-            const isDeviceCard = targetCard.classList.contains('device-card');
-            return isGroupCard || isDeviceCard;
-        }
-
-        return false;
-    }
-
-    async performGroupOperation(targetCard) {
-        const targetId = targetCard.dataset.groupId || targetCard.dataset.deviceId;
-        const targetIsGroup = targetCard.classList.contains('group-card');
-
-        const dragState = this.dragState || this.touchState;
-
-        try {
-            if (dragState.type === 'device') {
-                if (targetIsGroup) {
-                    // Add device to existing group
-                    await this.addDeviceToGroup(dragState.id, targetId);
-                } else {
-                    // Create new group with both devices
-                    await this.createGroupWithDevices(targetId, [dragState.id]);
-                }
-            } else if (dragState.type === 'group') {
-                if (targetIsGroup) {
-                    // Merge groups
-                    await this.mergeGroups(dragState.id, targetId);
-                } else {
-                    // Group dropped on individual device - create new group with device as coordinator
-                    await this.createGroupFromGroupAndDevice(dragState.id, targetId);
-                }
-            }
-
-            // Wait a moment for the backend to process the changes
-            await new Promise(resolve => setTimeout(resolve, 1000));
-
-            // Refresh the view
-            await this.refreshView();
-
-            // Show success message
-            this.showSuccess('Group updated successfully!');
-
-        } catch (error) {
-            console.error('Group operation failed:', error);
-            this.showError('Failed to update group: ' + error.message);
-        }
-    }
-
-    async addDeviceToGroup(deviceId, groupId) {
-        const response = await fetch(`/api/sonos/groups/${groupId}/join/${deviceId}`, {
-            method: 'POST'
-        });
-
-        if (!response.ok) {
-            const error = await response.text();
-            throw new Error(error);
-        }
-    }
-
-    async createGroupWithDevices(coordinatorId, memberIds) {
-        const response = await fetch('/api/sonos/groups', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                coordinator: coordinatorId,
-                members: memberIds
-            })
-        });
-
-        if (!response.ok) {
-            const error = await response.text();
-            throw new Error(error);
-        }
-    }
-
-    async mergeGroups(sourceGroupId, targetGroupId) {
-        // Get source group members
-        const sourceGroup = this.groups.get(sourceGroupId);
-        if (!sourceGroup) {
-            return;
-        }
-
-        // Add all source group members to target group
-        for (const member of sourceGroup.members) {
-            // member is a device object, we need the UUID
-            const deviceId = member.uuid || member.id;
-            await this.addDeviceToGroup(deviceId, targetGroupId);
-        }
-
-        // Source group will be automatically dissolved when empty
-    }
-
-    async createGroupFromGroupAndDevice(sourceGroupId, targetDeviceId) {
-        // Get source group members
-        const sourceGroup = this.groups.get(sourceGroupId);
-        if (!sourceGroup) {
-            return;
-        }
-
-        // Get target device name
-        const targetDevice = this.devices.get(targetDeviceId);
-        if (!targetDevice) {
-            return;
-        }
-
-        // Get all device names from the source group (including coordinator)
-        const allDeviceNames = sourceGroup.members.map(member => {
-            const device = this.devices.get(member.uuid || member.id);
-            return device ? device.name : null;
-        }).filter(name => name !== null);
-
-        // Create new group with target device as coordinator and all source group members
-        const response = await fetch('/api/sonos/groups', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                coordinator: targetDevice.name,
-                members: [targetDevice.name, ...allDeviceNames] // Include target device and all source group members
-            })
-        });
-
-        if (!response.ok) {
-            const error = await response.text();
-            throw new Error(error);
-        }
-
-        const newGroup = await response.json();
-
-        // The group ID is the coordinator's UUID (targetDeviceId)
-        const groupId = targetDeviceId;
-
-        // No need to add members individually since they were included in the initial request
-    }
 
     async refreshView() {
         try {
@@ -473,18 +177,43 @@ class SonosUnifiedView {
         console.log('[UPDATE VIEW DEBUG] Rendered', items.length, 'items successfully');
     }
 
+    isActiveGroup(group) {
+        // Simple check: A group is active if it has multiple different devices
+        if (!group || !group.members || group.members.length < 2) {
+            return false;
+        }
+
+        if (!group.coordinator || !group.coordinator.uuid) {
+            return false;
+        }
+
+        // Check if there are actual other members (not just the coordinator)
+        const coordinatorUUID = group.coordinator.uuid;
+        const hasOtherMembers = group.members.some(member =>
+            member && member.uuid && member.uuid !== coordinatorUUID
+        );
+
+        return hasOtherMembers;
+    }
+
     createUnifiedItems(devices, groups) {
-        console.log('[CREATE UNIFIED DEBUG] Creating unified items from', devices.length, 'devices and', groups.length, 'groups');
+        console.log('[REBUILD DEBUG] Creating unified items from', devices.length, 'devices and', groups.length, 'groups');
+
         const items = [];
 
-        // Add groups first (sorted alphabetically by coordinator name)
-        const sortedGroups = [...groups].sort((a, b) => {
+        // Step 1: Process groups - only show groups that are actually active in Sonos
+        const activeGroups = groups.filter(group => this.isActiveGroup(group));
+        console.log(`[REBUILD DEBUG] Found ${activeGroups.length} active groups out of ${groups.length} total`);
+
+        // Add active groups to items (sorted alphabetically by coordinator name)
+        const sortedGroups = [...activeGroups].sort((a, b) => {
             const nameA = a.coordinator?.name || '';
             const nameB = b.coordinator?.name || '';
             return nameA.localeCompare(nameB);
         });
 
-        sortedGroups.forEach((group, index) => {
+        sortedGroups.forEach(group => {
+            console.log(`[REBUILD DEBUG] Adding group: ${group.coordinator?.name} with ${group.members?.length || 0} members`);
             items.push({
                 type: 'group',
                 id: group.id,
@@ -496,15 +225,40 @@ class SonosUnifiedView {
             });
         });
 
-        // Add individual devices (not in any group) - sorted alphabetically by name
-        const individualDevices = devices.filter(device => !device.group_id);
+        // Step 2: Find devices that are NOT in any active group
+        const devicesInActiveGroups = new Set();
+        activeGroups.forEach(group => {
+            // Add coordinator
+            if (group.coordinator?.uuid) {
+                devicesInActiveGroups.add(group.coordinator.uuid);
+            }
+            // Add members
+            if (group.members) {
+                group.members.forEach(member => {
+                    if (member.uuid) {
+                        devicesInActiveGroups.add(member.uuid);
+                    }
+                });
+            }
+        });
+
+        console.log(`[REBUILD DEBUG] Devices in active groups: ${Array.from(devicesInActiveGroups).length}`);
+
+        // Step 3: Add individual devices (not in any active group) - sorted alphabetically
+        const individualDevices = devices.filter(device =>
+            !devicesInActiveGroups.has(device.uuid)
+        );
+
+        // Sort individual devices alphabetically by name
         const sortedDevices = individualDevices.sort((a, b) => {
             const nameA = a.name || '';
             const nameB = b.name || '';
             return nameA.localeCompare(nameB);
         });
 
-        sortedDevices.forEach((device, index) => {
+        console.log(`[REBUILD DEBUG] Individual devices: ${sortedDevices.length}`);
+        sortedDevices.forEach(device => {
+            console.log(`[REBUILD DEBUG] Adding individual device: ${device.name}`);
             items.push({
                 type: 'device',
                 id: device.uuid,
@@ -515,14 +269,13 @@ class SonosUnifiedView {
             });
         });
 
-        console.log('[CREATE UNIFIED DEBUG] Created', items.length, 'unified items');
+        console.log(`[REBUILD DEBUG] Created ${items.length} total items (${items.filter(i => i.type === 'group').length} groups, ${items.filter(i => i.type === 'device').length} devices)`);
         return items;
     }
 
     createCard(item) {
         const card = document.createElement('div');
         card.className = `sonos-card ${item.type}-card`;
-        card.draggable = true;
         card.dataset[`${item.type}Id`] = item.id;
 
         if (item.type === 'group') {
@@ -542,16 +295,12 @@ class SonosUnifiedView {
                     <span class="device-name">${group.coordinator.name}</span>
                     <span class="device-status">${this.getTrackInfo(group.currentTrack, group.status) || '[No music selected]'}</span>
                 </div>
-                <div class="device-controls">
-                    <button class="control-btn play" onclick="sonosUnifiedView.playGroup('${group.id}')">▶️</button>
-                    <button class="control-btn pause" onclick="sonosUnifiedView.pauseGroup('${group.id}')">⏸️</button>
-                    <button class="control-btn stop" onclick="sonosUnifiedView.stopGroup('${group.id}')">⏹️</button>
-                    <div class="volume-control">
-                        <input type="range" min="0" max="100" value="${group.volume}" 
-                               onchange="sonosUnifiedView.setGroupVolume('${group.id}', this.value)">
-                        <span class="volume-display">${group.volume}%</span>
-                    </div>
-                </div>
+            </div>
+            <div class="volume-control-full">
+                <input type="range" min="0" max="100" value="${group.volume}" 
+                       onchange="sonosUnifiedView.setGroupVolume('${group.id}', this.value)"
+                       class="volume-slider-full">
+                <span class="volume-display">${group.volume}%</span>
             </div>
             ${albumArt}
             <div class="group-members">
@@ -561,21 +310,46 @@ class SonosUnifiedView {
                     </div>
                 `).join('')}
             </div>
+            <div class="device-controls-bottom">
+                <button class="control-btn play" onclick="sonosUnifiedView.playGroup('${group.id}')">
+                    <span class="material-symbols-outlined">play_arrow</span>
+                </button>
+                <button class="control-btn pause" onclick="sonosUnifiedView.pauseGroup('${group.id}')">
+                    <span class="material-symbols-outlined">pause</span>
+                </button>
+                <button class="control-btn stop" onclick="sonosUnifiedView.stopGroup('${group.id}')">
+                    <span class="material-symbols-outlined">stop</span>
+                </button>
+            </div>
         `;
     }
 
     getTrackInfo(currentTrack) {
         if (!currentTrack) return null;
 
-        // Check for TV/SPDIF input (HDMI ARC)
-        if (currentTrack.uri && currentTrack.uri.includes('spdif')) {
-            return 'TV Audio (HDMI ARC)';
+        // Debug: Log all track info for troubleshooting
+        console.log('[TRACK DEBUG] Processing track:', {
+            uri: currentTrack.uri,
+            type: currentTrack.type,
+            title: currentTrack.title,
+            artist: currentTrack.artist
+        });
+
+        // Check for TV/SPDIF input (HDMI ARC) - prioritize this check
+        if (currentTrack.uri && (currentTrack.uri.includes('spdif') || currentTrack.uri.includes('htastream'))) {
+            console.log('[SPDIF DEBUG] Detected TV audio:', {
+                uri: currentTrack.uri,
+                type: currentTrack.type,
+                title: currentTrack.title
+            });
+            return 'TV';
         }
 
         // Check for other line input types
         if (currentTrack.type === 'line_in' && currentTrack.uri) {
             if (currentTrack.uri.includes('htastream')) {
-                return 'TV Audio';
+                console.log('[LINE INPUT DEBUG] Detected TV audio via line_in:', currentTrack.uri);
+                return 'TV';
             }
             return 'Line Input';
         }
@@ -628,39 +402,34 @@ class SonosUnifiedView {
                 <span class="device-name">${device.name}</span>
                 <span class="device-status">${this.getTrackInfo(device.currentTrack, device.status) || '[No music selected]'}</span>
             </div>
+            <div class="volume-control-full">
+                <input type="range" min="0" max="100" value="${device.volume}" 
+                       onchange="sonosUnifiedView.setDeviceVolume('${device.id}', this.value)"
+                       class="volume-slider-full">
+                <span class="volume-display">${device.volume}%</span>
+            </div>
             ${albumArt}
-            <div class="device-controls">
-        <button class="control-btn play" onclick="sonosUnifiedView.playDevice('${device.id}')">▶️</button>
-        <button class="control-btn pause" onclick="sonosUnifiedView.pauseDevice('${device.id}')">⏸️</button>
-        <button class="control-btn stop" onclick="sonosUnifiedView.stopDevice('${device.id}')">⏹️</button>
-        <div class="volume-control">
-            <input type="range" min="0" max="100" value="${device.volume}" 
-                   onchange="sonosUnifiedView.setDeviceVolume('${device.id}', this.value)">
-            <span class="volume-display">${device.volume}%</span>
-        </div>
+            <div class="device-actions">
+                <button class="action-btn add-speaker-btn" 
+                        onclick="window.sonosSection.openAddSpeakerDialog('${device.uuid}', '${device.name}')"
+                        title="Add Speaker(s)">
+                    <span class="material-symbols-outlined">ad_group</span>
+                </button>
+            </div>
+            <div class="device-controls-bottom">
+                <button class="control-btn play" onclick="sonosUnifiedView.playDevice('${device.id}')">
+                    <span class="material-symbols-outlined">play_arrow</span>
+                </button>
+                <button class="control-btn pause" onclick="sonosUnifiedView.pauseDevice('${device.id}')">
+                    <span class="material-symbols-outlined">pause</span>
+                </button>
+                <button class="control-btn stop" onclick="sonosUnifiedView.stopDevice('${device.id}')">
+                    <span class="material-symbols-outlined">stop</span>
+                </button>
             </div>
         `;
     }
 
-    createDragPreview(card) {
-        const preview = card.cloneNode(true);
-        preview.classList.add('drag-preview');
-        preview.style.position = 'fixed';
-        preview.style.pointerEvents = 'none';
-        preview.style.zIndex = '1000';
-        preview.style.opacity = '0.8';
-        preview.style.transform = 'rotate(5deg)';
-
-        document.body.appendChild(preview);
-        this.dragPreview = preview;
-    }
-
-    removeDragPreview() {
-        if (this.dragPreview) {
-            document.body.removeChild(this.dragPreview);
-            this.dragPreview = null;
-        }
-    }
 
     async loadInitialData() {
         try {
@@ -827,6 +596,12 @@ class SonosUnifiedView {
             if (!response.ok) {
                 throw new Error('Failed to set group volume');
             }
+
+            // Update specific group card instead of full refresh
+            console.log('SonosUnifiedView: Group volume changed successfully, updating specific card');
+            setTimeout(() => {
+                this.updateSpecificCard('group', groupId);
+            }, 500); // Small delay to allow Sonos to update
         } catch (error) {
             console.error('Failed to set group volume:', error);
             this.showError('Failed to set group volume');
@@ -887,9 +662,113 @@ class SonosUnifiedView {
             if (!response.ok) {
                 throw new Error('Failed to set device volume');
             }
+
+            // Update specific device card instead of full refresh
+            console.log('SonosUnifiedView: Device volume changed successfully, updating specific card');
+            setTimeout(() => {
+                this.updateSpecificCard('device', deviceId);
+            }, 500); // Small delay to allow Sonos to update
         } catch (error) {
             console.error('Failed to set device volume:', error);
             this.showError('Failed to set device volume');
+        }
+    }
+
+    async updateSpecificCard(type, id) {
+        try {
+            console.log(`[TARGETED UPDATE] Updating ${type} card for ID: ${id}`);
+
+            // First refresh the data from live Sonos state
+            if (type === 'group') {
+                const refreshResponse = await fetch('/api/sonos/groups/refresh', {
+                    method: 'POST',
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                if (!refreshResponse.ok) {
+                    console.warn('[TARGETED UPDATE] Failed to refresh groups, falling back to cached data');
+                }
+            } else {
+                const refreshResponse = await fetch('/api/sonos/devices/refresh', {
+                    method: 'POST',
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                if (!refreshResponse.ok) {
+                    console.warn('[TARGETED UPDATE] Failed to refresh devices, falling back to cached data');
+                }
+            }
+
+            // Now fetch the fresh data
+            let freshData;
+            if (type === 'group') {
+                const response = await fetch('/api/sonos/groups');
+                if (!response.ok) throw new Error('Failed to fetch groups');
+                const data = await response.json();
+                freshData = data.groups.find(group => group.id === id);
+            } else {
+                const response = await fetch('/api/sonos/devices');
+                if (!response.ok) throw new Error('Failed to fetch devices');
+                const data = await response.json();
+                freshData = data.devices.find(device => device.uuid === id);
+            }
+
+            if (!freshData) {
+                console.warn(`[TARGETED UPDATE] ${type} with ID ${id} not found in fresh data`);
+                return;
+            }
+
+            // Find the existing card in the DOM
+            const existingCard = this.container.querySelector(`[data-${type}-id="${id}"]`);
+            if (!existingCard) {
+                console.warn(`[TARGETED UPDATE] Card for ${type} ${id} not found in DOM`);
+                return;
+            }
+
+            // Create unified item from fresh data
+            let unifiedItem;
+            if (type === 'group') {
+                unifiedItem = {
+                    type: 'group',
+                    id: freshData.id,
+                    coordinator: freshData.coordinator,
+                    members: freshData.members,
+                    status: freshData.state || freshData.playback_state,
+                    volume: freshData.volume,
+                    currentTrack: freshData.current_track
+                };
+            } else {
+                unifiedItem = {
+                    type: 'device',
+                    id: freshData.uuid,
+                    name: freshData.name,
+                    status: freshData.state || freshData.playback_state,
+                    volume: freshData.volume,
+                    currentTrack: freshData.current_track
+                };
+            }
+
+            // Create new card with fresh data
+            const newCard = this.createCard(unifiedItem);
+
+            // Replace the existing card with the new one
+            existingCard.parentNode.replaceChild(newCard, existingCard);
+
+            console.log(`[TARGETED UPDATE] Successfully updated ${type} card for ${id}`);
+
+        } catch (error) {
+            console.error(`[TARGETED UPDATE] Failed to update ${type} card:`, error);
+            // Fallback to full refresh if targeted update fails
+            console.log('[TARGETED UPDATE] Falling back to full refresh');
+            if (window.sonosSection && window.sonosSection.forceRefresh) {
+                window.sonosSection.forceRefresh();
+            }
         }
     }
 }

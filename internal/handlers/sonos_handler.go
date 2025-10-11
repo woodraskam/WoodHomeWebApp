@@ -30,10 +30,12 @@ func (h *SonosHandler) RegisterRoutes(router *mux.Router) {
 	// Device routes
 	sonosRouter.HandleFunc("/devices", h.GetDevices).Methods("GET")
 	sonosRouter.HandleFunc("/devices/{uuid}", h.GetDevice).Methods("GET")
+	sonosRouter.HandleFunc("/devices/refresh", h.RefreshDevices).Methods("POST")
 
 	// Group routes
 	sonosRouter.HandleFunc("/groups", h.GetGroups).Methods("GET")
 	sonosRouter.HandleFunc("/groups/{id}", h.GetGroup).Methods("GET")
+	sonosRouter.HandleFunc("/groups/refresh", h.RefreshGroups).Methods("POST")
 
 	// Playback routes
 	sonosRouter.HandleFunc("/devices/{uuid}/play", h.PlayDevice).Methods("POST")
@@ -119,6 +121,48 @@ func (h *SonosHandler) GetGroup(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(group)
+}
+
+// RefreshGroups forces a refresh of group data from the Sonos service
+func (h *SonosHandler) RefreshGroups(w http.ResponseWriter, r *http.Request) {
+	logrus.Info("Refreshing Sonos groups from live data...")
+
+	if err := h.sonosService.RefreshGroups(r.Context()); err != nil {
+		logrus.Errorf("Failed to refresh groups: %v", err)
+		http.Error(w, "Failed to refresh groups: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return the refreshed groups
+	groups := h.sonosService.GetGroups()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"groups":  groups,
+		"count":   len(groups),
+		"message": "Groups refreshed successfully",
+	})
+}
+
+// RefreshDevices forces a refresh of device data from the Sonos service
+func (h *SonosHandler) RefreshDevices(w http.ResponseWriter, r *http.Request) {
+	logrus.Info("Refreshing Sonos devices from live data...")
+
+	if err := h.sonosService.RefreshDevices(r.Context()); err != nil {
+		logrus.Errorf("Failed to refresh devices: %v", err)
+		http.Error(w, "Failed to refresh devices: "+err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	// Return the refreshed devices
+	devices := h.sonosService.GetDevices()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"devices": devices,
+		"count":   len(devices),
+		"message": "Devices refreshed successfully",
+	})
 }
 
 // PlayDevice plays a specific device

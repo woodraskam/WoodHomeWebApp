@@ -7,19 +7,19 @@ import (
 
 // SonosDevice represents a Sonos device
 type SonosDevice struct {
-	UUID        string      `json:"uuid"`
-	Name        string      `json:"name"`
-	Room        string      `json:"room"`
-	IP          string      `json:"ip"`
-	Model       string      `json:"model"`
-	IsOnline    bool        `json:"is_online"`
-	GroupID     string      `json:"group_id"`
-	Coordinator string      `json:"coordinator"`
-	Volume      int         `json:"volume"`
-	Mute        bool        `json:"mute"`
-	State       string      `json:"state"`
+	UUID         string     `json:"uuid"`
+	Name         string     `json:"name"`
+	Room         string     `json:"room"`
+	IP           string     `json:"ip"`
+	Model        string     `json:"model"`
+	IsOnline     bool       `json:"is_online"`
+	GroupID      string     `json:"group_id"`
+	Coordinator  string     `json:"coordinator"`
+	Volume       int        `json:"volume"`
+	Mute         bool       `json:"mute"`
+	State        string     `json:"state"`
 	CurrentTrack *TrackInfo `json:"current_track"`
-	LastSeen    time.Time   `json:"last_seen"`
+	LastSeen     time.Time  `json:"last_seen"`
 }
 
 // SonosGroup represents a group of Sonos devices
@@ -39,6 +39,8 @@ type TrackInfo struct {
 	Title  string `json:"title"`
 	Album  string `json:"album"`
 	Art    string `json:"art"`
+	URI    string `json:"uri"`
+	Type   string `json:"type"`
 }
 
 // SonosServiceConfig represents configuration for Sonos service

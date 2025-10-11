@@ -11,6 +11,7 @@ class SonosSection extends AuthenticatedSection {
         this.websocket = null;
         this.isConnected = false;
         this.sectionCreated = false;
+        this.unifiedView = null;
 
         // Initialize immediately
         this.init();
@@ -81,11 +82,11 @@ class SonosSection extends AuthenticatedSection {
 
             // Wait for transition to complete before hiding
             setTimeout(() => {
-            section.style.display = 'none';
+                section.style.display = 'none';
                 section.classList.remove('m3-section--transitioning');
                 console.log('SonosSection: Section hidden with dissolve transition');
             }, 300); // Match the CSS transition duration
-    }
+        }
 
         // Disconnect WebSocket
         this.disconnectWebSocket();
@@ -112,6 +113,10 @@ class SonosSection extends AuthenticatedSection {
                     <div class="sonos-status">
                         <span id="sonos-connection-status" class="status-indicator offline">Offline</span>
                         <span id="sonos-device-count" class="device-count">0 devices</span>
+                        <button id="create-group" class="md3-btn md3-btn-filled">
+                            <span class="material-symbols-outlined">group_add</span>
+                            Create Group
+                        </button>
                         <button id="refresh-devices" class="md3-btn md3-btn-text">
                             <span class="material-symbols-outlined">refresh</span>
                             Refresh
@@ -120,10 +125,12 @@ class SonosSection extends AuthenticatedSection {
                         </div>
                     </div>
             <div class="m3-section-content">
-                <div id="sonos-content" class="sonos-content">
-                    <div class="loading-spinner">
-                        <div class="spinner"></div>
-                        <p>Loading Sonos devices...</p>
+                <div class="sonos-unified-view">
+                    <div id="unified-device-list" class="device-list">
+                        <div class="loading-spinner">
+                            <div class="spinner"></div>
+                            <p>Loading Sonos devices...</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -131,7 +138,7 @@ class SonosSection extends AuthenticatedSection {
         sonosSection.style.display = 'none'; // Start hidden
 
         contentArea.appendChild(sonosSection);
-            this.setupSonosEventListeners();
+        this.setupSonosEventListeners();
     }
 
     setupSonosEventListeners() {
@@ -140,7 +147,16 @@ class SonosSection extends AuthenticatedSection {
         if (refreshBtn) {
             refreshBtn.addEventListener('click', () => {
                 console.log('SonosSection: Refresh button clicked');
-                this.loadData();
+                this.forceRefresh();
+            });
+        }
+
+        // Create Group button
+        const createGroupBtn = document.getElementById('create-group');
+        if (createGroupBtn) {
+            createGroupBtn.addEventListener('click', () => {
+                console.log('SonosSection: Create Group button clicked');
+                this.openGroupDialog();
             });
         }
     }
@@ -150,47 +166,146 @@ class SonosSection extends AuthenticatedSection {
         try {
             await this.loadDevices();
             await this.loadGroups();
-            this.renderUnifiedView();
+            this.initializeUnifiedView();
         } catch (error) {
             console.error('SonosSection: Error loading data:', error);
+        }
+    }
+
+    async forceRefresh() {
+        console.log('SonosSection: forceRefresh() called - forcing fresh data');
+        try {
+            // Clear any cached data
+            this.devices = [];
+            this.groups = [];
+
+            // Show loading state
+            const container = document.getElementById('unified-device-list');
+            if (container) {
+                container.innerHTML = `
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                        <p>Refreshing Sonos devices...</p>
+                    </div>
+                `;
+            }
+
+            // Force fresh data load
+            await this.loadDevices();
+            await this.loadGroups();
+            this.initializeUnifiedView();
+
+            console.log('SonosSection: Force refresh completed');
+        } catch (error) {
+            console.error('SonosSection: Error during force refresh:', error);
+            // Show error state
+            const container = document.getElementById('unified-device-list');
+            if (container) {
+                container.innerHTML = `
+                    <div class="error-state">
+                        <p>Failed to load Sonos devices. Please check if the Sonos service is running.</p>
+                        <button onclick="window.sonosSection.forceRefresh()" class="md3-btn md3-btn-filled">
+                            <span class="material-symbols-outlined">refresh</span>
+                            Retry
+                        </button>
+                    </div>
+                `;
+            }
         }
     }
 
     async loadDevices() {
         console.log('SonosSection: Loading devices...');
         try {
-            const response = await fetch('/api/sonos/devices');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
+            // First, refresh devices from live Sonos data
+            console.log('SonosSection: Refreshing devices from live Sonos data...');
+            const refreshResponse = await fetch('/api/sonos/devices/refresh', {
+                method: 'POST',
+                cache: 'no-cache',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache'
+                }
+            });
+
+            if (!refreshResponse.ok) {
+                console.warn('SonosSection: Failed to refresh devices, falling back to cached data');
+                // Fall back to regular devices endpoint
+                const timestamp = Date.now();
+                const response = await fetch(`/api/sonos/devices?t=${timestamp}`, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+                }
+                const data = await response.json();
                 this.devices = data.devices || [];
+            } else {
+                const refreshData = await refreshResponse.json();
+                this.devices = refreshData.devices || [];
+                console.log('SonosSection: Devices refreshed from live data');
+            }
+
             console.log('SonosSection: Loaded devices:', this.devices.length);
+            console.log('SonosSection: Device volumes:', this.devices.map(d => ({ name: d.name, volume: d.volume })));
         } catch (error) {
             console.error('SonosSection: Failed to load devices:', error);
             this.devices = [];
+            throw error; // Re-throw to be caught by forceRefresh
         }
     }
 
     async loadGroups() {
         console.log('SonosSection: Loading groups...');
         try {
-            const response = await fetch('/api/sonos/groups');
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            const data = await response.json();
+            // First, refresh groups from live Sonos data
+            console.log('SonosSection: Refreshing groups from live Sonos data...');
+            const refreshResponse = await fetch('/api/sonos/groups/refresh', {
+                method: 'POST',
+                cache: 'no-cache',
+                headers: {
+                    'Cache-Control': 'no-cache, no-store, must-revalidate',
+                    'Pragma': 'no-cache'
+                }
+            });
+
+            if (!refreshResponse.ok) {
+                console.warn('SonosSection: Failed to refresh groups, falling back to cached data');
+                // Fall back to regular groups endpoint
+                const timestamp = Date.now();
+                const response = await fetch(`/api/sonos/groups?t=${timestamp}`, {
+                    cache: 'no-cache',
+                    headers: {
+                        'Cache-Control': 'no-cache, no-store, must-revalidate',
+                        'Pragma': 'no-cache'
+                    }
+                });
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
+                }
+                const data = await response.json();
                 this.groups = data.groups || [];
+            } else {
+                const refreshData = await refreshResponse.json();
+                this.groups = refreshData.groups || [];
+                console.log('SonosSection: Groups refreshed from live data');
+            }
+
             console.log('SonosSection: Loaded groups:', this.groups.length);
+            console.log('SonosSection: Group volumes:', this.groups.map(g => ({ name: g.coordinator?.name, volume: g.volume })));
         } catch (error) {
             console.error('SonosSection: Failed to load groups:', error);
             this.groups = [];
+            throw error; // Re-throw to be caught by forceRefresh
         }
     }
 
-    renderUnifiedView() {
-        const content = document.getElementById('sonos-content');
-        if (!content) return;
+    initializeUnifiedView() {
+        console.log('SonosSection: Initializing unified view');
 
         // Update device count
         const deviceCount = document.getElementById('sonos-device-count');
@@ -198,107 +313,324 @@ class SonosSection extends AuthenticatedSection {
             deviceCount.textContent = `${this.devices.length} devices`;
         }
 
-        // Render devices and groups
-        let html = '<div class="sonos-unified-view">';
-
-        // Groups section
-        if (this.groups.length > 0) {
-            html += '<div class="sonos-groups-section">';
-            html += '<h2 class="section-title">Groups</h2>';
-            html += '<div class="sonos-groups-grid">';
-
-        this.groups.forEach(group => {
-                html += this.renderGroupCard(group);
-            });
-
-            html += '</div></div>';
+        // Initialize SonosUnifiedView if not already done
+        if (!this.unifiedView) {
+            this.unifiedView = new SonosUnifiedView();
         }
 
-        // Individual devices section
-        if (this.devices.length > 0) {
-            html += '<div class="sonos-devices-section">';
-            html += '<h2 class="section-title">Devices</h2>';
-            html += '<div class="sonos-devices-grid">';
-
-            this.devices.forEach(device => {
-                html += this.renderDeviceCard(device);
-            });
-
-            html += '</div></div>';
-        }
-
-        html += '</div>';
-        content.innerHTML = html;
+        // Update the unified view with current data
+        console.log('SonosSection: Passing to unified view - devices:', this.devices.length, 'groups:', this.groups.length);
+        console.log('SonosSection: Groups data:', this.groups);
+        this.unifiedView.updateView(this.devices, this.groups);
     }
 
-    renderGroupCard(group) {
-        return `
-            <div class="sonos-group-card" data-group-id="${group.id}">
-                <div class="group-header">
-                    <h3 class="group-name">${group.coordinator?.name || 'Unknown Group'}</h3>
-                    <div class="group-status">
-                        <span class="status-indicator ${(group.state || 'STOPPED').toLowerCase()}">${group.state || 'STOPPED'}</span>
-                    </div>
-                </div>
-                <div class="group-controls">
-                    <button class="control-btn play-pause" data-group-id="${group.id}">
-                        <span class="material-symbols-outlined">${(group.state || 'STOPPED') === 'PLAYING' ? 'pause' : 'play_arrow'}</span>
-                    </button>
-                    <button class="control-btn stop" data-group-id="${group.id}">
-                        <span class="material-symbols-outlined">stop</span>
-                    </button>
-                    <button class="control-btn next" data-group-id="${group.id}">
-                        <span class="material-symbols-outlined">skip_next</span>
-                    </button>
-                </div>
-                <div class="group-info">
-                    <div class="track-info">
-                        <div class="track-title">${group.currentTrack?.title || 'No track'}</div>
-                        <div class="track-artist">${group.currentTrack?.artist || ''}</div>
-                    </div>
-                    <div class="volume-control">
-                        <span class="material-symbols-outlined">volume_up</span>
-                        <input type="range" class="volume-slider" min="0" max="100" value="${group.volume || 0}" data-group-id="${group.id}">
-                        <span class="volume-value">${group.volume || 0}%</span>
-                    </div>
-                    </div>
-                </div>
-            `;
+    openGroupDialog() {
+        console.log('SonosSection: Opening group dialog');
+
+        // Create group dialog if it doesn't exist
+        if (!document.getElementById('group-dialog')) {
+            this.createGroupDialog();
         }
 
-    renderDeviceCard(device) {
-            return `
-            <div class="sonos-device-card" data-device-id="${device.id}">
-                <div class="device-header">
-                    <h3 class="device-name">${device.name}</h3>
-                    <div class="device-status">
-                        <span class="status-indicator ${(device.state || 'STOPPED').toLowerCase()}">${device.state || 'STOPPED'}</span>
+        // Show dialog
+        const dialog = document.getElementById('group-dialog');
+        if (dialog) {
+            dialog.style.display = 'block';
+            this.populateGroupDialog();
+        }
+    }
+
+    openAddSpeakerDialog(coordinatorUuid, coordinatorName) {
+        console.log('SonosSection: Opening add speaker dialog for coordinator:', coordinatorName);
+
+        // Create add speaker dialog if it doesn't exist
+        if (!document.getElementById('add-speaker-dialog')) {
+            this.createAddSpeakerDialog();
+        }
+
+        // Show dialog
+        const dialog = document.getElementById('add-speaker-dialog');
+        if (dialog) {
+            dialog.style.display = 'flex';
+            this.populateAddSpeakerDialog(coordinatorUuid, coordinatorName);
+        }
+    }
+
+    createGroupDialog() {
+        const dialog = document.createElement('div');
+        dialog.id = 'group-dialog';
+        dialog.className = 'md3-dialog-overlay';
+        dialog.innerHTML = `
+            <div class="md3-dialog">
+                <div class="md3-dialog-header">
+                    <h3 class="md3-dialog-title">Create Group</h3>
+                    <button class="icon-button" onclick="sonosSection.closeGroupDialog()">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="md3-dialog-content">
+                    <div class="group-creation">
+                        <div class="coordinator-selection">
+                            <label for="coordinator-select">Coordinator Room:</label>
+                            <select id="coordinator-select" class="md3-select">
+                                <option value="">Select coordinator...</option>
+                            </select>
+                        </div>
+                        <div class="member-selection">
+                            <label>Member Rooms:</label>
+                            <div id="member-checkboxes">
+                                <!-- Member checkboxes will be populated -->
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div class="device-controls">
-                    <button class="control-btn play-pause" data-device-id="${device.id}">
-                        <span class="material-symbols-outlined">${(device.state || 'STOPPED') === 'PLAYING' ? 'pause' : 'play_arrow'}</span>
+                <div class="md3-dialog-actions">
+                    <button id="create-group-btn" class="md3-btn md3-btn-filled">
+                        <span class="material-symbols-outlined">group_add</span>
+                        Create Group
                     </button>
-                    <button class="control-btn stop" data-device-id="${device.id}">
-                        <span class="material-symbols-outlined">stop</span>
+                    <button id="cancel-group-btn" class="md3-btn md3-btn-outlined" onclick="sonosSection.closeGroupDialog()">
+                        Cancel
                     </button>
-                    <button class="control-btn next" data-device-id="${device.id}">
-                        <span class="material-symbols-outlined">skip_next</span>
-                    </button>
-                </div>
-                <div class="device-info">
-                <div class="track-info">
-                        <div class="track-title">${device.currentTrack?.title || 'No track'}</div>
-                        <div class="track-artist">${device.currentTrack?.artist || ''}</div>
-                    </div>
-                    <div class="volume-control">
-                        <span class="material-symbols-outlined">volume_up</span>
-                        <input type="range" class="volume-slider" min="0" max="100" value="${device.volume || 0}" data-device-id="${device.id}">
-                        <span class="volume-value">${device.volume || 0}%</span>
-                    </div>
                 </div>
             </div>
         `;
+
+        document.body.appendChild(dialog);
+
+        // Add event listeners
+        document.getElementById('create-group-btn').addEventListener('click', () => {
+            this.createGroupFromDialog();
+        });
+    }
+
+    createAddSpeakerDialog() {
+        const dialog = document.createElement('div');
+        dialog.id = 'add-speaker-dialog';
+        dialog.className = 'md3-dialog-overlay';
+        dialog.innerHTML = `
+            <div class="md3-dialog">
+                <div class="md3-dialog-header">
+                    <h3 class="md3-dialog-title">Add Speakers to Group</h3>
+                    <button class="icon-button" onclick="sonosSection.closeAddSpeakerDialog()">
+                        <span class="material-symbols-outlined">close</span>
+                    </button>
+                </div>
+                <div class="md3-dialog-content">
+                    <div class="group-creation">
+                        <div class="coordinator-info">
+                            <label>Coordinator:</label>
+                            <div id="coordinator-name" class="coordinator-display"></div>
+                        </div>
+                        <div class="member-selection">
+                            <label>Add these speakers to the group:</label>
+                            <div id="member-checkboxes">
+                                <!-- Member checkboxes will be populated -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="md3-dialog-actions">
+                    <button id="add-speakers-btn" class="md3-btn md3-btn-filled">
+                        <span class="material-symbols-outlined">add</span>
+                        Add Speakers
+                    </button>
+                    <button id="cancel-add-speakers-btn" class="md3-btn md3-btn-outlined" onclick="sonosSection.closeAddSpeakerDialog()">
+                        Cancel
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(dialog);
+
+        // Add event listeners
+        document.getElementById('add-speakers-btn').addEventListener('click', () => {
+            this.addSpeakersToGroup();
+        });
+    }
+
+    populateGroupDialog() {
+        // Populate coordinator dropdown
+        const coordinatorSelect = document.getElementById('coordinator-select');
+        if (coordinatorSelect) {
+            coordinatorSelect.innerHTML = '<option value="">Select coordinator...</option>';
+            this.devices.forEach(device => {
+                const option = document.createElement('option');
+                option.value = device.name;
+                option.textContent = device.name;
+                coordinatorSelect.appendChild(option);
+            });
+        }
+
+        // Populate member checkboxes
+        const memberCheckboxes = document.getElementById('member-checkboxes');
+        if (memberCheckboxes) {
+            memberCheckboxes.innerHTML = '';
+            this.devices.forEach(device => {
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.className = 'member-checkbox';
+                checkboxDiv.innerHTML = `
+                    <input type="checkbox" id="member-${device.name}" value="${device.name}">
+                    <label for="member-${device.name}">${device.name}</label>
+                `;
+                memberCheckboxes.appendChild(checkboxDiv);
+            });
+        }
+    }
+
+    populateAddSpeakerDialog(coordinatorUuid, coordinatorName) {
+        // Set coordinator name
+        const coordinatorDisplay = document.getElementById('coordinator-name');
+        if (coordinatorDisplay) {
+            coordinatorDisplay.textContent = coordinatorName;
+        }
+
+        // Populate member checkboxes (excluding the coordinator)
+        const memberCheckboxes = document.getElementById('member-checkboxes');
+        if (memberCheckboxes) {
+            memberCheckboxes.innerHTML = '';
+            this.devices.forEach(device => {
+                // Skip the coordinator device
+                if (device.uuid === coordinatorUuid) {
+                    return;
+                }
+
+                const checkboxDiv = document.createElement('div');
+                checkboxDiv.className = 'member-checkbox';
+                checkboxDiv.innerHTML = `
+                    <input type="checkbox" id="add-member-${device.name}" value="${device.name}" data-uuid="${device.uuid}">
+                    <label for="add-member-${device.name}">${device.name}</label>
+                `;
+                memberCheckboxes.appendChild(checkboxDiv);
+            });
+        }
+    }
+
+    async createGroupFromDialog() {
+        const coordinatorSelect = document.getElementById('coordinator-select');
+        const memberCheckboxes = document.querySelectorAll('#member-checkboxes input[type="checkbox"]:checked');
+
+        if (!coordinatorSelect.value) {
+            alert('Please select a coordinator room');
+            return;
+        }
+
+        const members = Array.from(memberCheckboxes).map(cb => cb.value);
+        if (members.length === 0) {
+            alert('Please select at least one member room');
+            return;
+        }
+
+        try {
+            const response = await fetch('/api/sonos/groups', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    coordinator: coordinatorSelect.value,
+                    members: members
+                })
+            });
+
+            if (response.ok) {
+                console.log('Group created successfully');
+                this.closeGroupDialog();
+                this.loadData(); // Refresh data
+            } else {
+                const error = await response.text();
+                alert('Failed to create group: ' + error);
+            }
+        } catch (error) {
+            console.error('Error creating group:', error);
+            alert('Failed to create group: ' + error.message);
+        }
+    }
+
+    closeGroupDialog() {
+        const dialog = document.getElementById('group-dialog');
+        if (dialog) {
+            dialog.style.display = 'none';
+        }
+    }
+
+    async addSpeakersToGroup() {
+        const memberCheckboxes = document.querySelectorAll('#member-checkboxes input[type="checkbox"]:checked');
+        const selectedMembers = Array.from(memberCheckboxes).map(checkbox => ({
+            name: checkbox.value,
+            uuid: checkbox.dataset.uuid
+        }));
+
+        if (selectedMembers.length === 0) {
+            alert('Please select at least one speaker to add to the group.');
+            return;
+        }
+
+        try {
+            // Get the coordinator UUID from the dialog data
+            const coordinatorName = document.getElementById('coordinator-name').textContent;
+            const coordinatorDevice = this.devices.find(device => device.name === coordinatorName);
+
+            if (!coordinatorDevice) {
+                alert('Coordinator device not found.');
+                return;
+            }
+
+            // Create group with coordinator and selected members
+            const groupData = {
+                coordinator: coordinatorDevice.name,
+                members: selectedMembers.map(member => member.name)
+            };
+
+            console.log('Creating group with data:', groupData);
+
+            const response = await fetch('/api/sonos/groups', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(groupData)
+            });
+
+            if (response.ok) {
+                console.log('Speakers added to group successfully');
+                this.closeAddSpeakerDialog();
+                this.loadData(); // Refresh data
+            } else {
+                const error = await response.text();
+                alert('Failed to add speakers to group: ' + error);
+            }
+        } catch (error) {
+            console.error('Error adding speakers to group:', error);
+            alert('Failed to add speakers to group: ' + error.message);
+        }
+    }
+
+    closeAddSpeakerDialog() {
+        const dialog = document.getElementById('add-speaker-dialog');
+        if (dialog) {
+            dialog.style.display = 'none';
+        }
+    }
+
+    async dissolveGroup(groupId) {
+        try {
+            const response = await fetch(`/api/sonos/groups/${groupId}/dissolve`, {
+                method: 'POST'
+            });
+
+            if (response.ok) {
+                console.log('Group dissolved successfully');
+                this.loadData(); // Refresh data
+            } else {
+                const error = await response.text();
+                alert('Failed to dissolve group: ' + error);
+            }
+        } catch (error) {
+            console.error('Error dissolving group:', error);
+            alert('Failed to dissolve group: ' + error.message);
+        }
     }
 
     connectWebSocket() {
@@ -320,7 +652,7 @@ class SonosSection extends AuthenticatedSection {
             try {
                 const data = JSON.parse(event.data);
                 this.handleWebSocketMessage(data);
-        } catch (error) {
+            } catch (error) {
                 console.error('SonosSection: Error parsing WebSocket message:', error);
             }
         };
@@ -365,8 +697,10 @@ class SonosSection extends AuthenticatedSection {
             this.devices[index] = device;
         }
 
-        // Update UI
-        this.renderUnifiedView();
+        // Update unified view
+        if (this.unifiedView) {
+            this.unifiedView.updateView(this.devices, this.groups);
+        }
     }
 
     updateGroup(group) {
@@ -376,8 +710,10 @@ class SonosSection extends AuthenticatedSection {
             this.groups[index] = group;
         }
 
-        // Update UI
-        this.renderUnifiedView();
+        // Update unified view
+        if (this.unifiedView) {
+            this.unifiedView.updateView(this.devices, this.groups);
+        }
     }
 
     updateConnectionStatus(status) {
@@ -404,3 +740,6 @@ class SonosSection extends AuthenticatedSection {
 
 // Initialize the Sonos section
 const sonosSection = new SonosSection();
+
+// Make sonosSection globally accessible for dialog callbacks
+window.sonosSection = sonosSection;
