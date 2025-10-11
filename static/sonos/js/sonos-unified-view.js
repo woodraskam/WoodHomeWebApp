@@ -292,8 +292,20 @@ class SonosUnifiedView {
         return `
             <div class="coordinator">
                 <div class="device-info">
-                    <span class="device-name">${group.coordinator.name}</span>
-                    <span class="device-status">${this.getTrackInfo(group.currentTrack, group.status) || '[No music selected]'}</span>
+                    <div class="device-header">
+                        ${albumArt}
+                        <div class="device-text">
+                            <span class="device-name">${group.coordinator.name}</span>
+                            <span class="device-status">${this.getTrackInfo(group.currentTrack, group.status) || '[No music selected]'}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="device-actions">
+                    <button class="action-btn add-speaker-btn" 
+                            onclick="window.sonosSection.openAddSpeakerDialog('${group.coordinator.uuid}', '${group.coordinator.name}')"
+                            title="Add Speaker(s)">
+                        <span class="material-symbols-outlined">ad_group</span>
+                    </button>
                 </div>
             </div>
             <div class="volume-control-full">
@@ -302,11 +314,18 @@ class SonosUnifiedView {
                        class="volume-slider-full">
                 <span class="volume-display">${group.volume}%</span>
             </div>
-            ${albumArt}
             <div class="group-members">
                 ${group.members.filter(member => member.uuid !== group.coordinator?.uuid).map(member => `
                     <div class="member-device" data-device-id="${member.uuid}">
-                        <span class="member-name">${member.name}</span>
+                        <div class="member-info">
+                            <span class="member-name">${member.name}</span>
+                            <span class="member-volume">${member.volume || 0}%</span>
+                        </div>
+                        <div class="member-volume-control">
+                            <input type="range" min="0" max="100" value="${member.volume || 0}" 
+                                   onchange="sonosUnifiedView.setDeviceVolume('${member.uuid}', this.value)"
+                                   class="member-volume-slider">
+                        </div>
                     </div>
                 `).join('')}
             </div>
@@ -399,8 +418,13 @@ class SonosUnifiedView {
         const albumArt = this.getAlbumArtHTML(device.currentTrack);
         return `
             <div class="device-info">
-                <span class="device-name">${device.name}</span>
-                <span class="device-status">${this.getTrackInfo(device.currentTrack, device.status) || '[No music selected]'}</span>
+                <div class="device-header">
+                    ${albumArt}
+                    <div class="device-text">
+                        <span class="device-name">${device.name}</span>
+                        <span class="device-status">${this.getTrackInfo(device.currentTrack, device.status) || '[No music selected]'}</span>
+                    </div>
+                </div>
             </div>
             <div class="volume-control-full">
                 <input type="range" min="0" max="100" value="${device.volume}" 
@@ -408,7 +432,6 @@ class SonosUnifiedView {
                        class="volume-slider-full">
                 <span class="volume-display">${device.volume}%</span>
             </div>
-            ${albumArt}
             <div class="device-actions">
                 <button class="action-btn add-speaker-btn" 
                         onclick="window.sonosSection.openAddSpeakerDialog('${device.uuid}', '${device.name}')"
@@ -663,11 +686,20 @@ class SonosUnifiedView {
                 throw new Error('Failed to set device volume');
             }
 
-            // Update specific device card instead of full refresh
-            console.log('SonosUnifiedView: Device volume changed successfully, updating specific card');
-            setTimeout(() => {
-                this.updateSpecificCard('device', deviceId);
-            }, 500); // Small delay to allow Sonos to update
+            // Check if this device is a member of any group
+            const isGroupMember = this.container.querySelector(`[data-device-id="${deviceId}"]`);
+
+            if (isGroupMember) {
+                // This is a member device - only update the volume display in group cards
+                console.log('SonosUnifiedView: Member device volume changed, updating group member display');
+                this.updateGroupCardsWithMemberVolume(deviceId, volume);
+            } else {
+                // This is an individual device - update the entire device card
+                console.log('SonosUnifiedView: Individual device volume changed, updating specific card');
+                setTimeout(() => {
+                    this.updateSpecificCard('device', deviceId);
+                }, 500); // Small delay to allow Sonos to update
+            }
         } catch (error) {
             console.error('Failed to set device volume:', error);
             this.showError('Failed to set device volume');
@@ -769,6 +801,34 @@ class SonosUnifiedView {
             if (window.sonosSection && window.sonosSection.forceRefresh) {
                 window.sonosSection.forceRefresh();
             }
+        }
+    }
+
+    updateGroupCardsWithMemberVolume(deviceId, newVolume) {
+        try {
+            // Find all group cards that contain this device as a member
+            const groupCards = this.container.querySelectorAll('.group-card');
+
+            groupCards.forEach(groupCard => {
+                const memberDevice = groupCard.querySelector(`[data-device-id="${deviceId}"]`);
+                if (memberDevice) {
+                    // Update the member volume display
+                    const volumeDisplay = memberDevice.querySelector('.member-volume');
+                    if (volumeDisplay) {
+                        volumeDisplay.textContent = `${newVolume}%`;
+                    }
+
+                    // Update the member volume slider
+                    const volumeSlider = memberDevice.querySelector('.member-volume-slider');
+                    if (volumeSlider) {
+                        volumeSlider.value = newVolume;
+                    }
+
+                    console.log(`[TARGETED UPDATE] Updated member volume for device ${deviceId} in group card`);
+                }
+            });
+        } catch (error) {
+            console.error(`[TARGETED UPDATE] Failed to update group cards with member volume:`, error);
         }
     }
 }
