@@ -543,6 +543,7 @@ body {
     min-height: 14px;
     object-fit: contain;
     border-radius: 0;
+    max-height: 36px;
 }
 
 .forest-tile.character-tile {

@@ -129,22 +129,29 @@ function resetGameState() {
 function createDeck() {
     gameState.deck = [];
 
-    // Add single color cards (2 of each color)
+    // Add single color cards (4 of each color)
     cardTypes.single.forEach(color => {
-        gameState.deck.push({ type: 'single', color: color, value: 1 });
-        gameState.deck.push({ type: 'single', color: color, value: 1 });
+        for (let i = 0; i < 4; i++) {
+            gameState.deck.push({ type: 'single', color: color, value: 1 });
+        }
     });
 
     // Add double color cards (2 of each color)
     cardTypes.double.forEach(color => {
-        gameState.deck.push({ type: 'double', color: color, value: 2 });
-        gameState.deck.push({ type: 'double', color: color, value: 2 });
+        for (let i = 0; i < 2; i++) {
+            gameState.deck.push({ type: 'double', color: color, value: 2 });
+        }
     });
 
-    // Add special character cards
+    // Add special character cards (1 of each)
     cardTypes.special.forEach(character => {
         gameState.deck.push({ type: 'special', character: character, value: 0 });
     });
+
+    console.log(`🃏 Created deck with ${gameState.deck.length} cards total`);
+    console.log(`  - Single cards: ${gameState.deck.filter(c => c.type === 'single').length}`);
+    console.log(`  - Double cards: ${gameState.deck.filter(c => c.type === 'double').length}`);
+    console.log(`  - Special cards: ${gameState.deck.filter(c => c.type === 'special').length}`);
 }
 
 function shuffleDeck() {
@@ -154,34 +161,11 @@ function shuffleDeck() {
     }
 }
 
-// Create wheel deck with all possible card options
+// Initialize wheel deck from main deck
 function createWheelDeck() {
-    gameState.wheelDeck = [];
-
-    // Add single color cards (6 colors)
-    cardTypes.single.forEach(color => {
-        gameState.wheelDeck.push({ type: 'single', color: color, value: 1 });
-    });
-
-    // Add double color cards (6 colors)
-    cardTypes.double.forEach(color => {
-        gameState.wheelDeck.push({ type: 'double', color: color, value: 2 });
-    });
-
-    // Add special character cards (4 characters)
-    cardTypes.special.forEach(character => {
-        gameState.wheelDeck.push({ type: 'special', character: character, value: 0 });
-    });
-
-    // Shuffle the wheel deck
-    shuffleWheelDeck();
-}
-
-function shuffleWheelDeck() {
-    for (let i = gameState.wheelDeck.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [gameState.wheelDeck[i], gameState.wheelDeck[j]] = [gameState.wheelDeck[j], gameState.wheelDeck[i]];
-    }
+    // Use the main deck for wheel spinning
+    gameState.wheelDeck = [...gameState.deck];
+    console.log(`🎡 Wheel deck initialized with ${gameState.wheelDeck.length} cards`);
 }
 
 // Get available cards for wheel (not yet used)
@@ -260,11 +244,19 @@ function advanceToNextPlayer() {
 function drawCardFromDeck() {
     // Check if deck is empty, reshuffle if needed
     if (gameState.deck.length === 0) {
+        console.log('🔄 Deck exhausted, reshuffling...');
         createDeck();
         shuffleDeck();
+        // Reset used cards when deck is reshuffled
+        gameState.usedCards = [];
     }
 
-    return gameState.deck.pop();
+    const drawnCard = gameState.deck.pop();
+    // Add to used cards to track inventory
+    gameState.usedCards.push(drawnCard);
+
+    console.log(`🃏 Drew card: ${getCardText(drawnCard)} (${gameState.deck.length} cards remaining)`);
+    return drawnCard;
 }
 
 function getCardEmoji(card) {

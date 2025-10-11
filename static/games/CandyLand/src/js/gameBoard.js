@@ -2,15 +2,67 @@
 
 // Helper function to get character PNG for special positions
 function getSpecialCharacterAsset(position) {
-    // Map positions to character assets
+    // Map positions to character names (positions stay the same)
     const characterPositions = {
-        30: { name: 'Princess Lolly', asset: 'princess-lolly.png', emoji: '👸' },
-        60: { name: 'Queen Frostine', asset: 'queen-frostline.png', emoji: '❄️' },
-        90: { name: 'King Candy', asset: 'king-candy.png', emoji: '👑' },
-        120: { name: 'Gingerbread Man', asset: 'gingerbread-man.png', emoji: '🍪' }
+        30: { name: 'Princess Lolly', emoji: '👸' },
+        60: { name: 'Queen Frostine', emoji: '❄️' },
+        90: { name: 'King Candy', emoji: '👑' },
+        120: { name: 'Gingerbread Man', emoji: '🍪' }
     };
 
-    return characterPositions[position] || null;
+    const character = characterPositions[position];
+    if (!character) return null;
+
+    // Use theme-based character mapping for asset path
+    const characterMapping = getCharacterMapping();
+    const themeCharacter = characterMapping[character.name];
+
+    if (themeCharacter) {
+        return {
+            name: character.name,  // Keep original name
+            asset: themeCharacter.image.split('/').pop(),  // Extract just the filename
+            emoji: character.emoji
+        };
+    }
+
+    return character;
+}
+
+// Function to refresh board assets when theme changes
+function refreshBoardAssets() {
+    console.log('🎨 Refreshing board assets for theme:', getTheme());
+
+    // Refresh timeline segments
+    const timeline = document.getElementById('progress-timeline');
+    if (timeline) {
+        const segments = timeline.querySelectorAll('.timeline-segment');
+        segments.forEach((segment, index) => {
+            const specialCharacter = getSpecialCharacterAsset(index);
+            if (specialCharacter) {
+                const characterMapping = getCharacterMapping();
+                const themeCharacter = characterMapping[specialCharacter.name];
+                const imageSrc = themeCharacter ? themeCharacter.image : `/static/games/CandyLand/assets/images/cards/${specialCharacter.asset}`;
+                segment.innerHTML = `<img src="${imageSrc}" alt="${specialCharacter.name}" class="character-asset" onerror="this.style.display='none'; this.nextSibling.style.display='inline';" /><span style="display:none;">${specialCharacter.emoji}</span>`;
+            }
+        });
+    }
+
+    // Refresh path tiles
+    const pathTiles = document.querySelectorAll('.path-tile');
+    pathTiles.forEach(tile => {
+        const tilePosition = parseInt(tile.dataset.position);
+        if (tilePosition) {
+            const specialCharacter = getSpecialCharacterAsset(tilePosition);
+            if (specialCharacter) {
+                const characterMapping = getCharacterMapping();
+                const themeCharacter = characterMapping[specialCharacter.name];
+                const imageSrc = themeCharacter ? themeCharacter.image : `/static/games/CandyLand/assets/images/cards/${specialCharacter.asset}`;
+                tile.innerHTML = `<img src="${imageSrc}" alt="${specialCharacter.name}" class="character-asset" onerror="this.style.display='none'; this.nextSibling.style.display='inline';" /><span style="display:none;">${specialCharacter.emoji}</span>`;
+            }
+        }
+    });
+
+    console.log('✅ Board assets refreshed');
 }
 
 // Create the master progress timeline
@@ -93,8 +145,11 @@ function createProgressTimeline() {
             // Mark special squares with character assets
             const specialCharacter = getSpecialCharacterAsset(i);
             if (specialCharacter) {
-                // Use PNG asset for special character cards
-                segment.innerHTML = `<img src="/static/games/CandyLand/assets/images/cards/${specialCharacter.asset}" alt="${specialCharacter.name}" class="character-asset" onerror="this.style.display='none'; this.nextSibling.style.display='inline';" /><span style="display:none;">${specialCharacter.emoji}</span>`;
+                // Use theme-based PNG asset for special character cards
+                const characterMapping = getCharacterMapping();
+                const themeCharacter = characterMapping[specialCharacter.name];
+                const imageSrc = themeCharacter ? themeCharacter.image : `/static/games/CandyLand/assets/images/cards/${specialCharacter.asset}`;
+                segment.innerHTML = `<img src="${imageSrc}" alt="${specialCharacter.name}" class="character-asset" onerror="this.style.display='none'; this.nextSibling.style.display='inline';" /><span style="display:none;">${specialCharacter.emoji}</span>`;
                 segment.className += ' milestone character-square';
             } else if (gameState.specialSquares.shortcuts[i]) {
                 segment.innerHTML = '🌈';
@@ -198,8 +253,11 @@ function updatePlayerTiles(player) {
             // Add special square indicators with character assets
             const specialCharacter = getSpecialCharacterAsset(tilePosition);
             if (specialCharacter) {
-                // Use PNG asset for special character cards
-                tile.innerHTML = `<img src="/static/games/CandyLand/assets/images/cards/${specialCharacter.asset}" alt="${specialCharacter.name}" class="character-asset" onerror="this.style.display='none'; this.nextSibling.style.display='inline';" /><span style="display:none;">${specialCharacter.emoji}</span>`;
+                // Use theme-based PNG asset for special character cards
+                const characterMapping = getCharacterMapping();
+                const themeCharacter = characterMapping[specialCharacter.name];
+                const imageSrc = themeCharacter ? themeCharacter.image : `/static/games/CandyLand/assets/images/cards/${specialCharacter.asset}`;
+                tile.innerHTML = `<img src="${imageSrc}" alt="${specialCharacter.name}" class="character-asset" onerror="this.style.display='none'; this.nextSibling.style.display='inline';" /><span style="display:none;">${specialCharacter.emoji}</span>`;
                 tile.className += ' character-tile';
             } else if (gameState.specialSquares.shortcuts[tilePosition]) {
                 tile.innerHTML = '🌈';
@@ -730,6 +788,7 @@ window.createOverlayWheel = createOverlayWheel;
 window.showWheelOverlay = showWheelOverlay;
 window.hideWheelOverlay = hideWheelOverlay;
 window.spinOverlayWheel = spinOverlayWheel;
+window.refreshBoardAssets = refreshBoardAssets;
 
 // Create overlay wheel with predetermined ending position
 function createOverlayWheel(endingCard) {
@@ -850,18 +909,13 @@ function createOverlayWheel(endingCard) {
 
         // Set content based on card type
         if (card.type === 'special') {
-            // Use PNG image for special characters
-            const characterMap = {
-                'Princess Lolly': 'princess-lolly.png',
-                'Queen Frostine': 'queen-frostline.png',
-                'King Candy': 'king-candy.png',
-                'Gingerbread Man': 'gingerbread-man.png'
-            };
-
-            const imageSrc = characterMap[card.character] || 'princess-lolly.png';
-            textOverlay.innerHTML = `<img src="/static/games/CandyLand/assets/images/cards/${imageSrc}" alt="${card.character}" style="width: 32px; height: 32px; object-fit: contain;">`;
+            // Use theme-based character mapping
+            const characterMapping = getCharacterMapping();
+            const themeCharacter = characterMapping[card.character];
+            const imageSrc = themeCharacter ? themeCharacter.image : `/static/games/CandyLand/assets/images/cards/princess-lolly.png`;
+            textOverlay.innerHTML = `<img src="${imageSrc}" alt="${themeCharacter ? themeCharacter.name : card.character}" style="width: 32px; height: 32px; object-fit: contain;">`;
             textOverlay.style.color = '#8B5CF6'; // Purple for special cards
-            console.log(`  Text overlay ${index}: Special card "${card.character}" -> PNG: "${imageSrc}"`);
+            console.log(`  Text overlay ${index}: Special card "${card.character}" -> Theme: "${themeCharacter ? themeCharacter.name : card.character}" -> Image: "${imageSrc}"`);
         } else {
             // Use colored icons for color cards
             const colorMap = {
@@ -933,20 +987,42 @@ function startCardSpinning(endingCard) {
     console.log('🎲 Card spinning:');
     console.log('  - Predetermined card:', endingCard);
 
-    // Get all available cards for cycling
-    const availableCards = getAvailableWheelCards();
-    const allCards = [...availableCards];
+    // Get available cards from the main deck (not yet used)
+    const availableCards = gameState.deck.filter(card =>
+        !gameState.usedCards.some(usedCard =>
+            usedCard.type === card.type &&
+            usedCard.color === card.color &&
+            usedCard.character === card.character
+        )
+    );
 
-    // Add some random cards if we don't have enough
-    while (allCards.length < 20) {
-        const randomCard = gameState.wheelDeck[Math.floor(Math.random() * gameState.wheelDeck.length)];
-        allCards.push(randomCard);
+    console.log(`🎡 Available cards for spinning: ${availableCards.length}`);
+
+    // Create spinning sequence with available cards
+    const allCards = [];
+
+    // Add available cards to spinning sequence
+    if (availableCards.length > 0) {
+        // Take up to 15 random cards from available deck
+        const cardsToUse = Math.min(15, availableCards.length);
+        const shuffledAvailable = [...availableCards];
+
+        // Shuffle available cards
+        for (let i = shuffledAvailable.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledAvailable[i], shuffledAvailable[j]] = [shuffledAvailable[j], shuffledAvailable[i]];
+        }
+
+        // Add random cards from available deck
+        for (let i = 0; i < cardsToUse; i++) {
+            allCards.push(shuffledAvailable[i]);
+        }
     }
 
-    // Shuffle the cards for random cycling
-    for (let i = allCards.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [allCards[i], allCards[j]] = [allCards[j], allCards[i]];
+    // If we don't have enough cards, add some from the full deck (this should rarely happen)
+    while (allCards.length < 10) {
+        const randomCard = gameState.deck[Math.floor(Math.random() * gameState.deck.length)];
+        allCards.push(randomCard);
     }
 
     // Ensure the ending card is at the end
@@ -969,15 +1045,12 @@ function startCardSpinning(endingCard) {
         const currentCard = allCards[currentIndex % allCards.length];
 
         if (currentCard.type === 'special') {
-            const characterMap = {
-                'Princess Lolly': 'princess-lolly.png',
-                'Queen Frostine': 'queen-frostline.png',
-                'King Candy': 'king-candy.png',
-                'Gingerbread Man': 'gingerbread-man.png'
-            };
-            const imageSrc = characterMap[currentCard.character] || 'princess-lolly.png';
-            cardIcon.innerHTML = `<img src="/static/games/CandyLand/assets/images/cards/${imageSrc}" alt="${currentCard.character}" style="width: 120px; height: 120px; object-fit: contain;">`;
-            cardText.textContent = ''; // No text for special cards
+            // Use theme-based character mapping
+            const characterMapping = getCharacterMapping();
+            const themeCharacter = characterMapping[currentCard.character];
+            const imageSrc = themeCharacter ? themeCharacter.image : `/static/games/CandyLand/assets/images/cards/princess-lolly.png`;
+            cardIcon.innerHTML = `<img src="${imageSrc}" alt="${themeCharacter ? themeCharacter.name : currentCard.character}" style="width: 120px; height: 120px; object-fit: contain;">`;
+            cardText.textContent = themeCharacter ? themeCharacter.name : currentCard.character; // Show theme-based name
         } else {
             const colorMap = {
                 'red': '🔴', 'blue': '🔵', 'yellow': '🟡',
@@ -1015,15 +1088,12 @@ function startCardSpinning(endingCard) {
 
             // CRITICAL: Update the overlay card to show the EXACT predetermined card
             if (endingCard.type === 'special') {
-                const characterMap = {
-                    'Princess Lolly': 'princess-lolly.png',
-                    'Queen Frostine': 'queen-frostline.png',
-                    'King Candy': 'king-candy.png',
-                    'Gingerbread Man': 'gingerbread-man.png'
-                };
-                const imageSrc = characterMap[endingCard.character] || 'princess-lolly.png';
-                cardIcon.innerHTML = `<img src="/static/games/CandyLand/assets/images/cards/${imageSrc}" alt="${endingCard.character}" style="width: 120px; height: 120px; object-fit: contain;">`;
-                cardText.textContent = ''; // No text for special cards
+                // Use theme-based character mapping
+                const characterMapping = getCharacterMapping();
+                const themeCharacter = characterMapping[endingCard.character];
+                const imageSrc = themeCharacter ? themeCharacter.image : `/static/games/CandyLand/assets/images/cards/princess-lolly.png`;
+                cardIcon.innerHTML = `<img src="${imageSrc}" alt="${themeCharacter ? themeCharacter.name : endingCard.character}" style="width: 120px; height: 120px; object-fit: contain;">`;
+                cardText.textContent = themeCharacter ? themeCharacter.name : endingCard.character; // Show theme-based name
             } else {
                 const colorMap = {
                     'red': '🔴', 'blue': '🔵', 'yellow': '🟡',
@@ -1101,6 +1171,7 @@ if (typeof module !== 'undefined' && module.exports) {
         createOverlayWheel,
         showWheelOverlay,
         hideWheelOverlay,
-        spinOverlayWheel
+        spinOverlayWheel,
+        refreshBoardAssets
     };
 }

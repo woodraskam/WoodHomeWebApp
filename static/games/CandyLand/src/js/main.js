@@ -18,19 +18,19 @@ function getCharacterMapping() {
         return {
             'Princess Lolly': {
                 image: '/static/games/CandyLand/assets/images/cards/Gerald.png',
-                name: 'Gerald'
+                name: 'Gerald'  // Change to new character name
             },
             'Queen Frostine': {
                 image: '/static/games/CandyLand/assets/images/cards/Piggie.png',
-                name: 'Piggie'
+                name: 'Piggie'  // Change to new character name
             },
             'King Candy': {
                 image: '/static/games/CandyLand/assets/images/cards/Unicorn.png',
-                name: 'Unicorn'
+                name: 'Unicorn'  // Change to new character name
             },
             'Gingerbread Man': {
                 image: '/static/games/CandyLand/assets/images/cards/Yeti.png',
-                name: 'Yeti'
+                name: 'Yeti'  // Change to new character name
             }
         };
     } else {
@@ -66,6 +66,11 @@ function selectTheme(theme) {
     });
     event.target.classList.add('selected');
     event.target.style.transform = 'scale(1.1)';
+
+    // Refresh board assets if game is already started
+    if (typeof refreshBoardAssets === 'function') {
+        refreshBoardAssets();
+    }
 
     // Play selection sound if available
     if (typeof playSound === 'function') {
