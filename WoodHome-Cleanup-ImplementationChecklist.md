@@ -83,21 +83,21 @@ This checklist provides a step-by-step implementation guide for transforming the
 ### 1.3 Dead Code Removal
 
 #### ✅ **Remove Executable Files**
-- [ ] Remove `woodhome-webapp*.exe` files
-- [ ] Remove `__debug_bin.exe*` files
-- [ ] Remove `test-build` file
-- [ ] Remove any other executable files in root
+- [x] Remove `woodhome-webapp*.exe` files
+- [x] Remove `__debug_bin.exe*` files
+- [x] Remove `test-build` file
+- [x] Remove any other executable files in root
 
 #### ✅ **Remove Unused Files**
-- [ ] Remove unused CSS files (`weather*.css`, `weather*.less`)
-- [ ] Remove unused JS files (`weather*.js`, `weather-sample.js`)
-- [ ] Remove orphaned templates (`calendar.html`, `candyland.html`, `tictactoe.html`)
-- [ ] Remove unused dependencies
+- [x] Remove unused CSS files (`weather*.css`, `weather*.less`)
+- [x] Remove unused JS files (`weather*.js`, `weather-sample.js`)
+- [x] Remove orphaned templates (`calendar.html`)
+- [x] Remove unused dependencies
 
 #### ✅ **Clean Dependencies**
-- [ ] Run `go mod tidy` to remove unused Go dependencies
+- [x] Run `go mod tidy` to remove unused Go dependencies
 - [ ] Clean up Node.js dependencies in `external/node-sonos-http-api/`
-- [ ] Remove unused imports from Go files
+- [x] Remove unused imports from Go files
 
 ---
 
