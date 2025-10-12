@@ -626,7 +626,7 @@ func main() {
 	http.HandleFunc("/api/connectivity", connectivityTestHandler)
 
 	// Static files (register before catch-all)
-	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./static/"))))
+	http.Handle("/static/", http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static/"))))
 
 	// Root handler last (catch-all)
 	http.HandleFunc("/", homeHandler)
@@ -661,7 +661,7 @@ func homeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	log.Printf("Loading SPA dashboard template...")
-	tmpl, err := template.ParseFiles("templates/spa-dashboard.html")
+	tmpl, err := template.ParseFiles("web/templates/spa-dashboard.html")
 	if err != nil {
 		log.Printf("Error parsing template: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -688,7 +688,7 @@ func candyLandHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	// Try to parse the template with error handling
-	tmpl, err := template.ParseFiles("templates/candyland.html")
+	tmpl, err := template.ParseFiles("web/templates/candyland.html")
 	if err != nil {
 		log.Printf("Template parsing error: %v", err)
 		http.Error(w, "Template parsing error: "+err.Error(), http.StatusInternalServerError)
@@ -712,7 +712,7 @@ func ticTacToeHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	// Try to parse the template with error handling
-	tmpl, err := template.ParseFiles("templates/tictactoe.html")
+	tmpl, err := template.ParseFiles("web/templates/tictactoe.html")
 	if err != nil {
 		log.Printf("Template parsing error: %v", err)
 		http.Error(w, "Template parsing error: "+err.Error(), http.StatusInternalServerError)
@@ -980,7 +980,7 @@ func cribbageHomeHandler(w http.ResponseWriter, r *http.Request) {
 		"lower":      strings.ToLower,
 		"suitSymbol": getSuitSymbol,
 		"colorClass": getColorClass,
-	}).ParseFiles("templates/cribbage-home.html"))
+	}).ParseFiles("web/templates/cribbage-home.html"))
 
 	data := map[string]interface{}{
 		"Title": "Woodraska Cribbage - WoodHome",
@@ -1016,7 +1016,7 @@ func cribbageBoardHandler(w http.ResponseWriter, r *http.Request) {
 		"lower":      strings.ToLower,
 		"suitSymbol": getSuitSymbol,
 		"colorClass": getColorClass,
-	}).ParseFiles("templates/cribbage-board.html"))
+	}).ParseFiles("web/templates/cribbage-board.html"))
 
 	// Create sample card data for display
 	player1Hand := []map[string]interface{}{
@@ -1095,7 +1095,7 @@ func cribbagePlayerHandler(w http.ResponseWriter, r *http.Request) {
 		"lower":      strings.ToLower,
 		"suitSymbol": getSuitSymbol,
 		"colorClass": getColorClass,
-	}).ParseFiles("templates/cribbage-controller.html"))
+	}).ParseFiles("web/templates/cribbage-controller.html"))
 
 	// Determine player score and opponent score
 	var playerScore, opponentScore int
@@ -1454,7 +1454,7 @@ func sonosDashboardHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	// Try to parse the template with error handling
-	tmpl, err := template.ParseFiles("templates/sonos/dashboard.html")
+	tmpl, err := template.ParseFiles("web/templates/sonos/dashboard.html")
 	if err != nil {
 		log.Printf("Sonos template parsing error: %v", err)
 		http.Error(w, "Template parsing error: "+err.Error(), http.StatusInternalServerError)

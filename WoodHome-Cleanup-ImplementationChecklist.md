@@ -34,16 +34,16 @@ This checklist provides a step-by-step implementation guide for transforming the
 - [x] Move `ImplementationChecklists/` to `docs/guides/`
 - [x] Move `static/` to `web/`
 - [x] Move `templates/` to `web/`
-- [ ] Move `node-sonos-http-api/` to `external/` (blocked - process in use)
+- [x] Move `node-sonos-http-api/` to `external/`
 - [x] Move `*.ps1` files to `scripts/`
 - [x] Move `*.bat` files to `scripts/`
 - [x] Move `database/` to `configs/`
 
 #### ✅ **Update Import Paths**
-- [ ] Update all Go files to use new import paths
-- [ ] Update `go.mod` if necessary
-- [ ] Test compilation after path changes
-- [ ] Fix any broken imports
+- [x] Update all Go files to use new import paths
+- [x] Update `go.mod` if necessary
+- [x] Test compilation after path changes
+- [x] Fix any broken imports
 
 ### 1.2 Main.go Refactoring
 
