@@ -25,6 +25,13 @@ func NewHueHandler(hueService *services.HueService) *HueHandler {
 	}
 }
 
+// RegisterRoutes registers all Hue routes
+func (h *HueHandler) RegisterRoutes(router *mux.Router) {
+	router.HandleFunc("/lights", h.GetLights).Methods("GET")
+	router.HandleFunc("/rooms", h.GetRooms).Methods("GET")
+	router.HandleFunc("/lights/{id}/toggle", h.ToggleLight).Methods("POST")
+}
+
 // GetLights returns all lights
 func (h *HueHandler) GetLights(w http.ResponseWriter, r *http.Request) {
 	lights := h.hueService.GetLights()
