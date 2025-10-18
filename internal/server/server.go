@@ -114,6 +114,7 @@ func (s *Server) SetupRoutes() {
 	// Game routes
 	router.HandleFunc("/candyland", s.candylandHandler).Methods("GET")
 	router.HandleFunc("/tictactoe", s.tictactoeHandler).Methods("GET")
+	router.HandleFunc("/ConnectFour", s.connectfourHandler).Methods("GET")
 	router.HandleFunc("/cribbage", s.cribbageHandler).Methods("GET")
 	router.HandleFunc("/cribbage-board", s.cribbageBoardHandler).Methods("GET")
 	router.HandleFunc("/cribbage-controller", s.cribbageControllerHandler).Methods("GET")
@@ -237,6 +238,21 @@ func (s *Server) tictactoeHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	if err := tmpl.Execute(w, nil); err != nil {
 		log.Printf("Error executing tictactoe template: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
+
+func (s *Server) connectfourHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	tmpl, err := template.ParseFiles("web/templates/connectfour.html")
+	if err != nil {
+		log.Printf("Error parsing connectfour template: %v", err)
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if err := tmpl.Execute(w, nil); err != nil {
+		log.Printf("Error executing connectfour template: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

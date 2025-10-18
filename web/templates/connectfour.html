@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{{.Title}}</title>
+
+        <!-- Connect Four Game Styles -->
+        <link rel="stylesheet" href="/static/games/ConnectFour/src/css/styles.css">
+        <link rel="stylesheet" href="/static/games/ConnectFour/src/css/animations.css">
+        <link rel="stylesheet" href="/static/games/ConnectFour/src/css/responsive.css">
+
+        <!-- Navigation back to main site -->
+        <style>
+            .nav-back {
+                position: fixed;
+                top: 20px;
+                left: 20px;
+                z-index: 1000;
+                background: rgba(255, 255, 255, 0.9);
+                padding: 10px;
+                border-radius: 25px;
+                text-decoration: none;
+                color: #333;
+                font-weight: bold;
+                box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+                transition: all 0.3s ease;
+                display: flex;
+                align-items: center;
+                overflow: hidden;
+                white-space: nowrap;
+                width: 50px;
+                height: 50px;
+            }
+
+            .nav-back .arrow {
+                font-size: 1.2rem;
+                transition: all 0.3s ease;
+                display: inline-block;
+                flex-shrink: 0;
+            }
+
+            .nav-back .text {
+                opacity: 0;
+                transform: translateX(-20px);
+                transition: all 0.3s ease;
+                margin-left: 8px;
+                font-size: 0.9rem;
+                white-space: nowrap;
+            }
+
+            .nav-back:hover {
+                width: 120px;
+                background: rgba(255, 255, 255, 1);
+            }
+
+            .nav-back:hover .arrow {
+                transform: translateX(-5px);
+            }
+
+            .nav-back:hover .text {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        </style>
+    </head>
+
+    <body>
+        <!-- Navigation back to main site -->
+        <a href="/" class="nav-back">
+            <span class="arrow">←</span>
+            <span class="text">Back to Home</span>
+        </a>
+
+        <!-- Connect Four Game Container -->
+        <div class="game-container">
+            <div class="game-header">
+                <h1>Connect Four</h1>
+                <div class="game-info">
+                    <div class="current-player">
+                        <span class="player-label">Current Player:</span>
+                        <span class="player-disc red"></span>
+                        <span class="player-name">Player 1</span>
+                    </div>
+                    <div class="game-controls">
+                        <button id="newGameBtn" class="btn btn-primary">New Game</button>
+                        <button id="resetBtn" class="btn btn-secondary">Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Board -->
+            <div class="game-board" id="gameBoard">
+                <!-- 7 columns x 6 rows = 42 cells -->
+                <div class="board-column" data-column="0">
+                    <div class="board-cell" data-row="0"></div>
+                    <div class="board-cell" data-row="1"></div>
+                    <div class="board-cell" data-row="2"></div>
+                    <div class="board-cell" data-row="3"></div>
+                    <div class="board-cell" data-row="4"></div>
+                    <div class="board-cell" data-row="5"></div>
+                </div>
+                <div class="board-column" data-column="1">
+                    <div class="board-cell" data-row="0"></div>
+                    <div class="board-cell" data-row="1"></div>
+                    <div class="board-cell" data-row="2"></div>
+                    <div class="board-cell" data-row="3"></div>
+                    <div class="board-cell" data-row="4"></div>
+                    <div class="board-cell" data-row="5"></div>
+                </div>
+                <div class="board-column" data-column="2">
+                    <div class="board-cell" data-row="0"></div>
+                    <div class="board-cell" data-row="1"></div>
+                    <div class="board-cell" data-row="2"></div>
+                    <div class="board-cell" data-row="3"></div>
+                    <div class="board-cell" data-row="4"></div>
+                    <div class="board-cell" data-row="5"></div>
+                </div>
+                <div class="board-column" data-column="3">
+                    <div class="board-cell" data-row="0"></div>
+                    <div class="board-cell" data-row="1"></div>
+                    <div class="board-cell" data-row="2"></div>
+                    <div class="board-cell" data-row="3"></div>
+                    <div class="board-cell" data-row="4"></div>
+                    <div class="board-cell" data-row="5"></div>
+                </div>
+                <div class="board-column" data-column="4">
+                    <div class="board-cell" data-row="0"></div>
+                    <div class="board-cell" data-row="1"></div>
+                    <div class="board-cell" data-row="2"></div>
+                    <div class="board-cell" data-row="3"></div>
+                    <div class="board-cell" data-row="4"></div>
+                    <div class="board-cell" data-row="5"></div>
+                </div>
+                <div class="board-column" data-column="5">
+                    <div class="board-cell" data-row="0"></div>
+                    <div class="board-cell" data-row="1"></div>
+                    <div class="board-cell" data-row="2"></div>
+                    <div class="board-cell" data-row="3"></div>
+                    <div class="board-cell" data-row="4"></div>
+                    <div class="board-cell" data-row="5"></div>
+                </div>
+                <div class="board-column" data-column="6">
+                    <div class="board-cell" data-row="0"></div>
+                    <div class="board-cell" data-row="1"></div>
+                    <div class="board-cell" data-row="2"></div>
+                    <div class="board-cell" data-row="3"></div>
+                    <div class="board-cell" data-row="4"></div>
+                    <div class="board-cell" data-row="5"></div>
+                </div>
+            </div>
+
+            <!-- Game Status -->
+            <div class="game-status" id="gameStatus">
+                <div class="status-message">Click a column to drop your disc!</div>
+            </div>
+
+            <!-- Game Settings -->
+            <div class="game-settings">
+                <div class="setting-group">
+                    <label for="gameMode">Game Mode:</label>
+                    <select id="gameMode" class="setting-select">
+                        <option value="human">Human vs Human</option>
+                        <option value="ai">Human vs AI</option>
+                    </select>
+                </div>
+                <div class="setting-group">
+                    <label for="aiDifficulty">AI Difficulty:</label>
+                    <select id="aiDifficulty" class="setting-select">
+                        <option value="easy">Easy</option>
+                        <option value="medium">Medium</option>
+                        <option value="hard">Hard</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <!-- Game Scripts -->
+        <script src="/static/games/ConnectFour/src/js/main.js"></script>
+        <script src="/static/games/ConnectFour/src/js/gameLogic.js"></script>
+        <script src="/static/games/ConnectFour/src/js/ai.js"></script>
+        <script src="/static/games/ConnectFour/src/js/animations.js"></script>
+    </body>
+
+</html>
