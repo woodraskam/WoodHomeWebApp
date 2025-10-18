@@ -133,10 +133,10 @@ body {
 }
 
 .btn {
-    padding: 10px 20px;
+    padding: clamp(8px, 1.5vw, 12px) clamp(16px, 3vw, 24px);
     border: none;
-    border-radius: 25px;
-    font-size: 1rem;
+    border-radius: clamp(15px, 3vw, 25px);
+    font-size: var(--responsive-font);
     font-weight: bold;
     cursor: pointer;
     transition: all 0.3s ease;
@@ -150,7 +150,7 @@ body {
 
 .btn-primary:hover {
     background: #45a049;
-    transform: translateY(-2px);
+    transform: translateY(clamp(-1px, -0.2vw, -3px));
     box-shadow: 0 6px 20px var(--shadow-hover);
 }
 
@@ -161,7 +161,7 @@ body {
 
 .btn-secondary:hover {
     background: #e68900;
-    transform: translateY(-2px);
+    transform: translateY(clamp(-1px, -0.2vw, -3px));
     box-shadow: 0 6px 20px var(--shadow-hover);
 }
 
@@ -205,7 +205,7 @@ body {
 }
 
 .board-column:hover {
-    transform: translateY(-5px);
+    transform: translateY(clamp(-3px, -0.5vw, -8px));
 }
 
 .board-column:hover::after {
@@ -228,7 +228,7 @@ body {
     }
 
     100% {
-        transform: translateX(-50%) translateY(5px);
+        transform: translateX(-50%) translateY(clamp(3px, 0.5vw, 8px));
     }
 }
 
@@ -253,7 +253,7 @@ body {
 
 @keyframes dropDisc {
     0% {
-        transform: translateY(-100px);
+        transform: translateY(clamp(-50px, -10vw, -100px));
         opacity: 0;
     }
 
