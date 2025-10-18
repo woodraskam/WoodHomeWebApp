@@ -387,6 +387,20 @@ body {
         flex-direction: column;
         gap: 20px;
     }
+    
+    /* Touch-friendly improvements */
+    .board-column {
+        min-height: clamp(200px, 40vh, 300px);
+    }
+    
+    .btn {
+        min-height: 44px; /* Touch target minimum */
+        min-width: 44px;
+    }
+    
+    .setting-select {
+        min-height: 44px; /* Touch target minimum */
+    }
 }
 
 @media (max-width: 480px) {
@@ -407,6 +421,23 @@ body {
     .btn {
         padding: 8px 16px;
         font-size: 0.9rem;
+        min-height: 44px; /* Touch target minimum */
+        min-width: 44px;
+    }
+    
+    /* Enhanced mobile touch targets */
+    .board-column {
+        min-height: clamp(180px, 35vh, 250px);
+        padding: 2px; /* Add touch padding */
+    }
+    
+    .setting-select {
+        min-height: 44px; /* Touch target minimum */
+        font-size: 1rem; /* Larger text for mobile */
+    }
+    
+    .game-header h1 {
+        font-size: clamp(1.2rem, 5vw, 1.8rem);
     }
 }
 
@@ -415,6 +446,18 @@ body {
     .game-board {
         width: min(95vw, 70vh);
         height: min(95vw, 70vh);
+    }
+    
+    .game-container {
+        padding: 1vh 2vw;
+    }
+    
+    .game-header {
+        margin-bottom: 1vh;
+    }
+    
+    .game-settings {
+        margin-top: 1vh;
     }
 }
 
@@ -426,6 +469,25 @@ body {
     
     .game-container {
         padding: 1vh 2vw;
+    }
+    
+    .game-header {
+        margin-bottom: 1vh;
+    }
+    
+    .game-settings {
+        margin-top: 1vh;
+    }
+    
+    /* Landscape mobile optimizations */
+    .board-cell {
+        min-width: clamp(15px, 3vw, 25px);
+        min-height: clamp(15px, 3vw, 25px);
+    }
+    
+    .btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
     }
 }
 
