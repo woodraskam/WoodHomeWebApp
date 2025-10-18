@@ -213,26 +213,6 @@ class MemoryGame {
             // Add click event with throttling for performance
             card.addEventListener('click', this.throttle(() => this.handleCardClick(card, i), 300));
             
-            // Add touch event to clear focus on touch devices
-            card.addEventListener('touchend', (e) => {
-                e.preventDefault();
-                card.blur();
-                // Force remove focus immediately
-                if (document.activeElement === card) {
-                    document.activeElement.blur();
-                }
-            });
-            
-            // Prevent focus on touch devices
-            card.addEventListener('touchstart', (e) => {
-                e.preventDefault();
-            });
-            
-            // Additional focus prevention for iPad
-            card.addEventListener('focus', (e) => {
-                e.target.blur();
-            });
-            
             fragment.appendChild(card);
         }
         
@@ -266,21 +246,8 @@ class MemoryGame {
             return;
         }
         
-        // Clear focus to prevent touch device hover/focus issues
-        cardElement.blur();
-        if (document.activeElement) {
-            document.activeElement.blur();
-        }
-        
         this.gameLogic.flipCard(cardIndex);
         this.animations.flipCard(cardElement);
-        
-        // Additional focus clearing for iPad
-        setTimeout(() => {
-            if (document.activeElement) {
-                document.activeElement.blur();
-            }
-        }, 100);
         
         // Check for match after flip animation completes
         setTimeout(() => {

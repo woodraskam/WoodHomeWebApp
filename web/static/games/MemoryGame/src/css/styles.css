@@ -222,7 +222,8 @@ body {
     transform-style: preserve-3d;
     perspective: 1000px;
     will-change: transform;
-    /* Prevent focus on touch devices */
+    /* Proper touch handling for iOS Safari */
+    touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
@@ -287,14 +288,22 @@ body {
     transform: rotateY(180deg);
 }
 
-/* Ensure card-back is completely hidden when flipped */
+/* Completely hide card-back when flipped - multiple approaches */
 .memory-card.flipped .card-back {
-    display: none;
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+    transform: scale(0) !important;
+    z-index: -1 !important;
+    pointer-events: none !important;
 }
 
 /* Ensure card-front is visible when flipped */
 .memory-card.flipped .card-front {
-    display: flex;
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
+    z-index: 1 !important;
 }
 
 .memory-card.matched {

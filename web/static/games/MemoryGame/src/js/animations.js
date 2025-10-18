@@ -8,44 +8,43 @@ class MemoryGameAnimations {
 
     flipCard(cardElement) {
         if (!cardElement) return;
-
+        
         console.log('Flipping card:', cardElement);
         cardElement.classList.add('flipping');
-
+        
         setTimeout(() => {
             cardElement.classList.remove('flipping');
             cardElement.classList.add('flipped');
-
-            // Force hide card-back element to prevent overlay issues
+            
+            // Completely remove card-back element from DOM to prevent any overlay
             const cardBack = cardElement.querySelector('.card-back');
             if (cardBack) {
-                cardBack.style.display = 'none';
-                cardBack.style.visibility = 'hidden';
-                cardBack.style.opacity = '0';
+                cardBack.remove();
             }
-
+            
             console.log('Card flip complete');
         }, 800); // Match animation duration
     }
 
     flipCardsBack() {
         const flippedCards = document.querySelectorAll('.memory-card.flipped:not(.matched)');
-
+        
         console.log('Flipping back', flippedCards.length, 'non-matched cards');
         flippedCards.forEach(card => {
             card.classList.add('flipping');
-
+            
             setTimeout(() => {
                 card.classList.remove('flipping', 'flipped');
-
-                // Restore card-back element for unflipped cards
-                const cardBack = card.querySelector('.card-back');
-                if (cardBack) {
-                    cardBack.style.display = '';
-                    cardBack.style.visibility = '';
-                    cardBack.style.opacity = '';
+                
+                // Recreate card-back element since it was removed
+                const cardInner = card.querySelector('.card-inner');
+                if (cardInner && !card.querySelector('.card-back')) {
+                    const cardBack = document.createElement('div');
+                    cardBack.className = 'card-back';
+                    cardBack.textContent = '?';
+                    cardInner.appendChild(cardBack);
                 }
-
+                
                 console.log('Card flipped back');
             }, 800); // Match animation duration
         });
