@@ -209,6 +209,12 @@ class MemoryGame {
             // Add click event with throttling for performance
             card.addEventListener('click', this.throttle(() => this.handleCardClick(card, i), 300));
             
+            // Add touch event to clear focus on touch devices
+            card.addEventListener('touchend', (e) => {
+                e.preventDefault();
+                card.blur();
+            });
+            
             fragment.appendChild(card);
         }
         
@@ -241,6 +247,9 @@ class MemoryGame {
         if (!this.gameLogic.canFlipCard(cardIndex)) {
             return;
         }
+        
+        // Clear focus to prevent touch device hover/focus issues
+        cardElement.blur();
         
         this.gameLogic.flipCard(cardIndex);
         this.animations.flipCard(cardElement);

@@ -226,6 +226,31 @@ body {
     box-shadow: 0 4px 12px var(--shadow-hover);
 }
 
+/* Disable hover effects on flipped and matched cards */
+.memory-card.flipped:hover,
+.memory-card.matched:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+/* Touch device fixes - prevent focus/hover persistence */
+@media (hover: none) and (pointer: coarse) {
+    .memory-card:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .memory-card:focus {
+        outline: none;
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .memory-card:active {
+        transform: scale(0.95);
+    }
+}
+
 .memory-card.flipped {
     transform: rotateY(180deg);
 }
