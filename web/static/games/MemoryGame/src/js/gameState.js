@@ -247,7 +247,7 @@ class Player {
 
     addMatch() {
         this.matches++;
-        this.score += 10; // Base points per match
+        // Score is now handled by updatePlayerScore() in main.js
         this.updateAccuracy();
     }
 
