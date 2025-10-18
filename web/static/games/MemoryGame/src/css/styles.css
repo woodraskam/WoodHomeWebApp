@@ -218,6 +218,7 @@ body {
     cursor: pointer;
     transform-style: preserve-3d;
     perspective: 1000px;
+    will-change: transform;
 }
 
 .memory-card:hover {
@@ -241,6 +242,7 @@ body {
     text-align: center;
     transition: transform 0.6s;
     transform-style: preserve-3d;
+    will-change: transform;
 }
 
 .memory-card .card-front,

@@ -20,8 +20,9 @@
 }
 
 .memory-card.flipping {
-    animation: cardFlip 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    animation: cardFlip 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
     transform-style: preserve-3d;
+    will-change: transform;
 }
 
 /* Card Reveal Animation */
@@ -69,8 +70,9 @@
 }
 
 .memory-card.matching {
-    animation: cardMatch 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+    animation: cardMatch 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
     background: linear-gradient(45deg, #4CAF50, #8BC34A);
+    will-change: transform, box-shadow;
 }
 
 /* Enhanced Card Mismatch Animation */
@@ -118,8 +120,9 @@
 }
 
 .memory-card.mismatching {
-    animation: cardMismatch 0.6s ease-in-out;
+    animation: cardMismatch 0.6s ease-in-out forwards;
     background: linear-gradient(45deg, #F44336, #FF5722);
+    will-change: transform, box-shadow;
 }
 
 /* Card Shuffle Animation */

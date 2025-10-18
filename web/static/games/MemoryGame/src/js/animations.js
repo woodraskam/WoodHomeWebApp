@@ -9,12 +9,14 @@ class MemoryGameAnimations {
     flipCard(cardElement) {
         if (!cardElement) return;
         
+        console.log('Flipping card:', cardElement);
         cardElement.classList.add('flipping');
         
         setTimeout(() => {
             cardElement.classList.remove('flipping');
             cardElement.classList.add('flipped');
-        }, 300);
+            console.log('Card flip complete');
+        }, 800); // Match animation duration
     }
 
     flipCardsBack() {
@@ -25,13 +27,14 @@ class MemoryGameAnimations {
             
             setTimeout(() => {
                 card.classList.remove('flipping', 'flipped');
-            }, 300);
+            }, 800); // Match animation duration
         });
     }
 
     showMatch() {
         const flippedCards = document.querySelectorAll('.memory-card.flipped:not(.matched)');
         
+        console.log('Showing match animation for', flippedCards.length, 'cards');
         flippedCards.forEach(card => {
             card.classList.add('matching', 'matched');
             
@@ -40,6 +43,7 @@ class MemoryGameAnimations {
             
             setTimeout(() => {
                 card.classList.remove('matching');
+                console.log('Match animation complete');
             }, 800);
         });
     }
@@ -47,11 +51,13 @@ class MemoryGameAnimations {
     showMismatch() {
         const flippedCards = document.querySelectorAll('.memory-card.flipped:not(.matched)');
         
+        console.log('Showing mismatch animation for', flippedCards.length, 'cards');
         flippedCards.forEach(card => {
             card.classList.add('mismatching');
             
             setTimeout(() => {
                 card.classList.remove('mismatching');
+                console.log('Mismatch animation complete');
             }, 500);
         });
     }
