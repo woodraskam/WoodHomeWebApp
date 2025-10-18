@@ -3,7 +3,7 @@
 class MemoryGameState {
     constructor() {
         this.gridSize = 4; // 4x4, 6x6, or 8x8
-        this.cards = []; // 2D array of card objects
+        this.cards = []; // Array of card objects
         this.players = []; // Array of player objects
         this.currentPlayer = 0;
         this.gamePhase = 'setup'; // 'setup', 'playing', 'finished'
@@ -14,6 +14,9 @@ class MemoryGameState {
         this.timer = 0;
         this.gameStartTime = null;
         this.isGameActive = false;
+        this.emojiSet = 'animals'; // Current emoji theme
+        this.difficulty = 'easy'; // easy, medium, hard
+        this.maxFlippedCards = 2; // Maximum cards that can be flipped at once
     }
 
     initializeGame() {
@@ -102,8 +105,61 @@ class MemoryGameState {
             time: this.getGameTime(),
             matchedPairs: this.matchedPairs,
             totalPairs: this.totalPairs,
-            completionRate: (this.matchedPairs / this.totalPairs) * 100
+            completionRate: (this.matchedPairs / this.totalPairs) * 100,
+            gridSize: this.gridSize,
+            emojiSet: this.emojiSet,
+            difficulty: this.difficulty
         };
+    }
+
+    // Validation methods
+    validateGridSize(size) {
+        return [4, 6, 8].includes(size);
+    }
+
+    validatePlayerCount(count) {
+        return count >= 1 && count <= 4;
+    }
+
+    validateEmojiSet(setName) {
+        const validSets = ['animals', 'food', 'objects', 'seasonal'];
+        return validSets.includes(setName);
+    }
+
+    validateDifficulty(level) {
+        const validLevels = ['easy', 'medium', 'hard'];
+        return validLevels.includes(level);
+    }
+
+    // State validation
+    isGameStateValid() {
+        return this.validateGridSize(this.gridSize) &&
+               this.validatePlayerCount(this.players.length) &&
+               this.validateEmojiSet(this.emojiSet) &&
+               this.validateDifficulty(this.difficulty);
+    }
+
+    // Error handling
+    getValidationErrors() {
+        const errors = [];
+        
+        if (!this.validateGridSize(this.gridSize)) {
+            errors.push(`Invalid grid size: ${this.gridSize}. Must be 4, 6, or 8.`);
+        }
+        
+        if (!this.validatePlayerCount(this.players.length)) {
+            errors.push(`Invalid player count: ${this.players.length}. Must be 1-4 players.`);
+        }
+        
+        if (!this.validateEmojiSet(this.emojiSet)) {
+            errors.push(`Invalid emoji set: ${this.emojiSet}. Must be animals, food, objects, or seasonal.`);
+        }
+        
+        if (!this.validateDifficulty(this.difficulty)) {
+            errors.push(`Invalid difficulty: ${this.difficulty}. Must be easy, medium, or hard.`);
+        }
+        
+        return errors;
     }
 }
 
@@ -116,10 +172,20 @@ class Card {
         this.isFlipped = false;
         this.isMatched = false;
         this.pairId = null; // Links paired cards
+        this.flipCount = 0; // Track how many times card has been flipped
+        this.lastFlippedTime = null; // Timestamp of last flip
     }
 
     flip() {
+        if (this.isMatched) {
+            console.warn('Cannot flip matched card');
+            return false;
+        }
+        
         this.isFlipped = !this.isFlipped;
+        this.flipCount++;
+        this.lastFlippedTime = Date.now();
+        return true;
     }
 
     match() {
@@ -130,6 +196,31 @@ class Card {
     reset() {
         this.isFlipped = false;
         this.isMatched = false;
+        this.flipCount = 0;
+        this.lastFlippedTime = null;
+    }
+
+    canFlip() {
+        return !this.isMatched && !this.isFlipped;
+    }
+
+    getStats() {
+        return {
+            id: this.id,
+            emoji: this.emoji,
+            isFlipped: this.isFlipped,
+            isMatched: this.isMatched,
+            flipCount: this.flipCount,
+            pairId: this.pairId
+        };
+    }
+
+    // Validation
+    isValid() {
+        return this.emoji && 
+               typeof this.id === 'number' && 
+               typeof this.row === 'number' && 
+               typeof this.col === 'number';
     }
 }
 
@@ -143,6 +234,12 @@ class Player {
         this.isActive = true;
         this.moves = 0;
         this.accuracy = 0;
+        this.gameStartTime = null;
+        this.totalGameTime = 0;
+        this.bestTime = null;
+        this.wins = 0;
+        this.losses = 0;
+        this.ties = 0;
     }
 
     addMatch() {
@@ -177,7 +274,58 @@ class Player {
             matches: this.matches,
             moves: this.moves,
             accuracy: this.accuracy,
-            isAI: this.isAI
+            isAI: this.isAI,
+            totalGameTime: this.totalGameTime,
+            bestTime: this.bestTime,
+            wins: this.wins,
+            losses: this.losses,
+            ties: this.ties
         };
+    }
+
+    // Game session management
+    startGame() {
+        this.gameStartTime = Date.now();
+    }
+
+    endGame() {
+        if (this.gameStartTime) {
+            const gameTime = Date.now() - this.gameStartTime;
+            this.totalGameTime += gameTime;
+            
+            if (!this.bestTime || gameTime < this.bestTime) {
+                this.bestTime = gameTime;
+            }
+            
+            this.gameStartTime = null;
+        }
+    }
+
+    // Win/Loss tracking
+    recordWin() {
+        this.wins++;
+    }
+
+    recordLoss() {
+        this.losses++;
+    }
+
+    recordTie() {
+        this.ties++;
+    }
+
+    // Validation
+    isValid() {
+        return this.name && 
+               this.color && 
+               typeof this.score === 'number' &&
+               typeof this.matches === 'number' &&
+               typeof this.moves === 'number';
+    }
+
+    // Color validation
+    static isValidColor(color) {
+        const validColors = ['red', 'yellow', 'green', 'blue'];
+        return validColors.includes(color);
     }
 }

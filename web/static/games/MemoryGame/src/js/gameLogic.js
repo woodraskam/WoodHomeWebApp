@@ -3,13 +3,7 @@
 class MemoryGameLogic {
     constructor(gameState) {
         this.gameState = gameState;
-        this.emojiSets = {
-            animals: ['🐶', '🐱', '🐭', '🐹', '🐰', '🦊', '🐻', '🐼', '🐨', '🐯', '🦁', '🐮', '🐷', '🐸', '🐵', '🐔'],
-            food: ['🍎', '🍊', '🍌', '🍇', '🍓', '🍑', '🍒', '🍅', '🥕', '🌽', '🍞', '🧀', '🍕', '🍔', '🌮', '🍰'],
-            objects: ['🚗', '🚕', '🚙', '🚌', '🚎', '🏎️', '🚓', '🚑', '🚒', '🚐', '🚚', '🚛', '🚜', '🏍️', '🚲', '🚁'],
-            seasonal: ['🎃', '👻', '🦇', '🍂', '🍁', '🎄', '⛄', '🎅', '🎁', '🧸', '🎈', '🎉', '🎊', '🎀', '🎂', '🍭']
-        };
-        this.currentEmojiSet = 'animals';
+        this.emojiManager = new EmojiManager();
     }
 
     initializeGame() {
@@ -32,19 +26,14 @@ class MemoryGameLogic {
     generateCardPairs() {
         const totalCards = this.gameState.gridSize * this.gameState.gridSize;
         const pairs = totalCards / 2;
-        const emojis = this.emojiSets[this.currentEmojiSet];
         
-        // Generate pairs
-        const cardEmojis = [];
-        for (let i = 0; i < pairs; i++) {
-            const emoji = emojis[i % emojis.length];
-            cardEmojis.push(emoji, emoji); // Add pair
-        }
+        // Use emoji manager to generate card pairs
+        const cardPairs = this.emojiManager.createCardPairs(this.gameState.gridSize, this.gameState.emojiSet);
         
         // Update game state cards
         for (let i = 0; i < totalCards; i++) {
-            this.gameState.cards[i].emoji = cardEmojis[i];
-            this.gameState.cards[i].pairId = Math.floor(i / 2); // Same pairId for pairs
+            this.gameState.cards[i].emoji = cardPairs[i].emoji;
+            this.gameState.cards[i].pairId = cardPairs[i].pairId;
         }
     }
 
@@ -165,19 +154,20 @@ class MemoryGameLogic {
     }
 
     setEmojiSet(setName) {
-        if (this.emojiSets[setName]) {
-            this.currentEmojiSet = setName;
+        if (this.emojiManager.isValidEmojiSet(setName)) {
+            this.gameState.emojiSet = setName;
+            this.emojiManager.setCurrentSet(setName);
             return true;
         }
         return false;
     }
 
     getAvailableEmojiSets() {
-        return Object.keys(this.emojiSets);
+        return this.emojiManager.getAvailableSets();
     }
 
     getCurrentEmojiSet() {
-        return this.currentEmojiSet;
+        return this.gameState.emojiSet;
     }
 
     // AI helper methods
