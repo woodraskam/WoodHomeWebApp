@@ -346,9 +346,8 @@ class MemoryGame {
             setTimeout(() => {
                 this.showVictoryScreen(results);
             }, 2000);
-        } else {
-            this.nextPlayer();
         }
+        // Note: nextPlayer() is now only called on mismatch in checkForMatch()
     }
 
     showVictoryScreen(results = null) {
