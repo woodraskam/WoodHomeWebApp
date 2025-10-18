@@ -23,6 +23,8 @@
     --responsive-border: clamp(0.2vw, 0.3vw, 0.5vw);
     --responsive-font: clamp(0.8rem, 2vw, 1.2rem);
     --responsive-cell-min: clamp(20px, 4vw, 60px);
+    --responsive-cell-max: clamp(40px, 8vw, 80px);
+    --responsive-hover-size: clamp(30px, 6vw, 80px);
 }
 
 * {
@@ -212,8 +214,8 @@ body {
     top: clamp(-5px, -1vw, -15px);
     left: 50%;
     transform: translateX(-50%);
-    width: clamp(30px, 6vw, 80px);
-    height: clamp(30px, 6vw, 80px);
+    width: var(--responsive-hover-size);
+    height: var(--responsive-hover-size);
     border-radius: 50%;
     background: var(--primary-yellow);
     opacity: 0.7;
@@ -241,6 +243,8 @@ body {
     overflow: hidden;
     min-width: var(--responsive-cell-min);
     min-height: var(--responsive-cell-min);
+    max-width: var(--responsive-cell-max);
+    max-height: var(--responsive-cell-max);
 }
 
 .board-cell.occupied {
@@ -402,6 +406,25 @@ body {
     .btn {
         padding: 8px 16px;
         font-size: 0.9rem;
+    }
+}
+
+/* Orientation-specific responsive sizing */
+@media (orientation: portrait) {
+    .game-board {
+        width: min(95vw, 70vh);
+        height: min(95vw, 70vh);
+    }
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+    .game-board {
+        width: min(80vw, 85vh);
+        height: min(80vw, 85vh);
+    }
+    
+    .game-container {
+        padding: 1vh 2vw;
     }
 }
 
