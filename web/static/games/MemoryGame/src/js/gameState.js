@@ -75,7 +75,10 @@ class MemoryGameState {
 
     clearFlippedCards() {
         this.flippedCards.forEach(cardIndex => {
-            this.cards[cardIndex].isFlipped = false;
+            // Only unflip cards that are not matched
+            if (!this.cards[cardIndex].isMatched) {
+                this.cards[cardIndex].isFlipped = false;
+            }
         });
         this.flippedCards = [];
     }

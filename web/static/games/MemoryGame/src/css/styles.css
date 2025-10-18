@@ -231,8 +231,19 @@ body {
 }
 
 .memory-card.matched {
-    opacity: 0.7;
-    transform: scale(0.95);
+    opacity: 1;
+    transform: scale(1) rotateY(180deg);
+    cursor: default;
+    pointer-events: none;
+    background: linear-gradient(45deg, #4CAF50, #8BC34A);
+    border: 2px solid #4CAF50;
+    box-shadow: 0 0 15px rgba(76, 175, 80, 0.5);
+}
+
+.memory-card.matched .card-front {
+    background: linear-gradient(45deg, #4CAF50, #8BC34A);
+    color: white;
+    font-weight: bold;
 }
 
 .memory-card .card-inner {

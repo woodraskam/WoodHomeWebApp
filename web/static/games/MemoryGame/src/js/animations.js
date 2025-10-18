@@ -22,11 +22,13 @@ class MemoryGameAnimations {
     flipCardsBack() {
         const flippedCards = document.querySelectorAll('.memory-card.flipped:not(.matched)');
         
+        console.log('Flipping back', flippedCards.length, 'non-matched cards');
         flippedCards.forEach(card => {
             card.classList.add('flipping');
             
             setTimeout(() => {
                 card.classList.remove('flipping', 'flipped');
+                console.log('Card flipped back');
             }, 800); // Match animation duration
         });
     }
@@ -43,7 +45,9 @@ class MemoryGameAnimations {
             
             setTimeout(() => {
                 card.classList.remove('matching');
-                console.log('Match animation complete');
+                // Ensure the card stays flipped and matched
+                card.classList.add('flipped');
+                console.log('Match animation complete - card stays revealed');
             }, 800);
         });
     }
