@@ -99,6 +99,12 @@ class MemoryGameLogic {
         const card1 = this.gameState.cards[card1Index];
         const card2 = this.gameState.cards[card2Index];
         
+        console.log('Checking match between cards:');
+        console.log('Card 1:', { emoji: card1.emoji, pairId: card1.pairId, index: card1Index });
+        console.log('Card 2:', { emoji: card2.emoji, pairId: card2.pairId, index: card2Index });
+        console.log('Emoji match:', card1.emoji === card2.emoji);
+        console.log('PairId match:', card1.pairId === card2.pairId);
+        
         if (card1.emoji === card2.emoji && card1.pairId === card2.pairId) {
             // Match found!
             this.gameState.markCardsAsMatched();
