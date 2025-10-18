@@ -260,8 +260,12 @@ class MemoryGame {
             this.animations.showMatch();
             this.updatePlayerScore(result.score);
             this.checkGameComplete();
+            
+            // Show message that player can continue
+            this.showTurnMessage("Great match! Pick another pair to continue your turn.");
         } else if (result.isMismatch) {
             this.animations.showMismatch();
+            this.showTurnMessage("No match! Turn switches to next player.");
             setTimeout(() => {
                 this.gameLogic.flipCardsBack();
                 this.animations.flipCardsBack();
@@ -281,6 +285,19 @@ class MemoryGame {
         }
         
         this.updatePlayerScores();
+    }
+
+    showTurnMessage(message) {
+        const messageElement = document.querySelector('.turn-message');
+        if (messageElement) {
+            messageElement.textContent = message;
+            messageElement.style.display = 'block';
+            
+            // Hide message after 3 seconds
+            setTimeout(() => {
+                messageElement.style.display = 'none';
+            }, 3000);
+        }
     }
 
     updatePlayerScores() {

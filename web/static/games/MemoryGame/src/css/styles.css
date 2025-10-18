@@ -296,6 +296,30 @@ body {
     animation: statusGlow 2s ease-in-out infinite alternate;
 }
 
+.turn-message {
+    font-size: clamp(0.9rem, 2vw, 1.2rem);
+    font-weight: 600;
+    color: var(--primary-yellow);
+    text-shadow: 1px 1px 3px var(--shadow);
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    border: 2px solid var(--primary-yellow);
+    animation: turnMessagePulse 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes turnMessagePulse {
+    0% {
+        transform: scale(1);
+        box-shadow: 0 0 5px var(--primary-yellow);
+    }
+    100% {
+        transform: scale(1.02);
+        box-shadow: 0 0 15px var(--primary-yellow);
+    }
+}
+
 @keyframes statusGlow {
     0% {
         text-shadow: 2px 2px 4px var(--shadow);
