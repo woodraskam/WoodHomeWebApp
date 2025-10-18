@@ -1,0 +1,347 @@
+/* Memory Game - Responsive Design */
+
+/* Mobile First Approach */
+@media (max-width: 768px) {
+    .game-header h1 {
+        font-size: clamp(1.5rem, 4vw, 2rem);
+    }
+
+    .game-info {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    /* Grid sizing for mobile */
+    .grid-4x4 {
+        width: min(95vw, 85vh);
+        height: min(95vw, 85vh);
+    }
+
+    .grid-6x6 {
+        width: min(98vw, 90vh);
+        height: min(98vw, 90vh);
+    }
+
+    .grid-8x8 {
+        width: min(100vw, 95vh);
+        height: min(100vw, 95vh);
+    }
+
+    .game-settings {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    /* Touch-friendly improvements */
+    .memory-card {
+        min-height: clamp(40px, 8vw, 60px);
+        min-width: clamp(40px, 8vw, 60px);
+    }
+
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    .setting-select {
+        min-height: 44px;
+    }
+
+    .player-scores {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .player-score {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .game-container {
+        padding: 10px;
+    }
+
+    /* Smaller grids for very small screens */
+    .grid-4x4 {
+        width: min(98vw, 90vh);
+        height: min(98vw, 90vh);
+    }
+
+    .grid-6x6 {
+        width: min(100vw, 95vh);
+        height: min(100vw, 95vh);
+    }
+
+    .grid-8x8 {
+        /* 8x8 might be too cramped on very small screens */
+        width: min(100vw, 98vh);
+        height: min(100vw, 98vh);
+    }
+
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+        min-height: 44px;
+        min-width: 44px;
+    }
+
+    /* Enhanced mobile touch targets */
+    .memory-card {
+        min-height: clamp(35px, 7vw, 50px);
+        min-width: clamp(35px, 7vw, 50px);
+    }
+
+    .setting-select {
+        min-height: 44px;
+        font-size: 1rem;
+    }
+
+    .game-header h1 {
+        font-size: clamp(1.2rem, 5vw, 1.8rem);
+    }
+
+    /* Stack player scores vertically on very small screens */
+    .player-scores {
+        flex-direction: column;
+        align-items: center;
+    }
+}
+
+/* Tablet Landscape */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .grid-4x4 {
+        width: min(80vw, 70vh, 500px);
+        height: min(80vw, 70vh, 500px);
+    }
+
+    .grid-6x6 {
+        width: min(85vw, 75vh, 600px);
+        height: min(85vw, 75vh, 600px);
+    }
+
+    .grid-8x8 {
+        width: min(90vw, 80vh, 700px);
+        height: min(90vw, 80vh, 700px);
+    }
+
+    .game-info {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .game-settings {
+        flex-direction: row;
+        gap: 30px;
+    }
+}
+
+/* Desktop */
+@media (min-width: 1025px) {
+    .grid-4x4 {
+        width: min(60vw, 50vh, 500px);
+        height: min(60vw, 50vh, 500px);
+    }
+
+    .grid-6x6 {
+        width: min(70vw, 60vh, 600px);
+        height: min(70vw, 60vh, 600px);
+    }
+
+    .grid-8x8 {
+        width: min(80vw, 70vh, 700px);
+        height: min(80vw, 70vh, 700px);
+    }
+
+    .game-container {
+        padding: 3vh 3vw;
+    }
+
+    .game-header h1 {
+        font-size: clamp(2rem, 4vw, 3rem);
+    }
+
+    .memory-card {
+        transition: all 0.3s ease;
+    }
+
+    .memory-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 6px 20px var(--shadow-hover);
+    }
+}
+
+/* Large Desktop */
+@media (min-width: 1440px) {
+    .grid-4x4 {
+        width: 500px;
+        height: 500px;
+    }
+
+    .grid-6x6 {
+        width: 600px;
+        height: 600px;
+    }
+
+    .grid-8x8 {
+        width: 700px;
+        height: 700px;
+    }
+
+    .game-container {
+        padding: 4vh 4vw;
+    }
+}
+
+/* Orientation-specific adjustments */
+@media (orientation: portrait) {
+    .game-board {
+        width: min(95vw, 70vh);
+        height: min(95vw, 70vh);
+    }
+
+    .game-container {
+        padding: 1vh 2vw;
+    }
+
+    .game-header {
+        margin-bottom: 1vh;
+    }
+
+    .game-settings {
+        margin-top: 1vh;
+    }
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+    .game-board {
+        width: min(80vw, 85vh);
+        height: min(80vw, 85vh);
+    }
+
+    .game-container {
+        padding: 1vh 2vw;
+    }
+
+    .game-header {
+        margin-bottom: 1vh;
+    }
+
+    .game-settings {
+        margin-top: 1vh;
+    }
+
+    .btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+
+    /* Reduce header size in landscape */
+    .game-header h1 {
+        font-size: clamp(1.2rem, 3vw, 1.8rem);
+    }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .memory-card .card-front,
+    .memory-card .card-back {
+        font-size: clamp(1.2rem, 3vw, 2.5rem);
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+
+    .memory-card {
+        transition: none;
+    }
+
+    .memory-card:hover {
+        transform: none;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --card-front: #2d2d2d;
+        --card-back: #1a1a1a;
+        --white: #ffffff;
+        --dark-gray: #e0e0e0;
+    }
+
+    .victory-content {
+        background: #2d2d2d;
+        color: #e0e0e0;
+    }
+
+    .victory-title {
+        color: #e0e0e0;
+    }
+
+    .victory-message {
+        color: #b0b0b0;
+    }
+}
+
+/* Print Styles */
+@media print {
+    .game-container {
+        background: white;
+        color: black;
+    }
+
+    .game-header h1 {
+        color: black;
+        text-shadow: none;
+    }
+
+    .memory-card {
+        border: 2px solid black;
+        background: white;
+    }
+
+    .btn, .game-settings, .victory-screen {
+        display: none;
+    }
+}
+
+/* Accessibility Improvements */
+@media (prefers-contrast: high) {
+    .memory-card {
+        border: 3px solid var(--black);
+    }
+
+    .memory-card .card-back {
+        background: var(--black);
+        color: var(--white);
+    }
+
+    .memory-card .card-front {
+        background: var(--white);
+        color: var(--black);
+    }
+}
+
+/* Focus Styles for Keyboard Navigation */
+.memory-card:focus {
+    outline: 3px solid var(--primary-yellow);
+    outline-offset: 2px;
+}
+
+.btn:focus {
+    outline: 3px solid var(--primary-yellow);
+    outline-offset: 2px;
+}
+
+.setting-select:focus {
+    outline: 3px solid var(--primary-yellow);
+    outline-offset: 2px;
+}
