@@ -16,7 +16,7 @@
     --shadow-hover: rgba(0, 0, 0, 0.3);
     --board-blue: #1976D2;
     --board-holes: #0D47A1;
-    
+
     /* Responsive sizing variables */
     --responsive-padding: clamp(1vw, 2vw, 3vw);
     --responsive-gap: clamp(0.5vw, 1vw, 2vw);
@@ -169,6 +169,7 @@ body {
 .game-board {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
+    grid-template-rows: repeat(6, 1fr);
     gap: var(--responsive-gap);
     background: var(--board-blue);
     padding: var(--responsive-padding);
@@ -196,8 +197,8 @@ body {
 }
 
 .board-column {
-    display: flex;
-    flex-direction: column;
+    display: grid;
+    grid-template-rows: repeat(6, 1fr);
     gap: var(--responsive-gap);
     cursor: pointer;
     transition: all 0.3s ease;
@@ -234,6 +235,7 @@ body {
 
 .board-cell {
     width: 100%;
+    height: 100%;
     aspect-ratio: 1;
     border-radius: 50%;
     background: var(--white);
@@ -241,10 +243,6 @@ body {
     transition: all 0.3s ease;
     position: relative;
     overflow: hidden;
-    min-width: var(--responsive-cell-min);
-    min-height: var(--responsive-cell-min);
-    max-width: var(--responsive-cell-max);
-    max-height: var(--responsive-cell-max);
 }
 
 .board-cell.occupied {
@@ -367,39 +365,38 @@ body {
     .game-header h1 {
         font-size: clamp(1.5rem, 4vw, 2rem);
     }
-    
+
     .game-info {
         flex-direction: column;
         gap: 15px;
     }
-    
+
     .game-board {
         width: min(95vw, 85vh);
         height: min(95vw, 85vh);
     }
-    
-    .board-cell {
-        min-width: clamp(25px, 5vw, 40px);
-        min-height: clamp(25px, 5vw, 40px);
-    }
-    
+
+    /* Board cells will scale automatically with the grid */
+
     .game-settings {
         flex-direction: column;
         gap: 20px;
     }
-    
+
     /* Touch-friendly improvements */
     .board-column {
         min-height: clamp(200px, 40vh, 300px);
     }
-    
+
     .btn {
-        min-height: 44px; /* Touch target minimum */
+        min-height: 44px;
+        /* Touch target minimum */
         min-width: 44px;
     }
-    
+
     .setting-select {
-        min-height: 44px; /* Touch target minimum */
+        min-height: 44px;
+        /* Touch target minimum */
     }
 }
 
@@ -407,35 +404,36 @@ body {
     .game-container {
         padding: 10px;
     }
-    
+
     .game-board {
         width: min(98vw, 90vh);
         height: min(98vw, 90vh);
     }
-    
-    .board-cell {
-        min-width: clamp(20px, 6vw, 35px);
-        min-height: clamp(20px, 6vw, 35px);
-    }
-    
+
+    /* Board cells will scale automatically with the grid */
+
     .btn {
         padding: 8px 16px;
         font-size: 0.9rem;
-        min-height: 44px; /* Touch target minimum */
+        min-height: 44px;
+        /* Touch target minimum */
         min-width: 44px;
     }
-    
+
     /* Enhanced mobile touch targets */
     .board-column {
         min-height: clamp(180px, 35vh, 250px);
-        padding: 2px; /* Add touch padding */
+        padding: 2px;
+        /* Add touch padding */
     }
-    
+
     .setting-select {
-        min-height: 44px; /* Touch target minimum */
-        font-size: 1rem; /* Larger text for mobile */
+        min-height: 44px;
+        /* Touch target minimum */
+        font-size: 1rem;
+        /* Larger text for mobile */
     }
-    
+
     .game-header h1 {
         font-size: clamp(1.2rem, 5vw, 1.8rem);
     }
@@ -447,15 +445,15 @@ body {
         width: min(95vw, 70vh);
         height: min(95vw, 70vh);
     }
-    
+
     .game-container {
         padding: 1vh 2vw;
     }
-    
+
     .game-header {
         margin-bottom: 1vh;
     }
-    
+
     .game-settings {
         margin-top: 1vh;
     }
@@ -466,25 +464,21 @@ body {
         width: min(80vw, 85vh);
         height: min(80vw, 85vh);
     }
-    
+
     .game-container {
         padding: 1vh 2vw;
     }
-    
+
     .game-header {
         margin-bottom: 1vh;
     }
-    
+
     .game-settings {
         margin-top: 1vh;
     }
-    
-    /* Landscape mobile optimizations */
-    .board-cell {
-        min-width: clamp(15px, 3vw, 25px);
-        min-height: clamp(15px, 3vw, 25px);
-    }
-    
+
+    /* Landscape mobile optimizations - board cells scale automatically */
+
     .btn {
         padding: 6px 12px;
         font-size: 0.8rem;
@@ -565,7 +559,8 @@ body {
     border-radius: clamp(6px, 1.5vw, 12px);
     cursor: pointer;
     transition: all 0.3s ease;
-    min-height: 44px; /* Touch target minimum */
+    min-height: 44px;
+    /* Touch target minimum */
     min-width: 44px;
 }
 
@@ -605,9 +600,10 @@ body {
         flex-direction: column;
         gap: clamp(0.5rem, 1.5vw, 0.75rem);
     }
-    
+
     .victory-buttons .btn {
         width: 100%;
-        min-height: 48px; /* Larger touch targets on mobile */
+        min-height: 48px;
+        /* Larger touch targets on mobile */
     }
 }
