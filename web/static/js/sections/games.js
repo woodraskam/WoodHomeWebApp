@@ -3,40 +3,40 @@
  * Games collection with iframe integration
  */
 class GamesSection {
-    constructor() {
-        this.isLoaded = false;
-        this.init();
-    }
+  constructor() {
+    this.isLoaded = false;
+    this.init();
+  }
 
-    init() {
-        this.setupEventListeners();
-        this.createGamesSection();
-    }
+  init() {
+    this.setupEventListeners();
+    this.createGamesSection();
+  }
 
-    setupEventListeners() {
-        document.addEventListener('sectionload', (e) => {
-            if (e.detail.section === 'games') {
-                this.load();
-            }
-        });
+  setupEventListeners() {
+    document.addEventListener('sectionload', (e) => {
+      if (e.detail.section === 'games') {
+        this.load();
+      }
+    });
 
-        document.addEventListener('sectionchange', (e) => {
-            if (e.detail.section === 'games') {
-                this.show();
-            } else {
-                this.hide();
-            }
-        });
-    }
+    document.addEventListener('sectionchange', (e) => {
+      if (e.detail.section === 'games') {
+        this.show();
+      } else {
+        this.hide();
+      }
+    });
+  }
 
-    createGamesSection() {
-        const contentArea = document.getElementById('main-content');
-        if (!contentArea) return;
+  createGamesSection() {
+    const contentArea = document.getElementById('main-content');
+    if (!contentArea) return;
 
-        const gamesSection = document.createElement('div');
-        gamesSection.id = 'games-section';
-        gamesSection.className = 'm3-section';
-        gamesSection.innerHTML = `
+    const gamesSection = document.createElement('div');
+    gamesSection.id = 'games-section';
+    gamesSection.className = 'm3-section';
+    gamesSection.innerHTML = `
       <div class="m3-section-header">
         <div>
           <h1 class="m3-section-title">Games</h1>
@@ -61,6 +61,14 @@ class GamesSection {
           <p class="m3-game-card__description">Simple strategy game</p>
         </a>
         
+        <a href="/connectfour" class="m3-game-card" target="_blank">
+          <svg class="m3-game-card__icon" viewBox="0 0 24 24">
+            <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
+          </svg>
+          <h4 class="m3-game-card__title">Connect Four</h4>
+          <p class="m3-game-card__description">Strategy board game</p>
+        </a>
+        
         <a href="/cribbage" class="m3-game-card" target="_blank">
           <svg class="m3-game-card__icon" viewBox="0 0 24 24">
             <path d="M12,2A10,10 0 0,0 2,12A10,10 0 0,0 12,22A10,10 0 0,0 22,12A10,10 0 0,0 12,2M12,4A8,8 0 0,1 20,12A8,8 0 0,1 12,20A8,8 0 0,1 4,12A8,8 0 0,1 12,4M12,6A6,6 0 0,0 6,12A6,6 0 0,0 12,18A6,6 0 0,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 0,1 16,12A4,4 0 0,1 12,16A4,4 0 0,1 8,12A4,4 0 0,1 12,8Z"/>
@@ -71,31 +79,31 @@ class GamesSection {
       </div>
     `;
 
-        contentArea.appendChild(gamesSection);
-    }
+    contentArea.appendChild(gamesSection);
+  }
 
-    load() {
-        if (!this.isLoaded) {
-            this.isLoaded = true;
-        }
-        this.show();
+  load() {
+    if (!this.isLoaded) {
+      this.isLoaded = true;
     }
+    this.show();
+  }
 
-    show() {
-        const section = document.getElementById('games-section');
-        if (section) {
-            section.classList.add('m3-section--active');
-        }
+  show() {
+    const section = document.getElementById('games-section');
+    if (section) {
+      section.classList.add('m3-section--active');
     }
+  }
 
-    hide() {
-        const section = document.getElementById('games-section');
-        if (section) {
-            section.classList.remove('m3-section--active');
-        }
+  hide() {
+    const section = document.getElementById('games-section');
+    if (section) {
+      section.classList.remove('m3-section--active');
     }
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    window.gamesSection = new GamesSection();
+  window.gamesSection = new GamesSection();
 });

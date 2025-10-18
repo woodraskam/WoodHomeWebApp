@@ -41,10 +41,20 @@ func New(cfg *config.Config, db *database.DB) *Server {
 // SetupRoutes configures all HTTP routes
 func (s *Server) SetupRoutes() {
 	// Create main router
-	router := mux.NewRouter()
+	router := mux.NewRouter().StrictSlash(true)
 
 	// Update the server's router
 	s.router = router
+
+	// Game routes - MUST be first to avoid being intercepted
+	log.Println("Registering game routes...")
+	router.HandleFunc("/candyland", s.candylandHandler).Methods("GET")
+	router.HandleFunc("/tictactoe", s.tictactoeHandler).Methods("GET")
+	router.HandleFunc("/connectfour", s.connectfourHandler).Methods("GET")
+	router.HandleFunc("/cribbage", s.cribbageHandler).Methods("GET")
+	router.HandleFunc("/cribbage-board", s.cribbageBoardHandler).Methods("GET")
+	router.HandleFunc("/cribbage-controller", s.cribbageControllerHandler).Methods("GET")
+	log.Println("Game routes registered successfully")
 
 	// API routes
 	api := router.PathPrefix("/api").Subrouter()
@@ -111,20 +121,11 @@ func (s *Server) SetupRoutes() {
 	api.HandleFunc("/auth/status", handlers.AuthStatusHandler).Methods("GET")
 	api.HandleFunc("/auth/logout", handlers.LogoutHandler).Methods("POST")
 
-	// Game routes
-	router.HandleFunc("/candyland", s.candylandHandler).Methods("GET")
-	router.HandleFunc("/tictactoe", s.tictactoeHandler).Methods("GET")
-	router.HandleFunc("/connectfour", s.connectfourHandler).Methods("GET")
-	router.HandleFunc("/cribbage", s.cribbageHandler).Methods("GET")
-	router.HandleFunc("/cribbage-board", s.cribbageBoardHandler).Methods("GET")
-	router.HandleFunc("/cribbage-controller", s.cribbageControllerHandler).Methods("GET")
-
 	// Static files
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static/"))))
 
 	// Root handler (SPA) - MUST be last to avoid intercepting API routes
-	// Exclude game routes from SPA routing
-	router.PathPrefix("/").HandlerFunc(s.spaHandler)
+	router.HandleFunc("/", s.homeHandler).Methods("GET")
 
 	// Create HTTP server
 	s.httpServer = &http.Server{
@@ -196,6 +197,7 @@ func (s *Server) connectivityHandler(w http.ResponseWriter, r *http.Request) {
 
 // Home handler (SPA)
 func (s *Server) homeHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Home handler called for path: %s", r.URL.Path)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	// Parse and serve the SPA dashboard template
@@ -220,12 +222,14 @@ func (s *Server) spaHandler(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == route {
 			// This should have been handled by the specific game handler
 			// If we reach here, it means the route wasn't matched properly
+			log.Printf("SPA handler called for game route: %s - this should not happen", r.URL.Path)
 			http.NotFound(w, r)
 			return
 		}
 	}
-	
+
 	// Serve SPA for all other routes
+	log.Printf("SPA handler serving for path: %s", r.URL.Path)
 	s.homeHandler(w, r)
 }
 
@@ -261,6 +265,7 @@ func (s *Server) tictactoeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) connectfourHandler(w http.ResponseWriter, r *http.Request) {
+	log.Printf("Connect Four handler called for path: %s", r.URL.Path)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	tmpl, err := template.ParseFiles("web/templates/connectfour.html")
 	if err != nil {
