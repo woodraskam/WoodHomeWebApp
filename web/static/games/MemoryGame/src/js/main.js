@@ -255,6 +255,8 @@ class MemoryGame {
         const result = this.gameLogic.checkMatch();
         
         if (result.isMatch) {
+            console.log('Match found! Cards:', result.cards);
+            console.log('Game state cards after match:', this.gameState.cards.slice(0, 4));
             this.animations.showMatch();
             this.updatePlayerScore(result.score);
             this.checkGameComplete();

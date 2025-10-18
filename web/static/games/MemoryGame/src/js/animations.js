@@ -37,7 +37,10 @@ class MemoryGameAnimations {
         const flippedCards = document.querySelectorAll('.memory-card.flipped:not(.matched)');
         
         console.log('Showing match animation for', flippedCards.length, 'cards');
-        flippedCards.forEach(card => {
+        console.log('Flipped cards:', flippedCards);
+        
+        flippedCards.forEach((card, index) => {
+            console.log(`Processing card ${index}:`, card);
             card.classList.add('matching', 'matched');
             
             // Add particle effect
@@ -47,7 +50,7 @@ class MemoryGameAnimations {
                 card.classList.remove('matching');
                 // Ensure the card stays flipped and matched
                 card.classList.add('flipped');
-                console.log('Match animation complete - card stays revealed');
+                console.log(`Match animation complete for card ${index} - classes:`, card.className);
             }, 800);
         });
     }
