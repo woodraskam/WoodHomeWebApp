@@ -114,7 +114,7 @@ func (s *Server) SetupRoutes() {
 	// Game routes
 	router.HandleFunc("/candyland", s.candylandHandler).Methods("GET")
 	router.HandleFunc("/tictactoe", s.tictactoeHandler).Methods("GET")
-	router.HandleFunc("/ConnectFour", s.connectfourHandler).Methods("GET")
+	router.HandleFunc("/connectfour", s.connectfourHandler).Methods("GET")
 	router.HandleFunc("/cribbage", s.cribbageHandler).Methods("GET")
 	router.HandleFunc("/cribbage-board", s.cribbageBoardHandler).Methods("GET")
 	router.HandleFunc("/cribbage-controller", s.cribbageControllerHandler).Methods("GET")
@@ -123,7 +123,8 @@ func (s *Server) SetupRoutes() {
 	router.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./web/static/"))))
 
 	// Root handler (SPA) - MUST be last to avoid intercepting API routes
-	router.PathPrefix("/").HandlerFunc(s.homeHandler)
+	// Exclude game routes from SPA routing
+	router.PathPrefix("/").HandlerFunc(s.spaHandler)
 
 	// Create HTTP server
 	s.httpServer = &http.Server{
@@ -210,6 +211,22 @@ func (s *Server) homeHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func (s *Server) spaHandler(w http.ResponseWriter, r *http.Request) {
+	// Check if this is a game route - if so, don't serve SPA
+	gameRoutes := []string{"/candyland", "/tictactoe", "/connectfour", "/cribbage", "/cribbage-board", "/cribbage-controller"}
+	for _, route := range gameRoutes {
+		if r.URL.Path == route {
+			// This should have been handled by the specific game handler
+			// If we reach here, it means the route wasn't matched properly
+			http.NotFound(w, r)
+			return
+		}
+	}
+	
+	// Serve SPA for all other routes
+	s.homeHandler(w, r)
 }
 
 // Game handlers
