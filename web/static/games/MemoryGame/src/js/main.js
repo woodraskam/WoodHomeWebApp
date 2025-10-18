@@ -6,6 +6,8 @@ class MemoryGame {
         this.gameLogic = null;
         this.animations = null;
         this.playerManager = null;
+        this.gameTimer = null;
+        this.isInitialized = false;
         
         this.initializeGame();
         this.setupEventListeners();
@@ -14,23 +16,31 @@ class MemoryGame {
     initializeGame() {
         console.log('Initializing Memory Game...');
         
-        // Initialize game components
-        this.gameState = new MemoryGameState();
-        this.gameLogic = new MemoryGameLogic(this.gameState);
-        this.animations = new MemoryGameAnimations();
-        this.playerManager = new PlayerManager(this.gameState);
-        
-        // Set default game settings
-        this.gameState.gridSize = 4;
-        this.gameState.players = [
-            new Player('Player 1', 'red', false),
-            new Player('Player 2', 'yellow', false)
-        ];
-        
-        // Initialize UI
-        this.updateGameDisplay();
-        this.updatePlayerDisplay();
-        this.updateGameStatus('Click New Game to start!');
+        try {
+            // Initialize game components
+            this.gameState = new MemoryGameState();
+            this.gameLogic = new MemoryGameLogic(this.gameState);
+            this.animations = new MemoryGameAnimations();
+            this.playerManager = new PlayerManager(this.gameState);
+            
+            // Set default game settings
+            this.gameState.gridSize = 4;
+            this.gameState.players = [
+                new Player('Player 1', 'red', false),
+                new Player('Player 2', 'yellow', false)
+            ];
+            
+            // Initialize UI
+            this.updateGameDisplay();
+            this.updatePlayerDisplay();
+            this.updateGameStatus('Click New Game to start!');
+            
+            this.isInitialized = true;
+            console.log('Memory Game initialized successfully');
+        } catch (error) {
+            console.error('Failed to initialize Memory Game:', error);
+            this.updateGameStatus('Error initializing game. Please refresh the page.');
+        }
     }
 
     setupEventListeners() {
@@ -171,6 +181,11 @@ class MemoryGame {
         const totalCards = this.gameState.gridSize * this.gameState.gridSize;
         const pairs = totalCards / 2;
         
+        // Performance optimization for large grids
+        if (totalCards > 36) { // 6x6 or larger
+            this.animations.addLoadingPulse(gameBoard);
+        }
+        
         // Generate emoji pairs
         const emojis = this.getEmojiSet();
         const cardEmojis = [];
@@ -182,6 +197,9 @@ class MemoryGame {
         
         // Shuffle cards
         this.shuffleArray(cardEmojis);
+        
+        // Use DocumentFragment for better performance
+        const fragment = document.createDocumentFragment();
         
         // Create card elements
         for (let i = 0; i < totalCards; i++) {
@@ -197,11 +215,35 @@ class MemoryGame {
                 </div>
             `;
             
-            // Add click event
-            card.addEventListener('click', () => this.handleCardClick(card, i));
+            // Add click event with throttling for performance
+            card.addEventListener('click', this.throttle(() => this.handleCardClick(card, i), 300));
             
-            gameBoard.appendChild(card);
+            fragment.appendChild(card);
         }
+        
+        // Append all cards at once
+        gameBoard.appendChild(fragment);
+        
+        // Remove loading animation
+        if (totalCards > 36) {
+            setTimeout(() => {
+                this.animations.removeLoadingPulse(gameBoard);
+            }, 500);
+        }
+    }
+
+    // Throttle function for performance
+    throttle(func, limit) {
+        let inThrottle;
+        return function() {
+            const args = arguments;
+            const context = this;
+            if (!inThrottle) {
+                func.apply(context, args);
+                inThrottle = true;
+                setTimeout(() => inThrottle = false, limit);
+            }
+        };
     }
 
     handleCardClick(cardElement, cardIndex) {
@@ -444,6 +486,58 @@ class MemoryGame {
             this.gameTimer = null;
         }
     }
+
+    // Error handling and cleanup
+    handleError(error, context = 'Unknown') {
+        console.error(`Memory Game Error [${context}]:`, error);
+        this.updateGameStatus(`Error: ${error.message || 'Unknown error occurred'}`);
+    }
+
+    cleanup() {
+        console.log('Cleaning up Memory Game...');
+        
+        // Stop timer
+        this.stopGameTimer();
+        
+        // Clear any pending animations
+        if (this.animations) {
+            this.animations.clearQueue();
+        }
+        
+        // Remove event listeners
+        const cards = document.querySelectorAll('.memory-card');
+        cards.forEach(card => {
+            card.replaceWith(card.cloneNode(true));
+        });
+        
+        // Clear game state
+        if (this.gameState) {
+            this.gameState.resetGame();
+        }
+        
+        console.log('Memory Game cleanup completed');
+    }
+
+    // Performance monitoring
+    measurePerformance(operation, callback) {
+        const start = performance.now();
+        const result = callback();
+        const end = performance.now();
+        console.log(`${operation} took ${end - start} milliseconds`);
+        return result;
+    }
+
+    // Memory usage monitoring
+    checkMemoryUsage() {
+        if (performance.memory) {
+            const memory = performance.memory;
+            console.log('Memory usage:', {
+                used: Math.round(memory.usedJSHeapSize / 1048576) + ' MB',
+                total: Math.round(memory.totalJSHeapSize / 1048576) + ' MB',
+                limit: Math.round(memory.jsHeapSizeLimit / 1048576) + ' MB'
+            });
+        }
+    }
 }
 
 // Initialize game when DOM is loaded
@@ -452,4 +546,26 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Make game instance globally accessible for debugging
     window.memoryGame = game;
+    
+    // Cleanup on page unload
+    window.addEventListener('beforeunload', () => {
+        if (game && game.cleanup) {
+            game.cleanup();
+        }
+    });
+    
+    // Handle visibility change for performance
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            // Pause game when tab is not visible
+            if (game && game.gameTimer) {
+                game.stopGameTimer();
+            }
+        } else {
+            // Resume game when tab becomes visible
+            if (game && game.gameState && game.gameState.isGameActive) {
+                game.startGameTimer();
+            }
+        }
+    });
 });
