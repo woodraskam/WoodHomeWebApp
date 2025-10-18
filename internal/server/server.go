@@ -51,7 +51,7 @@ func (s *Server) SetupRoutes() {
 	router.HandleFunc("/candyland", s.candylandHandler).Methods("GET")
 	router.HandleFunc("/tictactoe", s.tictactoeHandler).Methods("GET")
 	router.HandleFunc("/connectfour", s.connectfourHandler).Methods("GET")
-	router.HandleFunc("/memorygame", s.memorygameHandler).Methods("GET")
+	router.HandleFunc("/memory", s.memoryHandler).Methods("GET")
 	router.HandleFunc("/cribbage", s.cribbageHandler).Methods("GET")
 	router.HandleFunc("/cribbage-board", s.cribbageBoardHandler).Methods("GET")
 	router.HandleFunc("/cribbage-controller", s.cribbageControllerHandler).Methods("GET")
@@ -218,7 +218,7 @@ func (s *Server) homeHandler(w http.ResponseWriter, r *http.Request) {
 
 func (s *Server) spaHandler(w http.ResponseWriter, r *http.Request) {
 	// Check if this is a game route - if so, don't serve SPA
-	gameRoutes := []string{"/candyland", "/tictactoe", "/connectfour", "/memorygame", "/cribbage", "/cribbage-board", "/cribbage-controller"}
+	gameRoutes := []string{"/candyland", "/tictactoe", "/connectfour", "/memory", "/cribbage", "/cribbage-board", "/cribbage-controller"}
 	for _, route := range gameRoutes {
 		if r.URL.Path == route {
 			// This should have been handled by the specific game handler
@@ -281,17 +281,17 @@ func (s *Server) connectfourHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (s *Server) memorygameHandler(w http.ResponseWriter, r *http.Request) {
+func (s *Server) memoryHandler(w http.ResponseWriter, r *http.Request) {
 	log.Printf("Memory Game handler called for path: %s", r.URL.Path)
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	tmpl, err := template.ParseFiles("web/templates/memorygame.html")
+	tmpl, err := template.ParseFiles("web/templates/memory.html")
 	if err != nil {
-		log.Printf("Error parsing memorygame template: %v", err)
+		log.Printf("Error parsing memory template: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 	if err := tmpl.Execute(w, nil); err != nil {
-		log.Printf("Error executing memorygame template: %v", err)
+		log.Printf("Error executing memory template: %v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}

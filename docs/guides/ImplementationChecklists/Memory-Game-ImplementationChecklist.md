@@ -19,13 +19,13 @@ Implementation checklist for Memory Game with emoji cards, following the compreh
 - [x] Create `src/css/` directory with styles.css, animations.css, responsive.css
 - [x] Create `src/js/` directory with main.js, gameLogic.js, gameState.js, animations.js, playerManager.js
 - [x] Create `assets/emojis/` directory for emoji sets
-- [x] Create `web/templates/memorygame.html` template
+- [x] Create `web/templates/memory.html` template
 
 #### 1.2 Add Route Handler
 - [x] Add memory game route to `internal/server/server.go`
-- [x] Create `memorygameHandler` function
+- [x] Create `memoryHandler` function
 - [x] Add route to game routes list in SPA handler
-- [x] Test route accessibility at `/memorygame`
+- [x] Test route accessibility at `/memory`
 
 #### 1.3 Add Dependencies
 - [x] No external dependencies required
@@ -174,7 +174,7 @@ Implementation checklist for Memory Game with emoji cards, following the compreh
 - [ ] Performance optimized for large grids
 
 ### Integration Requirements
-- [ ] Route accessible at `/memorygame`
+- [ ] Route accessible at `/memory`
 - [ ] Game card added to SPA dashboard
 - [ ] Consistent styling with other games
 - [ ] Navigation working properly
