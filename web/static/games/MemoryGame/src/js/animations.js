@@ -15,6 +15,15 @@ class MemoryGameAnimations {
         setTimeout(() => {
             cardElement.classList.remove('flipping');
             cardElement.classList.add('flipped');
+            
+            // Force hide card-back element to prevent overlay issues
+            const cardBack = cardElement.querySelector('.card-back');
+            if (cardBack) {
+                cardBack.style.display = 'none';
+                cardBack.style.visibility = 'hidden';
+                cardBack.style.opacity = '0';
+            }
+            
             console.log('Card flip complete');
         }, 800); // Match animation duration
     }
@@ -28,6 +37,15 @@ class MemoryGameAnimations {
             
             setTimeout(() => {
                 card.classList.remove('flipping', 'flipped');
+                
+                // Restore card-back element for unflipped cards
+                const cardBack = card.querySelector('.card-back');
+                if (cardBack) {
+                    cardBack.style.display = '';
+                    cardBack.style.visibility = '';
+                    cardBack.style.opacity = '';
+                }
+                
                 console.log('Card flipped back');
             }, 800); // Match animation duration
         });

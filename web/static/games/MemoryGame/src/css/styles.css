@@ -249,10 +249,41 @@ body {
     .memory-card:active {
         transform: scale(0.95);
     }
+    
+    /* Prevent touch overlay issues */
+    .memory-card {
+        -webkit-tap-highlight-color: transparent;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+    
+    /* Ensure no overlay on flipped cards */
+    .memory-card.flipped {
+        -webkit-tap-highlight-color: transparent;
+    }
+    
+    .memory-card.flipped .card-back {
+        display: none !important;
+        visibility: hidden !important;
+        opacity: 0 !important;
+    }
 }
 
 .memory-card.flipped {
     transform: rotateY(180deg);
+}
+
+/* Ensure card-back is completely hidden when flipped */
+.memory-card.flipped .card-back {
+    display: none;
+}
+
+/* Ensure card-front is visible when flipped */
+.memory-card.flipped .card-front {
+    display: flex;
 }
 
 .memory-card.matched {
