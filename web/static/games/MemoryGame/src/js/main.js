@@ -245,10 +245,10 @@ class MemoryGame {
         this.gameLogic.flipCard(cardIndex);
         this.animations.flipCard(cardElement);
         
-        // Check for match after a short delay
+        // Check for match after flip animation completes
         setTimeout(() => {
             this.checkForMatch();
-        }, 600);
+        }, 800);
     }
 
     checkForMatch() {

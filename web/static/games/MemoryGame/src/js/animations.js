@@ -38,8 +38,10 @@ class MemoryGameAnimations {
         const allFlippedCards = document.querySelectorAll('.memory-card.flipped');
         const flippedCards = Array.from(allFlippedCards).filter(card => !card.classList.contains('matched'));
         
+        console.log('All flipped cards found:', allFlippedCards.length);
+        console.log('All flipped cards:', allFlippedCards);
+        console.log('Filtered flipped cards:', flippedCards.length);
         console.log('Showing match animation for', flippedCards.length, 'cards');
-        console.log('Flipped cards:', flippedCards);
         
         flippedCards.forEach((card, index) => {
             console.log(`Processing card ${index}:`, card);
