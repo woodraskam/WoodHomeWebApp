@@ -133,6 +133,34 @@
                     <option value="seasonal">Seasonal</option>
                 </select>
             </div>
+            <div class="setting-group">
+                <label for="difficulty">Difficulty:</label>
+                <select id="difficulty" class="setting-select">
+                    <option value="easy" selected>Easy</option>
+                    <option value="medium">Medium</option>
+                    <option value="hard">Hard</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Game Statistics -->
+        <div class="game-stats" id="gameStats" style="display: none;">
+            <div class="stat-item">
+                <span class="stat-label">Moves:</span>
+                <span class="stat-value" id="moveCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Time:</span>
+                <span class="stat-value" id="gameTime">0:00</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Matches:</span>
+                <span class="stat-value" id="matchCount">0</span>
+            </div>
+            <div class="stat-item">
+                <span class="stat-label">Accuracy:</span>
+                <span class="stat-value" id="accuracy">0%</span>
+            </div>
         </div>
     </div>
 

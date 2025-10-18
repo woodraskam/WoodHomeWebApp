@@ -51,6 +51,8 @@ class MemoryGame {
         // Settings
         const gridSizeSelect = document.getElementById('gridSize');
         const playerCountSelect = document.getElementById('playerCount');
+        const emojiSetSelect = document.getElementById('emojiSet');
+        const difficultySelect = document.getElementById('difficulty');
         
         if (gridSizeSelect) {
             gridSizeSelect.addEventListener('change', (e) => {
@@ -61,6 +63,18 @@ class MemoryGame {
         if (playerCountSelect) {
             playerCountSelect.addEventListener('change', (e) => {
                 this.changePlayerCount(parseInt(e.target.value));
+            });
+        }
+        
+        if (emojiSetSelect) {
+            emojiSetSelect.addEventListener('change', (e) => {
+                this.changeEmojiSet(e.target.value);
+            });
+        }
+        
+        if (difficultySelect) {
+            difficultySelect.addEventListener('change', (e) => {
+                this.changeDifficulty(e.target.value);
             });
         }
 
@@ -86,6 +100,8 @@ class MemoryGame {
         if (result.success) {
             this.updateGameDisplay();
             this.updatePlayerDisplay();
+            this.showGameStats();
+            this.startGameTimer();
             this.updateGameStatus('Game started! Click cards to find matches!');
         } else {
             console.error('Failed to start game:', result.errors);
@@ -95,9 +111,11 @@ class MemoryGame {
 
     resetGame() {
         console.log('Resetting game...');
+        this.stopGameTimer();
         this.gameLogic.resetGame();
         this.updateGameDisplay();
         this.updatePlayerDisplay();
+        this.hideGameStats();
         this.updateGameStatus('Game reset! Click New Game to start!');
     }
 
@@ -114,6 +132,22 @@ class MemoryGame {
         this.playerManager.setPlayerCount(count);
         this.updatePlayerDisplay();
         this.updateGameStatus(`Player count changed to ${count}`);
+    }
+
+    changeEmojiSet(emojiSet) {
+        console.log('Changing emoji set to:', emojiSet);
+        if (this.gameLogic.setEmojiSet(emojiSet)) {
+            this.gameState.emojiSet = emojiSet;
+            this.updateGameStatus(`Emoji theme changed to ${emojiSet}`);
+        } else {
+            this.updateGameStatus('Invalid emoji set selected');
+        }
+    }
+
+    changeDifficulty(difficulty) {
+        console.log('Changing difficulty to:', difficulty);
+        this.gameState.difficulty = difficulty;
+        this.updateGameStatus(`Difficulty changed to ${difficulty}`);
     }
 
     updateGameDisplay() {
@@ -332,6 +366,72 @@ class MemoryGame {
         for (let i = array.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // Game Statistics Methods
+    showGameStats() {
+        const gameStats = document.getElementById('gameStats');
+        if (gameStats) {
+            gameStats.style.display = 'flex';
+        }
+    }
+
+    hideGameStats() {
+        const gameStats = document.getElementById('gameStats');
+        if (gameStats) {
+            gameStats.style.display = 'none';
+        }
+    }
+
+    updateGameStats() {
+        const moveCount = document.getElementById('moveCount');
+        const gameTime = document.getElementById('gameTime');
+        const matchCount = document.getElementById('matchCount');
+        const accuracy = document.getElementById('accuracy');
+
+        if (moveCount) {
+            moveCount.textContent = this.gameState.moves;
+        }
+        
+        if (gameTime) {
+            const time = this.gameState.getGameTime();
+            const minutes = Math.floor(time / 60);
+            const seconds = time % 60;
+            gameTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        if (matchCount) {
+            matchCount.textContent = this.gameState.matchedPairs;
+        }
+        
+        if (accuracy) {
+            const currentPlayer = this.gameState.players[this.gameState.currentPlayer];
+            if (currentPlayer && currentPlayer.moves > 0) {
+                const accuracyPercent = Math.round((currentPlayer.matches / currentPlayer.moves) * 100);
+                accuracy.textContent = `${accuracyPercent}%`;
+            } else {
+                accuracy.textContent = '0%';
+            }
+        }
+    }
+
+    startGameTimer() {
+        // Clear any existing timer
+        if (this.gameTimer) {
+            clearInterval(this.gameTimer);
+        }
+        
+        // Start new timer
+        this.gameTimer = setInterval(() => {
+            this.updateGameStats();
+        }, 1000);
+    }
+
+    stopGameTimer() {
+        if (this.gameTimer) {
+            clearInterval(this.gameTimer);
+            this.gameTimer = null;
         }
     }
 }
