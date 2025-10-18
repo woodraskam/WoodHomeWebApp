@@ -8,14 +8,14 @@ class MemoryGameAnimations {
 
     flipCard(cardElement) {
         if (!cardElement) return;
-        
+
         console.log('Flipping card:', cardElement);
         cardElement.classList.add('flipping');
-        
+
         setTimeout(() => {
             cardElement.classList.remove('flipping');
             cardElement.classList.add('flipped');
-            
+
             // Force hide card-back element to prevent overlay issues
             const cardBack = cardElement.querySelector('.card-back');
             if (cardBack) {
@@ -23,21 +23,21 @@ class MemoryGameAnimations {
                 cardBack.style.visibility = 'hidden';
                 cardBack.style.opacity = '0';
             }
-            
+
             console.log('Card flip complete');
         }, 800); // Match animation duration
     }
 
     flipCardsBack() {
         const flippedCards = document.querySelectorAll('.memory-card.flipped:not(.matched)');
-        
+
         console.log('Flipping back', flippedCards.length, 'non-matched cards');
         flippedCards.forEach(card => {
             card.classList.add('flipping');
-            
+
             setTimeout(() => {
                 card.classList.remove('flipping', 'flipped');
-                
+
                 // Restore card-back element for unflipped cards
                 const cardBack = card.querySelector('.card-back');
                 if (cardBack) {
@@ -45,7 +45,7 @@ class MemoryGameAnimations {
                     cardBack.style.visibility = '';
                     cardBack.style.opacity = '';
                 }
-                
+
                 console.log('Card flipped back');
             }, 800); // Match animation duration
         });
@@ -55,19 +55,19 @@ class MemoryGameAnimations {
         // Get all flipped cards, then filter out already matched ones in JavaScript
         const allFlippedCards = document.querySelectorAll('.memory-card.flipped');
         const flippedCards = Array.from(allFlippedCards).filter(card => !card.classList.contains('matched'));
-        
+
         console.log('All flipped cards found:', allFlippedCards.length);
         console.log('All flipped cards:', allFlippedCards);
         console.log('Filtered flipped cards:', flippedCards.length);
         console.log('Showing match animation for', flippedCards.length, 'cards');
-        
+
         flippedCards.forEach((card, index) => {
             console.log(`Processing card ${index}:`, card);
             card.classList.add('matching', 'matched');
-            
+
             // Add particle effect
             this.createParticleEffect(card);
-            
+
             setTimeout(() => {
                 card.classList.remove('matching');
                 // Ensure the card stays flipped and matched
@@ -79,11 +79,11 @@ class MemoryGameAnimations {
 
     showMismatch() {
         const flippedCards = document.querySelectorAll('.memory-card.flipped:not(.matched)');
-        
+
         console.log('Showing mismatch animation for', flippedCards.length, 'cards');
         flippedCards.forEach(card => {
             card.classList.add('mismatching');
-            
+
             setTimeout(() => {
                 card.classList.remove('mismatching');
                 console.log('Mismatch animation complete');
@@ -93,11 +93,11 @@ class MemoryGameAnimations {
 
     shuffleCards() {
         const cards = document.querySelectorAll('.memory-card');
-        
+
         cards.forEach((card, index) => {
             setTimeout(() => {
                 card.classList.add('shuffling');
-                
+
                 setTimeout(() => {
                     card.classList.remove('shuffling');
                 }, 800);
@@ -109,7 +109,7 @@ class MemoryGameAnimations {
         const playerIndicator = document.querySelector('.player-indicator');
         if (playerIndicator) {
             playerIndicator.classList.add('active');
-            
+
             setTimeout(() => {
                 playerIndicator.classList.remove('active');
             }, 2000);
@@ -119,7 +119,7 @@ class MemoryGameAnimations {
     updateScore(scoreElement) {
         if (scoreElement) {
             scoreElement.classList.add('updating');
-            
+
             setTimeout(() => {
                 scoreElement.classList.remove('updating');
             }, 500);
@@ -130,7 +130,7 @@ class MemoryGameAnimations {
         const gameBoard = document.getElementById('gameBoard');
         if (gameBoard) {
             gameBoard.classList.add('shaking');
-            
+
             setTimeout(() => {
                 gameBoard.classList.remove('shaking');
             }, 500);
@@ -141,7 +141,7 @@ class MemoryGameAnimations {
         const victoryContent = document.querySelector('.victory-content');
         if (victoryContent) {
             victoryContent.classList.add('celebrating');
-            
+
             setTimeout(() => {
                 victoryContent.classList.remove('celebrating');
             }, 1000);
@@ -151,7 +151,7 @@ class MemoryGameAnimations {
     revealCard(cardElement) {
         if (cardElement) {
             cardElement.classList.add('revealing');
-            
+
             setTimeout(() => {
                 cardElement.classList.remove('revealing');
             }, 300);
@@ -162,7 +162,7 @@ class MemoryGameAnimations {
         const gameBoard = document.getElementById('gameBoard');
         if (gameBoard) {
             gameBoard.classList.add('resizing');
-            
+
             setTimeout(() => {
                 gameBoard.classList.remove('resizing');
             }, 500);
@@ -173,7 +173,7 @@ class MemoryGameAnimations {
         const currentPlayer = document.querySelector('.current-player');
         if (currentPlayer) {
             currentPlayer.classList.add('switching');
-            
+
             setTimeout(() => {
                 currentPlayer.classList.remove('switching');
             }, 500);
@@ -184,7 +184,7 @@ class MemoryGameAnimations {
         const statusMessage = document.querySelector('.status-message');
         if (statusMessage) {
             statusMessage.classList.add('updating');
-            
+
             setTimeout(() => {
                 statusMessage.classList.remove('updating');
             }, 300);
@@ -211,7 +211,7 @@ class MemoryGameAnimations {
     flashSuccess(cardElement) {
         if (cardElement) {
             cardElement.classList.add('success-flash');
-            
+
             setTimeout(() => {
                 cardElement.classList.remove('success-flash');
             }, 500);
@@ -221,7 +221,7 @@ class MemoryGameAnimations {
     flashError(cardElement) {
         if (cardElement) {
             cardElement.classList.add('error-flash');
-            
+
             setTimeout(() => {
                 cardElement.classList.remove('error-flash');
             }, 500);
@@ -264,10 +264,10 @@ class MemoryGameAnimations {
         if (this.isAnimating || this.animationQueue.length === 0) {
             return;
         }
-        
+
         this.isAnimating = true;
         const animation = this.animationQueue.shift();
-        
+
         setTimeout(() => {
             animation.func();
             this.isAnimating = false;
@@ -283,7 +283,7 @@ class MemoryGameAnimations {
     // Complex animation sequences
     playMatchSequence(card1, card2) {
         this.clearQueue();
-        
+
         this.addToQueue(() => this.flipCard(card1), 0);
         this.addToQueue(() => this.flipCard(card2), 300);
         this.addToQueue(() => this.showMatch(), 600);
@@ -293,7 +293,7 @@ class MemoryGameAnimations {
 
     playMismatchSequence(card1, card2) {
         this.clearQueue();
-        
+
         this.addToQueue(() => this.flipCard(card1), 0);
         this.addToQueue(() => this.flipCard(card2), 300);
         this.addToQueue(() => this.showMismatch(), 600);
@@ -304,7 +304,7 @@ class MemoryGameAnimations {
 
     playNewGameSequence() {
         this.clearQueue();
-        
+
         this.addToQueue(() => this.showLoading(), 0);
         this.addToQueue(() => this.hideLoading(), 500);
         this.addToQueue(() => this.shuffleCards(), 600);
@@ -312,7 +312,7 @@ class MemoryGameAnimations {
 
     playVictorySequence() {
         this.clearQueue();
-        
+
         this.addToQueue(() => this.showVictoryCelebration(), 0);
         this.addToQueue(() => this.shakeBoard(), 1000);
         this.addToQueue(() => this.createConfettiEffect(), 1500);
@@ -323,24 +323,24 @@ class MemoryGameAnimations {
         const rect = element.getBoundingClientRect();
         const centerX = rect.left + rect.width / 2;
         const centerY = rect.top + rect.height / 2;
-        
+
         // Create multiple particles
         for (let i = 0; i < 8; i++) {
             const particle = document.createElement('div');
             particle.className = 'particle';
-            
+
             // Random position around the card
             const angle = (i / 8) * Math.PI * 2;
             const distance = 30 + Math.random() * 20;
             const x = centerX + Math.cos(angle) * distance;
             const y = centerY + Math.sin(angle) * distance;
-            
+
             particle.style.left = x + 'px';
             particle.style.top = y + 'px';
             particle.style.background = this.getRandomColor();
-            
+
             document.body.appendChild(particle);
-            
+
             // Remove particle after animation
             setTimeout(() => {
                 if (particle.parentNode) {
@@ -352,11 +352,11 @@ class MemoryGameAnimations {
 
     createConfettiEffect() {
         const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'];
-        
+
         for (let i = 0; i < 50; i++) {
             const confetti = document.createElement('div');
             confetti.className = 'confetti';
-            
+
             // Random properties
             confetti.style.left = Math.random() * 100 + 'vw';
             confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
@@ -364,9 +364,9 @@ class MemoryGameAnimations {
             confetti.style.height = confetti.style.width;
             confetti.style.animationDelay = Math.random() * 2 + 's';
             confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
-            
+
             document.body.appendChild(confetti);
-            
+
             // Remove confetti after animation
             setTimeout(() => {
                 if (confetti.parentNode) {

@@ -45,9 +45,11 @@ body {
     0% {
         background-position: 0% 50%;
     }
+
     50% {
         background-position: 100% 50%;
     }
+
     100% {
         background-position: 0% 50%;
     }
@@ -85,6 +87,7 @@ body {
     0% {
         transform: scale(1);
     }
+
     100% {
         transform: scale(1.05);
     }
@@ -219,6 +222,14 @@ body {
     transform-style: preserve-3d;
     perspective: 1000px;
     will-change: transform;
+    /* Prevent focus on touch devices */
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    outline: none;
 }
 
 .memory-card:hover {
@@ -239,17 +250,17 @@ body {
         transform: none;
         box-shadow: none;
     }
-    
+
     .memory-card:focus {
         outline: none;
         transform: none;
         box-shadow: none;
     }
-    
+
     .memory-card:active {
         transform: scale(0.95);
     }
-    
+
     /* Prevent touch overlay issues */
     .memory-card {
         -webkit-tap-highlight-color: transparent;
@@ -259,12 +270,12 @@ body {
         -ms-user-select: none;
         user-select: none;
     }
-    
+
     /* Ensure no overlay on flipped cards */
     .memory-card.flipped {
         -webkit-tap-highlight-color: transparent;
     }
-    
+
     .memory-card.flipped .card-back {
         display: none !important;
         visibility: hidden !important;
@@ -370,6 +381,7 @@ body {
         transform: scale(1);
         box-shadow: 0 0 5px var(--primary-yellow);
     }
+
     100% {
         transform: scale(1.02);
         box-shadow: 0 0 15px var(--primary-yellow);
@@ -380,6 +392,7 @@ body {
     0% {
         text-shadow: 2px 2px 4px var(--shadow);
     }
+
     100% {
         text-shadow: 2px 2px 8px var(--primary-yellow);
     }
@@ -498,6 +511,7 @@ body {
     0% {
         transform: scale(1);
     }
+
     100% {
         transform: scale(1.05);
     }
