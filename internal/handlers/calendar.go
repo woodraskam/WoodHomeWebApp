@@ -35,17 +35,15 @@ func NewCalendarHandler(calendarService *services.CalendarService) *CalendarHand
 
 // RegisterRoutes registers all calendar routes
 func (h *CalendarHandler) RegisterRoutes(router *mux.Router) {
-	calendarRouter := router.PathPrefix("/api/calendar").Subrouter()
-
 	// Calendar API routes
-	calendarRouter.HandleFunc("/events", h.GetEventsHandler).Methods("GET")
-	calendarRouter.HandleFunc("/calendars", h.GetCalendarsHandler).Methods("GET")
-	calendarRouter.HandleFunc("/colors", h.GetColorsHandler).Methods("GET")
+	router.HandleFunc("/events", h.GetEventsHandler).Methods("GET")
+	router.HandleFunc("/calendars", h.GetCalendarsHandler).Methods("GET")
+	router.HandleFunc("/colors", h.GetColorsHandler).Methods("GET")
 
 	// Cache management routes
-	calendarRouter.HandleFunc("/cache/refresh", h.RefreshCacheHandler).Methods("POST")
-	calendarRouter.HandleFunc("/cache/stats", h.GetCacheStatsHandler).Methods("GET")
-	calendarRouter.HandleFunc("/cache/clear", h.ClearCacheHandler).Methods("POST")
+	router.HandleFunc("/cache/refresh", h.RefreshCacheHandler).Methods("POST")
+	router.HandleFunc("/cache/stats", h.GetCacheStatsHandler).Methods("GET")
+	router.HandleFunc("/cache/clear", h.ClearCacheHandler).Methods("POST")
 }
 
 // CalendarPageHandler serves the calendar HTML page

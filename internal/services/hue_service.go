@@ -136,6 +136,11 @@ func (h *HueService) discoverBridge() error {
 
 // startPolling starts the polling loop for device updates
 func (h *HueService) startPolling(ctx context.Context) {
+	// Load data immediately on startup
+	if err := h.updateDevices(); err != nil {
+		logrus.Errorf("Failed to update devices on startup: %v", err)
+	}
+
 	ticker := time.NewTicker(h.config.PollInterval)
 	defer ticker.Stop()
 
@@ -181,7 +186,7 @@ func (h *HueService) updateDevices() error {
 
 // updateLights fetches all lights from the bridge
 func (h *HueService) updateLights() error {
-	logrus.Debugf("Updating lights from bridge: %s", h.baseURL+"/lights")
+	logrus.Infof("Updating lights from bridge: %s", h.baseURL+"/lights")
 	resp, err := h.httpClient.Get(h.baseURL + "/lights")
 	if err != nil {
 		logrus.Errorf("Failed to fetch lights from bridge: %v", err)
@@ -189,13 +194,15 @@ func (h *HueService) updateLights() error {
 	}
 	defer resp.Body.Close()
 
+	logrus.Infof("Hue bridge response status: %d", resp.StatusCode)
+
 	var lightsData map[string]interface{}
 	if err := json.NewDecoder(resp.Body).Decode(&lightsData); err != nil {
 		logrus.Errorf("Failed to decode lights data: %v", err)
 		return err
 	}
 
-	logrus.Debugf("Received %d lights from bridge", len(lightsData))
+	logrus.Infof("Received %d lights from bridge", len(lightsData))
 	for lightID, lightData := range lightsData {
 		// Extract the state data and merge it with the main light data
 		lightMap, ok := lightData.(map[string]interface{})
@@ -356,6 +363,7 @@ func (h *HueService) GetLights() []*models.HueLight {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 
+	logrus.Infof("HueService: GetLights() called, returning %d lights", len(h.lights))
 	lights := make([]*models.HueLight, 0, len(h.lights))
 	for _, light := range h.lights {
 		lights = append(lights, light)
@@ -368,6 +376,7 @@ func (h *HueService) GetRooms() []*models.HueRoom {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 
+	logrus.Infof("HueService: GetRooms() called, returning %d rooms", len(h.rooms))
 	rooms := make([]*models.HueRoom, 0, len(h.rooms))
 	for _, room := range h.rooms {
 		rooms = append(rooms, room)

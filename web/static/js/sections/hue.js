@@ -11,6 +11,7 @@ class HueSection extends AuthenticatedSection {
         this.scenes = [];
         this.bridge = null;
         this.isLoading = false;
+        this.isVisible = false;
         this.init();
     }
 
@@ -191,6 +192,7 @@ class HueSection extends AuthenticatedSection {
      */
     show() {
         console.log('HueSection: Show called');
+        this.isVisible = true;
         const section = document.getElementById('hue-section');
         if (section) {
             section.style.display = 'block';
@@ -210,6 +212,7 @@ class HueSection extends AuthenticatedSection {
      */
     hide() {
         console.log('HueSection: Hide called');
+        this.isVisible = false;
         const section = document.getElementById('hue-section');
         if (section) {
             section.classList.remove('m3-section--active');
@@ -281,8 +284,10 @@ class HueSection extends AuthenticatedSection {
         if (!this.isLoaded) {
             console.log('HueSection: First time loading, calling loadData()');
             this.isLoaded = true;
-            await this.loadData();
         }
+
+        // Always load data when section becomes visible
+        await this.loadData();
         console.log('HueSection: Showing section');
         this.show();
     }
@@ -325,7 +330,7 @@ class HueSection extends AuthenticatedSection {
     }
 
     switchView(view) {
-        console.log('HueSection: Switching to view:', view);
+        console.log('HueSection: Switching to view:', view, 'current hash:', window.location.hash);
 
         // Update toggle button states
         const roomsToggle = document.getElementById('hue-rooms-toggle');
@@ -402,12 +407,14 @@ class HueSection extends AuthenticatedSection {
 
     async loadRooms() {
         try {
+            console.log('HueSection: Loading rooms from /api/hue/rooms');
             const response = await fetch('/api/hue/rooms');
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
 
             this.rooms = await response.json();
+            console.log('HueSection: Loaded rooms:', this.rooms);
             this.updateRoomsDisplay();
         } catch (error) {
             console.error('Failed to load rooms:', error);
@@ -432,12 +439,14 @@ class HueSection extends AuthenticatedSection {
 
     async loadLights() {
         try {
+            console.log('HueSection: Loading lights from /api/hue/lights');
             const response = await fetch('/api/hue/lights');
             if (!response.ok) {
                 throw new Error(`HTTP ${response.status}`);
             }
 
             this.lights = await response.json();
+            console.log('HueSection: Loaded lights:', this.lights);
             this.updateLightsDisplay();
         } catch (error) {
             console.error('Failed to load lights:', error);

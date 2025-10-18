@@ -22,7 +22,7 @@ func main() {
 		log.Fatalf("Configuration validation failed: %v", err)
 	}
 
-	// Initialize database
+// Initialize database
 	dbConfig := database.DatabaseConfig{
 		Host:     cfg.Database.Host,
 		Port:     cfg.Database.Port,

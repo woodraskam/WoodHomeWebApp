@@ -1328,7 +1328,7 @@
     position: relative;
     transition: all var(--m3-motion-duration-short4) var(--m3-motion-easing-standard);
     box-sizing: border-box;
-    height: 30px;
+    height: 32px;
 }
 
 .m3-switch-thumb {
@@ -1415,6 +1415,12 @@
 .m3-room-card .m3-switch--on .m3-switch-thumb {
     background: var(--m3-on-primary) !important;
     transform: translateX(20px) !important;
+}
+
+/* Simple Hue Light Toggle Transitions */
+.m3-light-card .m3-switch-thumb,
+.m3-room-card .m3-switch-thumb {
+    transition: transform 0.3s ease-in-out;
 }
 
 /* Material Design 3 Dialog Styles */

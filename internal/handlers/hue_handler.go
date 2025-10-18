@@ -30,13 +30,20 @@ func (h *HueHandler) RegisterRoutes(router *mux.Router) {
 	router.HandleFunc("/lights", h.GetLights).Methods("GET")
 	router.HandleFunc("/rooms", h.GetRooms).Methods("GET")
 	router.HandleFunc("/lights/{id}/toggle", h.ToggleLight).Methods("POST")
+	router.HandleFunc("/rooms/{id}/toggle", h.ToggleGroup).Methods("POST")
+	router.HandleFunc("/groups/{id}/toggle", h.ToggleGroup).Methods("POST")
 }
 
 // GetLights returns all lights
 func (h *HueHandler) GetLights(w http.ResponseWriter, r *http.Request) {
 	lights := h.hueService.GetLights()
 
+	// Disable caching
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Expires", "0")
 	w.Header().Set("Content-Type", "application/json")
+
 	if err := json.NewEncoder(w).Encode(lights); err != nil {
 		logrus.Errorf("Failed to encode lights response: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -48,7 +55,12 @@ func (h *HueHandler) GetLights(w http.ResponseWriter, r *http.Request) {
 func (h *HueHandler) GetRooms(w http.ResponseWriter, r *http.Request) {
 	rooms := h.hueService.GetRooms()
 
+	// Disable caching
+	w.Header().Set("Cache-Control", "no-cache, no-store, must-revalidate")
+	w.Header().Set("Pragma", "no-cache")
+	w.Header().Set("Expires", "0")
 	w.Header().Set("Content-Type", "application/json")
+
 	if err := json.NewEncoder(w).Encode(rooms); err != nil {
 		logrus.Errorf("Failed to encode rooms response: %v", err)
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
@@ -171,7 +183,7 @@ func (h *HueHandler) ToggleLight(w http.ResponseWriter, r *http.Request) {
 	if err := h.hueService.RefreshLights(); err != nil {
 		logrus.Warnf("Failed to refresh lights before toggle: %v", err)
 	}
-	
+
 	// Get current light state from bridge to determine toggle action
 	lights := h.hueService.GetLights()
 	var currentLight *models.HueLight

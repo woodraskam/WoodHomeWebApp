@@ -16,6 +16,7 @@ class CalendarSection extends AuthenticatedSection {
         this.navigationSetup = false; // Flag to prevent duplicate event listeners
         this.keyboardSetup = false; // Flag to prevent duplicate keyboard listeners
         this.filterDropdown = null; // Calendar filter dropdown instance
+        this.isVisible = false; // Track if calendar section is visible
         this.init();
         this.setupModalEventListeners();
     }
@@ -34,9 +35,12 @@ class CalendarSection extends AuthenticatedSection {
         });
 
         document.addEventListener('sectionchange', (e) => {
+            console.log('CalendarSection: sectionchange event received:', e.detail);
             if (e.detail.section === 'calendar') {
+                console.log('CalendarSection: Showing calendar section');
                 this.show();
             } else {
+                console.log('CalendarSection: Hiding calendar section');
                 this.hide();
             }
         });
@@ -85,6 +89,7 @@ class CalendarSection extends AuthenticatedSection {
      */
     show() {
         console.log('CalendarSection: Show called');
+        this.isVisible = true;
         const section = document.getElementById('calendar-section');
         if (section) {
             section.style.display = 'block';
@@ -104,6 +109,7 @@ class CalendarSection extends AuthenticatedSection {
      */
     hide() {
         console.log('CalendarSection: Hide called');
+        this.isVisible = false;
         const section = document.getElementById('calendar-section');
         if (section) {
             section.classList.remove('m3-section--active');
@@ -411,7 +417,7 @@ class CalendarSection extends AuthenticatedSection {
         }
 
         // View buttons
-        const viewButtons = document.querySelectorAll('[data-view]');
+        const viewButtons = document.querySelectorAll('#calendar-section [data-view]');
         viewButtons.forEach(btn => {
             btn.addEventListener('click', (e) => {
                 this.changeView(e.target.dataset.view);
@@ -627,7 +633,11 @@ class CalendarSection extends AuthenticatedSection {
     }
 
     async loadEvents() {
-        if (!this.isAuthenticated) return;
+        console.log('CalendarSection: loadEvents() called - isAuthenticated:', this.isAuthenticated, 'current section:', window.location.hash);
+        if (!this.isAuthenticated) {
+            this.showAuthenticationMessage();
+            return;
+        }
 
         try {
             // Load calendars and colors first (only once)
@@ -688,9 +698,15 @@ class CalendarSection extends AuthenticatedSection {
                 this.populateDropdownIfReady();
             } else {
                 console.error('Failed to load calendars:', response.status, response.statusText);
+                // If we get a 401 or 403, we need to authenticate
+                if (response.status === 401 || response.status === 403) {
+                    console.log('Authentication required, showing login view');
+                    this.showAuthenticationMessage();
+                }
             }
         } catch (error) {
             console.error('CalendarSection: Error loading calendars:', error);
+            this.showAuthenticationMessage();
         }
     }
 
@@ -699,9 +715,39 @@ class CalendarSection extends AuthenticatedSection {
             // Load calendar colors using the color manager
             this.calendarColors = await this.colorManager.loadCalendarColors();
             this.colorPalette = this.calendarColors; // Keep for backward compatibility
+
+            // Update the color manager with the loaded colors
+            this.colorManager.calendarColors = this.calendarColors;
+
             console.log('CalendarSection: Loaded calendar colors:', this.calendarColors);
+
+            // Re-render calendar to apply the loaded colors
+            this.renderCalendar();
         } catch (error) {
             console.error('CalendarSection: Error loading calendar colors:', error);
+            // If colors fail to load, show authentication message
+            this.showAuthenticationMessage();
+        }
+    }
+
+    showAuthenticationMessage() {
+        const calendarContent = document.getElementById('calendar-content');
+        if (calendarContent) {
+            calendarContent.innerHTML = `
+                <div class="m3-card m3-card--elevated" style="text-align: center; padding: 2rem;">
+                    <div class="m3-card__content">
+                        <div class="m3-icon m3-icon--large" style="color: #4285f4; margin-bottom: 1rem;">
+                            <span class="material-symbols-outlined" style="font-size: 4rem;">calendar_month</span>
+                        </div>
+                        <h3 class="m3-headline">Calendar Authentication Required</h3>
+                        <p class="m3-body">To view your calendar events with proper colors, please authenticate with Google.</p>
+                        <button class="m3-button m3-button--primary" onclick="window.location.href='/auth/google/login'">
+                            <span class="material-symbols-outlined">login</span>
+                            Sign in with Google
+                        </button>
+                    </div>
+                </div>
+            `;
         }
     }
 
@@ -737,11 +783,15 @@ class CalendarSection extends AuthenticatedSection {
         const grid = document.getElementById('calendar-grid');
         if (!grid) return;
 
+        console.log('CalendarSection: renderCalendar() called with currentView:', this.currentView);
         if (this.currentView === 'month') {
+            console.log('CalendarSection: Rendering month view');
             this.renderMonthView(grid);
         } else if (this.currentView === 'week') {
+            console.log('CalendarSection: Rendering week view');
             this.renderWeekView(grid);
         } else {
+            console.log('CalendarSection: Rendering day view (currentView:', this.currentView, ')');
             this.renderDayView(grid);
         }
     }
@@ -882,7 +932,9 @@ class CalendarSection extends AuthenticatedSection {
 
     getEventsForDate(date) {
         const dateStr = date.toISOString().split('T')[0];
-        return this.events.filter(event => {
+        console.log(`CalendarSection: getEventsForDate called for date: ${dateStr}`);
+
+        const filteredEvents = this.events.filter(event => {
             const eventStart = new Date(event.start);
             const eventEnd = new Date(event.end);
 
@@ -893,7 +945,11 @@ class CalendarSection extends AuthenticatedSection {
                 const eventStartDateStr = event.start.split('T')[0];
                 const targetDateStr = dateStr;
 
-                return eventStartDateStr === targetDateStr;
+                const matches = eventStartDateStr === targetDateStr;
+                if (matches) {
+                    console.log(`CalendarSection: All-day event matches date ${dateStr}:`, event.summary);
+                }
+                return matches;
             }
 
             // For timed events, use the existing logic
@@ -903,12 +959,23 @@ class CalendarSection extends AuthenticatedSection {
 
             // For single-day timed events, only show on the start date
             if (eventStartDate.getTime() === eventEndDate.getTime()) {
-                return eventStartDate.getTime() === targetDate.getTime();
+                const matches = eventStartDate.getTime() === targetDate.getTime();
+                if (matches) {
+                    console.log(`CalendarSection: Single-day event matches date ${dateStr}:`, event.summary);
+                }
+                return matches;
             }
 
             // For multi-day events, show on all days they span
-            return eventStartDate <= targetDate && eventEndDate >= targetDate;
+            const matches = eventStartDate <= targetDate && eventEndDate >= targetDate;
+            if (matches) {
+                console.log(`CalendarSection: Multi-day event matches date ${dateStr}:`, event.summary);
+            }
+            return matches;
         });
+
+        console.log(`CalendarSection: Found ${filteredEvents.length} events for date ${dateStr}`);
+        return filteredEvents;
     }
 
     isToday(date) {
@@ -958,8 +1025,8 @@ class CalendarSection extends AuthenticatedSection {
         }
 
         eventsList.innerHTML = sortedEvents.map(event => {
-            // Use calendar color if available, otherwise use event color, otherwise default
-            const eventColor = event.calendarColor || event.color || '#3788d8';
+            // Use color manager to get proper event color with fallbacks
+            const eventColor = this.getEventColor(event);
             const calendarName = this.getCalendarName(event.calendarId);
             const eventType = this.getEventType(event);
             const eventIcon = this.getEventIcon(event);
@@ -1070,6 +1137,7 @@ class CalendarSection extends AuthenticatedSection {
     }
 
     changeView(view) {
+        console.log('CalendarSection: changeView() called with view:', view);
         this.currentView = view;
 
         // Update button states
@@ -1084,7 +1152,10 @@ class CalendarSection extends AuthenticatedSection {
             activeBtn.classList.add('m3-button--primary');
         }
 
-        this.loadEvents();
+        // Only load events if we're on the calendar section and the calendar is visible
+        if (window.location.hash === '#calendar' && this.isVisible) {
+            this.loadEvents();
+        }
     }
 
     load() {
@@ -1144,7 +1215,7 @@ class CalendarSection extends AuthenticatedSection {
                                    class="calendar-filter-checkbox" 
                                    value="${cal.id}" 
                                    ${this.selectedCalendars.has(cal.id) ? 'checked' : ''}>
-                            <span class="calendar-filter-color" style="background-color: ${cal.color}"></span>
+                            <span class="calendar-filter-color" style="background-color: ${this.getCalendarColor(cal.id)}"></span>
                             <span class="calendar-filter-name">${cal.name}</span>
                             <span class="calendar-filter-count" id="count-${cal.id}">0 events</span>
                         </label>
@@ -1289,6 +1360,41 @@ class CalendarSection extends AuthenticatedSection {
         }
     }
 
+    getEventColor(event) {
+        // Use the color manager to get proper event color with fallbacks
+        if (event.colorId) {
+            const colorData = this.colorManager.getGoogleCalendarColor(event.colorId);
+            return colorData.background;
+        } else if (event.calendarId && this.calendarColors[event.calendarId]) {
+            return this.calendarColors[event.calendarId].backgroundColor;
+        } else if (event.calendarId) {
+            // Fallback: Generate a consistent color based on calendar ID
+            const hash = this.colorManager.hashCode(event.calendarId);
+            const colorIndex = Math.abs(hash) % 11; // Use 11 different colors
+            const colorKeys = Object.keys(this.colorManager.googleColors);
+            const colorKey = colorKeys[colorIndex];
+            const colorData = this.colorManager.googleColors[colorKey];
+            return colorData.background;
+        } else {
+            return '#4285f4'; // Default blue
+        }
+    }
+
+    getCalendarColor(calendarId) {
+        // Get calendar color with fallback logic
+        if (this.calendarColors[calendarId]) {
+            return this.calendarColors[calendarId].backgroundColor;
+        } else {
+            // Fallback: Generate a consistent color based on calendar ID
+            const hash = this.colorManager.hashCode(calendarId);
+            const colorIndex = Math.abs(hash) % 11; // Use 11 different colors
+            const colorKeys = Object.keys(this.colorManager.googleColors);
+            const colorKey = colorKeys[colorIndex];
+            const colorData = this.colorManager.googleColors[colorKey];
+            return colorData.background;
+        }
+    }
+
     openEventModal(mode, event, date) {
         if (window.calendarEventModalMD3) {
             window.calendarEventModalMD3.show(date, event);
@@ -1368,7 +1474,6 @@ class CalendarColorManager {
         let backgroundColor = '#4285f4'; // Default blue
         let foregroundColor = '#ffffff'; // Default white text
 
-
         if (event.colorId) {
             // Use Google Calendar's colorId mapping
             const colorData = this.getGoogleCalendarColor(event.colorId);
@@ -1379,11 +1484,31 @@ class CalendarColorManager {
             const calendarColor = this.calendarColors[event.calendarId];
             backgroundColor = calendarColor.backgroundColor;
             foregroundColor = calendarColor.foregroundColor;
+        } else if (event.calendarId) {
+            // Fallback: Generate a consistent color based on calendar ID
+            const hash = this.hashCode(event.calendarId);
+            const colorIndex = Math.abs(hash) % 11; // Use 11 different colors
+            const colorKeys = Object.keys(this.googleColors);
+            const colorKey = colorKeys[colorIndex];
+            const colorData = this.googleColors[colorKey];
+            backgroundColor = colorData.background;
+            foregroundColor = colorData.foreground;
         }
 
         // Apply colors via inline styles
         eventElement.style.backgroundColor = backgroundColor;
         eventElement.style.color = foregroundColor;
+    }
+
+    // Helper method to generate a hash from a string
+    hashCode(str) {
+        let hash = 0;
+        for (let i = 0; i < str.length; i++) {
+            const char = str.charCodeAt(i);
+            hash = ((hash << 5) - hash) + char;
+            hash = hash & hash; // Convert to 32-bit integer
+        }
+        return hash;
     }
 }
 

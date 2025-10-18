@@ -25,50 +25,48 @@ func NewSonosHandler(sonosService *services.SonosService) *SonosHandler {
 
 // RegisterRoutes registers all Sonos routes
 func (h *SonosHandler) RegisterRoutes(router *mux.Router) {
-	sonosRouter := router.PathPrefix("/api/sonos").Subrouter()
-
 	// Device routes
-	sonosRouter.HandleFunc("/devices", h.GetDevices).Methods("GET")
-	sonosRouter.HandleFunc("/devices/{uuid}", h.GetDevice).Methods("GET")
-	sonosRouter.HandleFunc("/devices/refresh", h.RefreshDevices).Methods("POST")
+	router.HandleFunc("/devices", h.GetDevices).Methods("GET")
+	router.HandleFunc("/devices/{uuid}", h.GetDevice).Methods("GET")
+	router.HandleFunc("/devices/refresh", h.RefreshDevices).Methods("POST")
 
 	// Group routes
-	sonosRouter.HandleFunc("/groups", h.GetGroups).Methods("GET")
-	sonosRouter.HandleFunc("/groups/{id}", h.GetGroup).Methods("GET")
-	sonosRouter.HandleFunc("/groups/refresh", h.RefreshGroups).Methods("POST")
+	router.HandleFunc("/groups", h.GetGroups).Methods("GET")
+	router.HandleFunc("/groups/{id}", h.GetGroup).Methods("GET")
+	router.HandleFunc("/groups/refresh", h.RefreshGroups).Methods("POST")
 
 	// Playback routes
-	sonosRouter.HandleFunc("/devices/{uuid}/play", h.PlayDevice).Methods("POST")
-	sonosRouter.HandleFunc("/devices/{uuid}/pause", h.PauseDevice).Methods("POST")
-	sonosRouter.HandleFunc("/devices/{uuid}/stop", h.StopDevice).Methods("POST")
-	sonosRouter.HandleFunc("/devices/{uuid}/next", h.NextTrack).Methods("POST")
-	sonosRouter.HandleFunc("/devices/{uuid}/previous", h.PreviousTrack).Methods("POST")
+	router.HandleFunc("/devices/{uuid}/play", h.PlayDevice).Methods("POST")
+	router.HandleFunc("/devices/{uuid}/pause", h.PauseDevice).Methods("POST")
+	router.HandleFunc("/devices/{uuid}/stop", h.StopDevice).Methods("POST")
+	router.HandleFunc("/devices/{uuid}/next", h.NextTrack).Methods("POST")
+	router.HandleFunc("/devices/{uuid}/previous", h.PreviousTrack).Methods("POST")
 
 	// Volume routes
-	sonosRouter.HandleFunc("/devices/{uuid}/volume/{volume}", h.SetVolume).Methods("POST")
-	sonosRouter.HandleFunc("/devices/{uuid}/mute", h.SetMute).Methods("POST")
+	router.HandleFunc("/devices/{uuid}/volume/{volume}", h.SetVolume).Methods("POST")
+	router.HandleFunc("/devices/{uuid}/mute", h.SetMute).Methods("POST")
 
 	// Group routes
-	sonosRouter.HandleFunc("/groups/{id}/play", h.PlayGroup).Methods("POST")
-	sonosRouter.HandleFunc("/groups/{id}/pause", h.PauseGroup).Methods("POST")
-	sonosRouter.HandleFunc("/groups/{id}/stop", h.StopGroup).Methods("POST")
-	sonosRouter.HandleFunc("/groups/{id}/volume/{volume}", h.SetGroupVolume).Methods("POST")
-	sonosRouter.HandleFunc("/groups/{id}/mute", h.SetGroupMute).Methods("POST")
+	router.HandleFunc("/groups/{id}/play", h.PlayGroup).Methods("POST")
+	router.HandleFunc("/groups/{id}/pause", h.PauseGroup).Methods("POST")
+	router.HandleFunc("/groups/{id}/stop", h.StopGroup).Methods("POST")
+	router.HandleFunc("/groups/{id}/volume/{volume}", h.SetGroupVolume).Methods("POST")
+	router.HandleFunc("/groups/{id}/mute", h.SetGroupMute).Methods("POST")
 
 	// Cleanup routes
-	sonosRouter.HandleFunc("/cleanup", h.CleanupZombieGroups).Methods("POST")
+	router.HandleFunc("/cleanup", h.CleanupZombieGroups).Methods("POST")
 
 	// Group management routes
-	sonosRouter.HandleFunc("/groups", h.CreateGroup).Methods("POST")
-	sonosRouter.HandleFunc("/groups/{id}/join/{deviceUuid}", h.JoinGroup).Methods("POST")
-	sonosRouter.HandleFunc("/groups/{id}/leave/{deviceUuid}", h.LeaveGroup).Methods("POST")
-	sonosRouter.HandleFunc("/groups/{id}/dissolve", h.DissolveGroup).Methods("POST")
+	router.HandleFunc("/groups", h.CreateGroup).Methods("POST")
+	router.HandleFunc("/groups/{id}/join/{deviceUuid}", h.JoinGroup).Methods("POST")
+	router.HandleFunc("/groups/{id}/leave/{deviceUuid}", h.LeaveGroup).Methods("POST")
+	router.HandleFunc("/groups/{id}/dissolve", h.DissolveGroup).Methods("POST")
 
 	// Jishi server management routes
-	sonosRouter.HandleFunc("/jishi/status", h.GetJishiStatus).Methods("GET")
-	sonosRouter.HandleFunc("/jishi/start", h.StartJishiServer).Methods("POST")
-	sonosRouter.HandleFunc("/jishi/stop", h.StopJishiServer).Methods("POST")
-	sonosRouter.HandleFunc("/jishi/restart", h.RestartJishiServer).Methods("POST")
+	router.HandleFunc("/jishi/status", h.GetJishiStatus).Methods("GET")
+	router.HandleFunc("/jishi/start", h.StartJishiServer).Methods("POST")
+	router.HandleFunc("/jishi/stop", h.StopJishiServer).Methods("POST")
+	router.HandleFunc("/jishi/restart", h.RestartJishiServer).Methods("POST")
 }
 
 // GetDevices returns all discovered devices
