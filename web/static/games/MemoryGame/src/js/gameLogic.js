@@ -140,12 +140,8 @@ class MemoryGameLogic {
     }
 
     calculateMatchScore() {
-        // Base score calculation
-        const baseScore = 10;
-        const timeBonus = Math.max(0, 5 - Math.floor(this.gameState.getGameTime() / 10));
-        const difficultyMultiplier = this.getDifficultyMultiplier();
-        
-        return Math.floor(baseScore * difficultyMultiplier) + timeBonus;
+        // Each matched pair is worth 2 points
+        return 2;
     }
 
     getDifficultyMultiplier() {
