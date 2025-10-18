@@ -35,9 +35,12 @@ class MemoryGameAnimations {
         flippedCards.forEach(card => {
             card.classList.add('matching', 'matched');
             
+            // Add particle effect
+            this.createParticleEffect(card);
+            
             setTimeout(() => {
                 card.classList.remove('matching');
-            }, 500);
+            }, 800);
         });
     }
 
@@ -277,5 +280,102 @@ class MemoryGameAnimations {
         
         this.addToQueue(() => this.showVictoryCelebration(), 0);
         this.addToQueue(() => this.shakeBoard(), 1000);
+        this.addToQueue(() => this.createConfettiEffect(), 1500);
+    }
+
+    // New Animation Methods
+    createParticleEffect(element) {
+        const rect = element.getBoundingClientRect();
+        const centerX = rect.left + rect.width / 2;
+        const centerY = rect.top + rect.height / 2;
+        
+        // Create multiple particles
+        for (let i = 0; i < 8; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            
+            // Random position around the card
+            const angle = (i / 8) * Math.PI * 2;
+            const distance = 30 + Math.random() * 20;
+            const x = centerX + Math.cos(angle) * distance;
+            const y = centerY + Math.sin(angle) * distance;
+            
+            particle.style.left = x + 'px';
+            particle.style.top = y + 'px';
+            particle.style.background = this.getRandomColor();
+            
+            document.body.appendChild(particle);
+            
+            // Remove particle after animation
+            setTimeout(() => {
+                if (particle.parentNode) {
+                    particle.parentNode.removeChild(particle);
+                }
+            }, 1000);
+        }
+    }
+
+    createConfettiEffect() {
+        const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'];
+        
+        for (let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.className = 'confetti';
+            
+            // Random properties
+            confetti.style.left = Math.random() * 100 + 'vw';
+            confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+            confetti.style.width = (5 + Math.random() * 10) + 'px';
+            confetti.style.height = confetti.style.width;
+            confetti.style.animationDelay = Math.random() * 2 + 's';
+            confetti.style.animationDuration = (2 + Math.random() * 2) + 's';
+            
+            document.body.appendChild(confetti);
+            
+            // Remove confetti after animation
+            setTimeout(() => {
+                if (confetti.parentNode) {
+                    confetti.parentNode.removeChild(confetti);
+                }
+            }, 5000);
+        }
+    }
+
+    getRandomColor() {
+        const colors = ['#FFD700', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7'];
+        return colors[Math.floor(Math.random() * colors.length)];
+    }
+
+    addCardGlow(cardElement) {
+        if (cardElement) {
+            cardElement.classList.add('glowing');
+        }
+    }
+
+    removeCardGlow(cardElement) {
+        if (cardElement) {
+            cardElement.classList.remove('glowing');
+        }
+    }
+
+    showScorePop(element) {
+        if (element) {
+            element.classList.add('score-pop');
+            setTimeout(() => {
+                element.classList.remove('score-pop');
+            }, 600);
+        }
+    }
+
+    addLoadingPulse(element) {
+        if (element) {
+            element.classList.add('loading-pulse');
+        }
+    }
+
+    removeLoadingPulse(element) {
+        if (element) {
+            element.classList.remove('loading-pulse');
+        }
     }
 }

@@ -270,6 +270,12 @@ class MemoryGame {
         currentPlayer.score += score;
         currentPlayer.matches++;
         this.updatePlayerScores();
+        
+        // Add score pop animation
+        const scoreElement = document.querySelector('.player-score.active');
+        if (scoreElement) {
+            this.animations.showScorePop(scoreElement);
+        }
     }
 
     nextPlayer() {
@@ -283,7 +289,11 @@ class MemoryGame {
     checkGameComplete() {
         if (this.gameLogic.isGameComplete()) {
             const results = this.gameLogic.endGame();
-            this.showVictoryScreen(results);
+            this.stopGameTimer();
+            this.animations.playVictorySequence();
+            setTimeout(() => {
+                this.showVictoryScreen(results);
+            }, 2000);
         } else {
             this.nextPlayer();
         }
