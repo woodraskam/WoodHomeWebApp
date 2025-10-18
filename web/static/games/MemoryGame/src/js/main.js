@@ -186,17 +186,8 @@ class MemoryGame {
             this.animations.addLoadingPulse(gameBoard);
         }
         
-        // Generate emoji pairs
-        const emojis = this.getEmojiSet();
-        const cardEmojis = [];
-        
-        for (let i = 0; i < pairs; i++) {
-            const emoji = emojis[i % emojis.length];
-            cardEmojis.push(emoji, emoji); // Add pair
-        }
-        
-        // Shuffle cards
-        this.shuffleArray(cardEmojis);
+        // Use game state cards instead of generating separate array
+        const cardEmojis = this.gameState.cards.map(card => card.emoji);
         
         // Use DocumentFragment for better performance
         const fragment = document.createDocumentFragment();
