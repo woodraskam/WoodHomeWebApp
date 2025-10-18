@@ -30,15 +30,21 @@ class MemoryGameLogic {
         // Use emoji manager to generate card pairs
         const cardPairs = this.emojiManager.createCardPairs(this.gameState.gridSize, this.gameState.emojiSet);
         
+        console.log('Generated card pairs:', cardPairs.slice(0, 4)); // Log first 4 pairs
+        
         // Update game state cards
         for (let i = 0; i < totalCards; i++) {
             this.gameState.cards[i].emoji = cardPairs[i].emoji;
             this.gameState.cards[i].pairId = cardPairs[i].pairId;
         }
+        
+        console.log('Cards after assignment:', this.gameState.cards.slice(0, 4)); // Log first 4 cards
     }
 
     shuffleCards() {
         const totalCards = this.gameState.gridSize * this.gameState.gridSize;
+        
+        console.log('Before shuffle:', this.gameState.cards.slice(0, 4));
         
         // Fisher-Yates shuffle algorithm
         for (let i = totalCards - 1; i > 0; i--) {
@@ -53,6 +59,8 @@ class MemoryGameLogic {
             this.gameState.cards[i].pairId = this.gameState.cards[j].pairId;
             this.gameState.cards[j].pairId = tempPairId;
         }
+        
+        console.log('After shuffle:', this.gameState.cards.slice(0, 4));
     }
 
     canFlipCard(cardIndex) {
