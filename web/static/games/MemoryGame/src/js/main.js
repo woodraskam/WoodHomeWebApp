@@ -79,10 +79,18 @@ class MemoryGame {
 
     newGame() {
         console.log('Starting new game...');
-        this.gameLogic.initializeGame();
-        this.updateGameDisplay();
-        this.updatePlayerDisplay();
-        this.updateGameStatus('Game started! Click cards to find matches!');
+        
+        // Use the enhanced startGame method
+        const result = this.gameLogic.startGame();
+        
+        if (result.success) {
+            this.updateGameDisplay();
+            this.updatePlayerDisplay();
+            this.updateGameStatus('Game started! Click cards to find matches!');
+        } else {
+            console.error('Failed to start game:', result.errors);
+            this.updateGameStatus('Error starting game. Please check settings.');
+        }
     }
 
     resetGame() {
@@ -181,7 +189,7 @@ class MemoryGame {
         
         if (result.isMatch) {
             this.animations.showMatch();
-            this.updatePlayerScore();
+            this.updatePlayerScore(result.score);
             this.checkGameComplete();
         } else if (result.isMismatch) {
             this.animations.showMismatch();
@@ -223,43 +231,59 @@ class MemoryGame {
         });
     }
 
-    updatePlayerScore() {
+    updatePlayerScore(score = 10) {
         const currentPlayer = this.gameState.players[this.gameState.currentPlayer];
-        currentPlayer.score += 10; // Points per match
+        currentPlayer.score += score;
         currentPlayer.matches++;
         this.updatePlayerScores();
     }
 
     nextPlayer() {
-        this.gameState.currentPlayer = (this.gameState.currentPlayer + 1) % this.gameState.players.length;
-        this.updatePlayerDisplay();
-        this.updateGameStatus(`${this.gameState.players[this.gameState.currentPlayer].name}'s turn`);
+        const success = this.gameLogic.nextTurn();
+        if (success) {
+            this.updatePlayerDisplay();
+            this.updateGameStatus(`${this.gameState.players[this.gameState.currentPlayer].name}'s turn`);
+        }
     }
 
     checkGameComplete() {
         if (this.gameLogic.isGameComplete()) {
-            this.showVictoryScreen();
+            const results = this.gameLogic.endGame();
+            this.showVictoryScreen(results);
         } else {
             this.nextPlayer();
         }
     }
 
-    showVictoryScreen() {
-        const winner = this.gameLogic.getWinner();
+    showVictoryScreen(results = null) {
         const victoryScreen = document.getElementById('victory-screen');
         const victoryTitle = document.getElementById('victory-title');
         const victoryMessage = document.getElementById('victory-message');
         const victoryIcon = document.getElementById('victory-icon');
         
         if (victoryScreen && victoryTitle && victoryMessage && victoryIcon) {
-            if (winner) {
-                victoryIcon.innerHTML = `<div class="player-indicator ${winner.color}"></div>`;
-                victoryTitle.textContent = `${winner.name} Wins!`;
-                victoryMessage.textContent = `Congratulations! ${winner.name} found the most matches!`;
+            if (results) {
+                if (results.winner) {
+                    victoryIcon.innerHTML = `<div class="player-indicator ${results.winner.color}"></div>`;
+                    victoryTitle.textContent = `${results.winner.name} Wins!`;
+                    victoryMessage.textContent = `Congratulations! ${results.winner.name} found the most matches! Score: ${results.winner.score}`;
+                } else {
+                    victoryIcon.innerHTML = '🤝';
+                    victoryTitle.textContent = 'Tie Game!';
+                    victoryMessage.textContent = `Great game! It's a tie! Completion time: ${Math.floor(results.completionTime / 60)}:${(results.completionTime % 60).toString().padStart(2, '0')}`;
+                }
             } else {
-                victoryIcon.innerHTML = '🤝';
-                victoryTitle.textContent = 'Tie Game!';
-                victoryMessage.textContent = 'Great game! It\'s a tie!';
+                // Fallback to old method
+                const winner = this.gameLogic.getWinner();
+                if (winner) {
+                    victoryIcon.innerHTML = `<div class="player-indicator ${winner.color}"></div>`;
+                    victoryTitle.textContent = `${winner.name} Wins!`;
+                    victoryMessage.textContent = `Congratulations! ${winner.name} found the most matches!`;
+                } else {
+                    victoryIcon.innerHTML = '🤝';
+                    victoryTitle.textContent = 'Tie Game!';
+                    victoryMessage.textContent = 'Great game! It\'s a tie!';
+                }
             }
             
             victoryScreen.classList.add('show');

@@ -92,14 +92,14 @@ class MemoryGameLogic {
 
     checkMatch() {
         if (this.gameState.flippedCards.length !== 2) {
-            return { isMatch: false, isMismatch: false };
+            return { isMatch: false, isMismatch: false, cards: [] };
         }
         
         const [card1Index, card2Index] = this.gameState.flippedCards;
         const card1 = this.gameState.cards[card1Index];
         const card2 = this.gameState.cards[card2Index];
         
-        if (card1.emoji === card2.emoji) {
+        if (card1.emoji === card2.emoji && card1.pairId === card2.pairId) {
             // Match found!
             this.gameState.markCardsAsMatched();
             
@@ -109,10 +109,37 @@ class MemoryGameLogic {
                 currentPlayer.addMatch();
             }
             
-            return { isMatch: true, isMismatch: false };
+            return { 
+                isMatch: true, 
+                isMismatch: false, 
+                cards: [card1Index, card2Index],
+                score: this.calculateMatchScore()
+            };
         } else {
             // Mismatch
-            return { isMatch: false, isMismatch: true };
+            return { 
+                isMatch: false, 
+                isMismatch: true, 
+                cards: [card1Index, card2Index]
+            };
+        }
+    }
+
+    calculateMatchScore() {
+        // Base score calculation
+        const baseScore = 10;
+        const timeBonus = Math.max(0, 5 - Math.floor(this.gameState.getGameTime() / 10));
+        const difficultyMultiplier = this.getDifficultyMultiplier();
+        
+        return Math.floor(baseScore * difficultyMultiplier) + timeBonus;
+    }
+
+    getDifficultyMultiplier() {
+        switch (this.gameState.difficulty) {
+            case 'easy': return 1.0;
+            case 'medium': return 1.5;
+            case 'hard': return 2.0;
+            default: return 1.0;
         }
     }
 
@@ -170,36 +197,191 @@ class MemoryGameLogic {
         return this.gameState.emojiSet;
     }
 
+    // Game flow management
+    startGame() {
+        console.log('Starting new game...');
+        
+        // Validate game state before starting
+        if (!this.gameState.isGameStateValid()) {
+            const errors = this.gameState.getValidationErrors();
+            console.error('Game state validation failed:', errors);
+            return { success: false, errors: errors };
+        }
+        
+        this.initializeGame();
+        this.gameState.isGameActive = true;
+        
+        // Start player game sessions
+        this.gameState.players.forEach(player => player.startGame());
+        
+        return { success: true, errors: [] };
+    }
+
+    endGame() {
+        console.log('Ending game...');
+        this.gameState.isGameActive = false;
+        this.gameState.gamePhase = 'finished';
+        
+        // End player game sessions
+        this.gameState.players.forEach(player => player.endGame());
+        
+        return this.getGameResults();
+    }
+
+    getGameResults() {
+        const winner = this.getWinner();
+        const stats = this.getGameStats();
+        
+        return {
+            winner: winner,
+            isTie: winner === null,
+            stats: stats,
+            completionTime: this.gameState.getGameTime(),
+            totalMoves: this.gameState.moves
+        };
+    }
+
+    // Turn management
+    nextTurn() {
+        if (!this.gameState.isGameActive) {
+            return false;
+        }
+        
+        // Check if game is complete
+        if (this.isGameComplete()) {
+            this.endGame();
+            return false;
+        }
+        
+        // Move to next player
+        this.gameState.currentPlayer = (this.gameState.currentPlayer + 1) % this.gameState.players.length;
+        
+        // If next player is AI, trigger AI move
+        const currentPlayer = this.gameState.players[this.gameState.currentPlayer];
+        if (currentPlayer && currentPlayer.isAI) {
+            setTimeout(() => this.executeAIMove(), 1000); // Delay for better UX
+        }
+        
+        return true;
+    }
+
+    executeAIMove() {
+        if (!this.gameState.isGameActive) {
+            return;
+        }
+        
+        const aiMove = this.getAIMove();
+        if (aiMove !== -1) {
+            this.flipCard(aiMove);
+        }
+    }
+
     // AI helper methods
     getAIMove() {
-        // Simple AI: try to find a match if we have one card flipped
+        const currentPlayer = this.gameState.players[this.gameState.currentPlayer];
+        if (!currentPlayer || !currentPlayer.isAI) {
+            return -1;
+        }
+        
+        // AI difficulty-based logic
+        switch (currentPlayer.difficulty || 'medium') {
+            case 'easy':
+                return this.getEasyAIMove();
+            case 'medium':
+                return this.getMediumAIMove();
+            case 'hard':
+                return this.getHardAIMove();
+            default:
+                return this.getMediumAIMove();
+        }
+    }
+
+    getEasyAIMove() {
+        // Random move
+        const availableCards = this.getAvailableCards();
+        return availableCards.length > 0 ? 
+            availableCards[Math.floor(Math.random() * availableCards.length)] : -1;
+    }
+
+    getMediumAIMove() {
+        // Try to find a match if we have one card flipped
         if (this.gameState.flippedCards.length === 1) {
             const flippedCard = this.gameState.cards[this.gameState.flippedCards[0]];
-            const targetEmoji = flippedCard.emoji;
-            
-            // Look for matching card
-            for (let i = 0; i < this.gameState.cards.length; i++) {
-                if (i !== this.gameState.flippedCards[0] && 
-                    !this.gameState.cards[i].isFlipped && 
-                    !this.gameState.cards[i].isMatched &&
-                    this.gameState.cards[i].emoji === targetEmoji) {
-                    return i;
-                }
+            const matchingCard = this.findMatchingCard(flippedCard.emoji, flippedCard.pairId);
+            if (matchingCard !== -1) {
+                return matchingCard;
             }
         }
         
-        // If no match found or no cards flipped, pick a random available card
+        // Otherwise, random move
+        return this.getEasyAIMove();
+    }
+
+    getHardAIMove() {
+        // Advanced AI with memory
+        const currentPlayer = this.gameState.players[this.gameState.currentPlayer];
+        
+        // Initialize AI memory if not exists
+        if (!currentPlayer.memory) {
+            currentPlayer.memory = new Map();
+        }
+        
+        // Try to find a match if we have one card flipped
+        if (this.gameState.flippedCards.length === 1) {
+            const flippedCard = this.gameState.cards[this.gameState.flippedCards[0]];
+            const matchingCard = this.findMatchingCard(flippedCard.emoji, flippedCard.pairId);
+            if (matchingCard !== -1) {
+                return matchingCard;
+            }
+        }
+        
+        // Use memory to make informed decisions
+        const rememberedCard = this.getRememberedCard();
+        if (rememberedCard !== -1) {
+            return rememberedCard;
+        }
+        
+        // Fallback to random
+        return this.getEasyAIMove();
+    }
+
+    findMatchingCard(emoji, pairId) {
+        for (let i = 0; i < this.gameState.cards.length; i++) {
+            if (i !== this.gameState.flippedCards[0] && 
+                !this.gameState.cards[i].isFlipped && 
+                !this.gameState.cards[i].isMatched &&
+                this.gameState.cards[i].emoji === emoji &&
+                this.gameState.cards[i].pairId === pairId) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+    getAvailableCards() {
         const availableCards = [];
         for (let i = 0; i < this.gameState.cards.length; i++) {
             if (!this.gameState.cards[i].isFlipped && !this.gameState.cards[i].isMatched) {
                 availableCards.push(i);
             }
         }
-        
-        if (availableCards.length > 0) {
-            return availableCards[Math.floor(Math.random() * availableCards.length)];
+        return availableCards;
+    }
+
+    getRememberedCard() {
+        const currentPlayer = this.gameState.players[this.gameState.currentPlayer];
+        if (!currentPlayer.memory || currentPlayer.memory.size === 0) {
+            return -1;
         }
         
-        return -1; // No available moves
+        // Find a card we remember that's not currently flipped
+        for (const [cardIndex, cardInfo] of currentPlayer.memory) {
+            if (!this.gameState.cards[cardIndex].isFlipped && 
+                !this.gameState.cards[cardIndex].isMatched) {
+                return cardIndex;
+            }
+        }
+        
+        return -1;
     }
 }
