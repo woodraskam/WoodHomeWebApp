@@ -34,7 +34,9 @@ class MemoryGameAnimations {
     }
 
     showMatch() {
-        const flippedCards = document.querySelectorAll('.memory-card.flipped:not(.matched)');
+        // Get all flipped cards, then filter out already matched ones in JavaScript
+        const allFlippedCards = document.querySelectorAll('.memory-card.flipped');
+        const flippedCards = Array.from(allFlippedCards).filter(card => !card.classList.contains('matched'));
         
         console.log('Showing match animation for', flippedCards.length, 'cards');
         console.log('Flipped cards:', flippedCards);
