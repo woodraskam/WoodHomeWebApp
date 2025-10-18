@@ -1,0 +1,308 @@
+/* Connect Four - Responsive Design */
+
+/* Mobile First Approach */
+
+/* Extra Small Devices (phones, 480px and down) */
+@media (max-width: 480px) {
+    .game-container {
+        padding: 5px;
+        min-height: 100vh;
+    }
+    
+    .game-header h1 {
+        font-size: 1.8rem;
+        margin-bottom: 15px;
+    }
+    
+    .game-info {
+        flex-direction: column;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .current-player {
+        font-size: 1rem;
+    }
+    
+    .player-disc {
+        width: 25px;
+        height: 25px;
+    }
+    
+    .game-board {
+        padding: 8px;
+        gap: 3px;
+        border-radius: 15px;
+    }
+    
+    .board-cell {
+        width: 30px;
+        height: 30px;
+    }
+    
+    .board-column {
+        gap: 3px;
+    }
+    
+    .btn {
+        padding: 6px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .game-settings {
+        flex-direction: column;
+        gap: 15px;
+        margin-top: 20px;
+    }
+    
+    .setting-group {
+        gap: 5px;
+    }
+    
+    .setting-group label {
+        font-size: 0.9rem;
+    }
+    
+    .setting-select {
+        padding: 4px 8px;
+        font-size: 0.8rem;
+    }
+    
+    .status-message {
+        font-size: 1.2rem;
+    }
+}
+
+/* Small Devices (phones, 481px to 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    .game-container {
+        padding: 10px;
+    }
+    
+    .game-header h1 {
+        font-size: 2.2rem;
+    }
+    
+    .game-info {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .board-cell {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .game-board {
+        padding: 12px;
+        gap: 4px;
+    }
+    
+    .board-column {
+        gap: 4px;
+    }
+    
+    .btn {
+        padding: 8px 16px;
+        font-size: 0.9rem;
+    }
+    
+    .game-settings {
+        flex-direction: row;
+        gap: 20px;
+    }
+}
+
+/* Medium Devices (tablets, 769px to 1024px) */
+@media (min-width: 769px) and (max-width: 1024px) {
+    .game-container {
+        padding: 15px;
+    }
+    
+    .game-header h1 {
+        font-size: 2.5rem;
+    }
+    
+    .board-cell {
+        width: 45px;
+        height: 45px;
+    }
+    
+    .game-board {
+        padding: 15px;
+        gap: 5px;
+    }
+    
+    .board-column {
+        gap: 5px;
+    }
+}
+
+/* Large Devices (desktops, 1025px and up) */
+@media (min-width: 1025px) {
+    .game-container {
+        padding: 20px;
+    }
+    
+    .game-header h1 {
+        font-size: 3rem;
+    }
+    
+    .board-cell {
+        width: 50px;
+        height: 50px;
+    }
+    
+    .game-board {
+        padding: 20px;
+        gap: 8px;
+    }
+    
+    .board-column {
+        gap: 8px;
+    }
+}
+
+/* Landscape Orientation Adjustments */
+@media (orientation: landscape) and (max-height: 600px) {
+    .game-container {
+        flex-direction: row;
+        align-items: flex-start;
+        padding: 10px;
+    }
+    
+    .game-header {
+        margin-bottom: 0;
+        margin-right: 20px;
+    }
+    
+    .game-header h1 {
+        font-size: 1.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .game-info {
+        flex-direction: row;
+        gap: 10px;
+        margin-bottom: 10px;
+    }
+    
+    .game-board {
+        padding: 10px;
+        gap: 4px;
+    }
+    
+    .board-cell {
+        width: 35px;
+        height: 35px;
+    }
+    
+    .board-column {
+        gap: 4px;
+    }
+    
+    .game-settings {
+        margin-top: 10px;
+    }
+}
+
+/* High DPI Displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .board-cell {
+        border-width: 2px;
+    }
+    
+    .player-disc {
+        border-width: 2px;
+    }
+}
+
+/* Touch Device Optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .board-column:hover {
+        transform: none;
+    }
+    
+    .board-column:hover::after {
+        display: none;
+    }
+    
+    .btn:hover {
+        transform: none;
+    }
+    
+    /* Increase touch targets */
+    .board-cell {
+        min-width: 44px;
+        min-height: 44px;
+    }
+    
+    .btn {
+        min-height: 44px;
+        min-width: 44px;
+    }
+}
+
+/* Reduced Motion Preferences */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+    
+    body {
+        animation: none;
+    }
+    
+    .game-header h1 {
+        animation: none;
+    }
+    
+    .status-message {
+        animation: none;
+    }
+}
+
+/* Dark Mode Support */
+@media (prefers-color-scheme: dark) {
+    :root {
+        --light-gray: #2a2a2a;
+        --dark-gray: #e0e0e0;
+        --white: #1a1a1a;
+        --black: #ffffff;
+    }
+    
+    .board-cell {
+        background: var(--light-gray);
+        border-color: var(--board-blue);
+    }
+    
+    .setting-select {
+        background: var(--light-gray);
+        color: var(--black);
+    }
+}
+
+/* Print Styles */
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+    }
+    
+    .nav-back,
+    .game-controls,
+    .game-settings {
+        display: none !important;
+    }
+    
+    .game-board {
+        box-shadow: none !important;
+        border: 2px solid black !important;
+    }
+    
+    .board-cell {
+        border: 1px solid black !important;
+    }
+}
